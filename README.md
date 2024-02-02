@@ -4,7 +4,7 @@
 HouseMate is designed for university students and young working individuals that share their living space with others to aid in tackling common household issues such as keeping the house clean, paying rent, and keeping track of expenses by having an all-in-one chore designation and tracker, calendar to keep track of important dates, as well as an expense splitting function.
 
 ## Wiki
-[Access our wiki here:](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Project-Proposal:-HouseMate)
+Access our wiki [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Project-Proposal:-HouseMate)
 
 ## Description
 Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
