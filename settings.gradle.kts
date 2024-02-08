@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "clean-android-ui"
+rootProject.name = "HouseMate"
 include(":app")
