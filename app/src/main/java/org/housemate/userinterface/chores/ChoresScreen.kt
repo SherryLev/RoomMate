@@ -6,13 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CutCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Text
+import androidx.compose.material.Button
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import kotlin.math.sqrt
 
 
@@ -30,7 +31,7 @@ fun houseButton(onClick: () -> Unit) {
 }
 
 @Composable
-fun MainLayout() {
+fun MainLayout(navController: NavHostController) {
     Box(
         Modifier.fillMaxSize()
             .padding(15.dp)) {
