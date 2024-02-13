@@ -28,21 +28,6 @@ import org.housemate.Routes
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        ClickableText(
-            text = AnnotatedString("Sign up here"),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(20.dp),
-            onClick = { navController.navigate(Routes.SignUp.route) },
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily.Default,
-                textDecoration = TextDecoration.Underline,
-                color = Color.Blue
-            )
-        )
-    }
     Column(
         modifier = Modifier.padding(20.dp),
         verticalArrangement = Arrangement.Center,
@@ -86,15 +71,21 @@ fun LoginScreen(navController: NavHostController) {
                 Text(text = "Login")
             }
         }
-
-        Spacer(modifier = Modifier.height(20.dp))
-        ClickableText(
-            text = AnnotatedString("Forgot password?"),
-            onClick = { navController.navigate(Routes.ForgotPassword.route) },
-            style = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = FontFamily.Default
+        Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
+            ClickableText(
+                text = AnnotatedString("Don't have an account? Sign up here"),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center)
+                    .padding(20.dp),
+                onClick = { navController.navigate(Routes.SignUp.route) },
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.Default,
+                    textDecoration = TextDecoration.Underline,
+                    color = Color.Blue
+                )
             )
-        )
+        }
     }
 }
