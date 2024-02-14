@@ -1,5 +1,4 @@
 package org.housemate.model
 
-class ChoreModel {
-
+class Metrics {
 }
