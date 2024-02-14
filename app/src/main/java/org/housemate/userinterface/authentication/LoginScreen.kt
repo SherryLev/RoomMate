@@ -1,6 +1,5 @@
 package org.housemate.userinterface.authentication
 
-import android.widget.Button
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -28,14 +27,15 @@ import org.housemate.Routes
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
+
+    val email = remember { mutableStateOf(TextFieldValue()) }
+    val password = remember { mutableStateOf(TextFieldValue()) }
+
     Column(
         modifier = Modifier.padding(20.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        val username = remember { mutableStateOf(TextFieldValue()) }
-        val password = remember { mutableStateOf(TextFieldValue()) }
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -48,8 +48,8 @@ fun LoginScreen(navController: NavHostController) {
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
             label = { Text(text = "Email") },
-            value = username.value,
-            onValueChange = { username.value = it })
+            value = email.value,
+            onValueChange = { email.value = it })
 
         Spacer(modifier = Modifier.height(20.dp))
         TextField(

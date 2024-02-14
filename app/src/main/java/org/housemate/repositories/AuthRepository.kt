@@ -8,9 +8,9 @@ import org.housemate.utils.AuthResultState
 interface AuthRepository {
     fun createUser(
         auth: User
-    ): Flow<AuthResultState<String>>
+    )
 
     fun loginUser(
         auth: User
-    ): Flow<AuthResultState<String>>
+    )
 }

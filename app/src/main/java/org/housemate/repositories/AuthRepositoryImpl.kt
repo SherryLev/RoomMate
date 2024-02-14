@@ -1,34 +1,31 @@
 package org.housemate.repositories
 
-import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.tasks.await
-import org.housemate.utils.AuthResultState
-import javax.inject.Inject
+import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import org.housemate.model.User
 
-class AuthRepositoryImpl @Inject constructor (
-    private val firebaseAuth:FirebaseAuth
-) : AuthRepository {
-    override fun loginUser(email: String, password: String): Flow<AuthResultState<AuthResult>> {
-        return flow {
-            emit(value = AuthResultState.Loading())
-            val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
-            emit(value = AuthResultState.Success(data = result))
-        }.catch {
-            emit(value = AuthResultState.Error(it.message.toString()))
+class AuthRepositoryImpl () : AuthRepository {
+    private val firebaseAuth = Firebase.auth
+    override fun createUser(auth: User) {
+        firebaseAuth.createUserWithEmailAndPassword(
+            auth.email,
+            auth.password
+        ).addOnCompleteListener {
+            if(it.isSuccessful) {
+                Log.d("main", "current user id: ${firebaseAuth.currentUser?.uid}")
+            }
         }
     }
 
-    override fun registerUser(email: String, password: String): Flow<AuthResultState<AuthResult>> {
-        return flow {
-            emit(value = AuthResultState.Loading())
-            val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
-            emit(value = AuthResultState.Success(data = result))
-        }.catch {
-            emit(value = AuthResultState.Error(it.message.toString()))
+    override fun loginUser(auth: User) {
+        firebaseAuth.signInWithEmailAndPassword(
+            auth.email,
+            auth.password
+        ).addOnSuccessListener {
+            Log.d("main", "current user id: ${firebaseAuth.currentUser?.uid}")
+        }.addOnFailureListener {
+            Log.d("main", "failed")
         }
     }
 }
