@@ -17,14 +17,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import org.housemate.Routes
+import androidx.navigation.compose.rememberNavController
 import org.housemate.model.User
 import org.housemate.repositories.AuthRepositoryImpl
-import org.housemate.viewmodels.SignUpViewModel
 
 @Composable
-fun SignUpScreen(navController: NavHostController) {
+fun SignUpScreen(navController: NavController) {
     val authRepositoryImpl = AuthRepositoryImpl()
 
     val email = remember { mutableStateOf("") }
@@ -61,8 +61,13 @@ fun SignUpScreen(navController: NavHostController) {
 
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button( onClick = {
-                authRepositoryImpl.createUser( User(email.value, password.value) )
-                navController.navigate(Routes.Home.route) },
+                authRepositoryImpl.createUser(User(email.value, password.value))
+                navController.navigate("mainapp") {
+                    popUpTo("auth") {
+                        inclusive = true
+                    }
+                }
+            },
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
                     .fillMaxWidth()

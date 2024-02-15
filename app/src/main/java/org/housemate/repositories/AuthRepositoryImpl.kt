@@ -25,7 +25,7 @@ class AuthRepositoryImpl () : AuthRepository {
         ).addOnSuccessListener {
             Log.d("main", "current user id: ${firebaseAuth.currentUser?.uid}")
         }.addOnFailureListener {
-            Log.d("main", "failed")
+            Log.d("main", "user login failed")
         }
     }
 }

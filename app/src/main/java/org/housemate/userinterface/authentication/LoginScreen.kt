@@ -22,11 +22,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import org.housemate.Routes
+import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun LoginScreen(navController: NavHostController) {
+fun LoginScreen(navController: NavController) {
 
     val email = remember { mutableStateOf(TextFieldValue()) }
     val password = remember { mutableStateOf(TextFieldValue()) }
@@ -61,8 +62,12 @@ fun LoginScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
-            Button(
-                onClick = { navController.navigate(Routes.Chores.route) },
+            Button(onClick = {
+                navController.navigate("mainapp") {
+                        popUpTo("auth") {
+                            inclusive = true
+                        }
+                    } },
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -78,7 +83,7 @@ fun LoginScreen(navController: NavHostController) {
                     .fillMaxWidth()
                     .align(Alignment.Center)
                     .padding(20.dp),
-                onClick = { navController.navigate(Routes.SignUp.route) },
+                onClick = { navController.navigate("signup") },
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontFamily = FontFamily.Default,
