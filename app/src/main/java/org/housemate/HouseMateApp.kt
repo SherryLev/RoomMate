@@ -1,72 +1,64 @@
 package org.housemate
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.Navigation
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navigation
-import org.housemate.userinterface.authentication.LoginScreen
-import org.housemate.userinterface.authentication.SignUpScreen
-import org.housemate.userinterface.calendar.CalendarScreen
-import org.housemate.userinterface.chores.MainLayout
-import org.housemate.userinterface.expenses.ExpensesScreen
-import org.housemate.userinterface.home.HomeScreen
-import org.housemate.userinterface.stats.StatsScreen
-import org.housemate.viewmodels.AuthViewModel
+import org.housemate.model.BottomNavItem
+import org.housemate.userinterface.sharedcomponents.BottomNavigationBar
+
 
 @Composable
-fun Navigation(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "auth") {
-        navigation(
-            startDestination = "login",
-            route = "auth"
-        ) {
-            composable("login") {
-                val viewModel = it.sharedViewModel<AuthViewModel>(navController)
-                LoginScreen()
-            }
-            composable("signup") {
-                val viewModel = it.sharedViewModel<AuthViewModel>(navController)
-                SignUpScreen()
-            }
+fun HouseMateApp() {
+    val navController = rememberNavController()
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(
+                items = listOf(
+                    BottomNavItem(
+                        name = "Home",
+                        route = "home",
+                        icon = Icons.Default.Home
+                    ),
+                    BottomNavItem(
+                        name = "Chores",
+                        route = "chores",
+                        icon = Icons.AutoMirrored.Filled.Assignment
+                    ),
+                    BottomNavItem(
+                        name = "Calendar",
+                        route = "calendar",
+                        icon = Icons.Default.CalendarToday
+                    ),
+                    BottomNavItem(
+                        name = "Expenses",
+                        route = "expenses",
+                        icon = Icons.Default.AttachMoney
+                    ),
+                    BottomNavItem(
+                        name = "Stats",
+                        route = "stats",
+                        icon = Icons.Default.Analytics
+                    ),
+                ),
+                navController = navController,
+                onItemClick = {
+                    navController.navigate(it.route)
+                })
         }
-
-        navigation(
-            startDestination = "home",
-            route = "mainapp"
+    ) { paddingValues ->
+        Box(
+            modifier = (Modifier.padding(bottom = paddingValues.calculateBottomPadding()))
         ) {
-            composable("home") {
-                HomeScreen()
-            }
-            composable("chores") {
-                MainLayout()
-            }
-            composable("calendar") {
-                CalendarScreen()
-            }
-            composable("expenses") {
-                ExpensesScreen()
-            }
-            composable("stats") {
-                StatsScreen()
-            }
-
+            Navigation(navController = navController)
         }
     }
-}
-
-@Composable
-inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navController: NavController): T {
-    val navGraphRoute = destination.parent?.route ?: return viewModel()
-    val parentEntry = remember(this) {
-        navController.getBackStackEntry(navGraphRoute)
-    }
-    return viewModel(parentEntry)
 }

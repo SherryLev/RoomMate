@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kotlin.math.sqrt
@@ -48,8 +49,7 @@ fun TaskList(tasks: List<Task>) {
     }
 }
 @Composable
-fun MainLayout() {
-    val navController = rememberNavController()
+fun MainLayout(navController: NavController) {
     var tasks by remember { mutableStateOf(emptyList<Task>()) }
     Box(
         Modifier
