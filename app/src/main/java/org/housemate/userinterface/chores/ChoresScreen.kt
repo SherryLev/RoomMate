@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import kotlin.math.sqrt
 data class Task(val name: String)
 
@@ -47,10 +48,12 @@ fun TaskList(tasks: List<Task>) {
     }
 }
 @Composable
-fun MainLayout(navController: NavHostController) {
+fun MainLayout() {
+    val navController = rememberNavController()
     var tasks by remember { mutableStateOf(emptyList<Task>()) }
     Box(
-        Modifier.fillMaxSize()
+        Modifier
+            .fillMaxSize()
             .padding(0.dp, 15.dp, 0.dp, 0.dp)
     ) {
         Column(
@@ -119,15 +122,6 @@ fun MainLayout(navController: NavHostController) {
                 }
             ) {
                 Text("+ Create Chore")
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 0.dp, top = 10.dp)
-                    .height(70.dp)
-                    .background(Color.Gray)
-            ) {
-                // Content of the Box
             }
         }
     }
