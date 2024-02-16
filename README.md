@@ -20,7 +20,7 @@ Access our wiki [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Pro
 - Enhanced security measures for user data
 
 **_Download Installer_**
-Download our installer for HouseMate here: 
+Download our installer for HouseMate here: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/blob/main/housemate-sprint1.apk
 
 For a full list of changes, visit our issues list on GitLab: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/?sort=created_date&state=closed&first_page_size=20
 
