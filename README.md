@@ -13,7 +13,7 @@ Access our wiki [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Pro
 - **Navigation Bar:** Implemented a navigation bar for improved app navigation https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/17
 - **Calendar screen UI:** Developed a Calendar UI, facilitating better planning and tracking of important dates and events for users https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/22
 - **Expenses UI:** Created expenses Ui, simplifying the process of tracking and splitting household expenses among roommates https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/20
-- **Firebase Authentication:** Added FireBase for user profiles/authentication
+- **Firebase Authentication:** Added FireBase for user profiles/authentication https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/14
 
 **_Enhancements_**
 - Improved UI/UX for easier navigation
