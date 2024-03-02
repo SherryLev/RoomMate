@@ -1,4 +1,4 @@
-package com.example.jetpackcomposedemo.ui.theme
+package org.housemate.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
