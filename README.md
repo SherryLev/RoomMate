@@ -6,6 +6,24 @@ HouseMate is designed for university students and young working individuals that
 ## Wiki
 Access our wiki [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Project-Proposal:-HouseMate)
 
+## Release Notes
+**_What's New_**
+- **Login screen UI:** Introduced a new login screen, enhancing user experience and security https://git.uwaterloo.ca/gmmoroie/team-101-13/-/work_items/19
+- **Sign up screen UI:** Added a sign-up screen, making it easier for new users to join HouseMate https://git.uwaterloo.ca/gmmoroie/team-101-13/-/work_items/18
+- **Navigation Bar:** Implemented a navigation bar for improved app navigation https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/17
+- **Calendar screen UI:** Developed a Calendar UI, facilitating better planning and tracking of important dates and events for users https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/22
+- **Expenses UI:** Created expenses Ui, simplifying the process of tracking and splitting household expenses among roommates https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/20
+- **Firebase Authentication:** Added FireBase for user profiles/authentication https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/14
+
+**_Enhancements_**
+- Improved UI/UX for easier navigation
+- Enhanced security measures for user data
+
+**_Download Installer_**
+Download our installer for HouseMate here: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/blob/main/housemate-sprint1.apk
+
+For a full list of changes, visit our issues list on GitLab: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/?sort=created_date&state=closed&first_page_size=20
+
 ## Description
 Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
 
@@ -40,5 +58,4 @@ Show your appreciation to those who have contributed to the project.
 ## License
 For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+
