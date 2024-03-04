@@ -64,10 +64,10 @@ class LoginViewModel @Inject constructor(
     private fun processInputValidationType(type: LoginInputValidationType){
         loginState = when(type){
             LoginInputValidationType.EmptyField -> {
-                loginState.copy(errorMessageInput = "Empty fields left", isInputValid = false)
+                loginState.copy(errorMessageInput = "Please fill in empty fields", isInputValid = false)
             }
             LoginInputValidationType.NoEmail -> {
-                loginState.copy(errorMessageInput = "No valid email", isInputValid = false)
+                loginState.copy(errorMessageInput = "Please enter a valid email", isInputValid = false)
             }
             LoginInputValidationType.Valid -> {
                 loginState.copy(errorMessageInput = null, isInputValid = true)

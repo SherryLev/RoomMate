@@ -60,7 +60,7 @@ fun RegisterScreen(
                     .fillMaxSize()
             )
             Text(
-                text = "HouseMate",
+                text = "\nHouseMate",
                 style = MaterialTheme.typography.h4,
                 color = Color.White,
                 fontWeight = FontWeight.SemiBold
