@@ -8,6 +8,7 @@ import org.housemate.presentation.userinterface.calendar.CalendarScreen
 import org.housemate.presentation.userinterface.chores.ChoresScreen
 import org.housemate.presentation.userinterface.expenses.ExpensesScreen
 import org.housemate.presentation.userinterface.home.HomeScreen
+import org.housemate.presentation.userinterface.home.HomeScreenHelper
 import org.housemate.presentation.userinterface.stats.StatsScreen
 
 @Composable
@@ -18,7 +19,7 @@ fun HomeNavGraph(navController: NavHostController) {
         startDestination = AppScreenRoutes.HomeScreen.route
     ) {
         composable(AppScreenRoutes.HomeScreen.route){
-            HomeScreen()
+            HomeScreenHelper()
         }
         composable(AppScreenRoutes.ChoresScreen.route){
             ChoresScreen()

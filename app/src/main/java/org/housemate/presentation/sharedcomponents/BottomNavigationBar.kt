@@ -18,6 +18,7 @@ import org.housemate.domain.model.BottomNavItem
 import org.housemate.theme.md_theme_light_primary
 import org.housemate.theme.md_theme_light_surfaceVariant
 
+
 @Composable
 fun BottomNavigationBar (
     items: List<BottomNavItem>,

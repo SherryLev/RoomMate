@@ -20,9 +20,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import org.housemate.presentation.sharedcomponents.*
 import org.housemate.presentation.viewmodel.LoginViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import org.housemate.theme.*
 
 @Composable
