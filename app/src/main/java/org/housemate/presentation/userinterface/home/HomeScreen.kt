@@ -59,7 +59,7 @@ fun HomeScreen(navController: NavHostController = rememberNavController()) {
         Box(
             modifier = (Modifier.padding(bottom = paddingValues.calculateBottomPadding()))
         ) {
+            HomeNavGraph(navController = navController)
         }
-        HomeNavGraph(navController = navController)
     }
 }
