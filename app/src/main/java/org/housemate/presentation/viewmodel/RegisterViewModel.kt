@@ -76,6 +76,8 @@ class RegisterViewModel @Inject constructor(
         processInputValidationType(validationResult)
     }
 
+
+
     private fun processInputValidationType(type: RegisterInputValidationType){
         registerState = when(type){
             RegisterInputValidationType.EmptyField -> {

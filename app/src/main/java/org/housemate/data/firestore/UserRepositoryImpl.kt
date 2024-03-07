@@ -11,7 +11,7 @@ class UserRepositoryImpl : UserRepository {
 
     override suspend fun addUser(user: User): Boolean {
         return try {
-            db.collection("users").document(user.uId).set(user.toMap()).await()
+            db.collection("users").document(user.uid).set(user.toMap()).await()
             true
         } catch (e: Exception) {
             Log.e("UserRepository", "Error adding user", e)
