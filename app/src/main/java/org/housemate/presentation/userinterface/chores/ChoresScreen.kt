@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import org.housemate.R
+import org.housemate.theme.starColor
 import kotlin.math.sqrt
 var choresList = mutableListOf<Chore>()
 
@@ -57,6 +58,7 @@ private fun RatingBarComposable() {
                 //imageVector = if (index < rating) Icons.Filled.Star else Icons.Outlined.Star,
                 painter = if (index < rating) filledStar else outlinedStar,
                 contentDescription = null,
+                tint = starColor,
                 modifier = Modifier
                     .size(36.dp)
                     .clickable {
@@ -105,7 +107,7 @@ fun TaskItem(chore: Chore) {
                     text = chore.choreName,
                     style = TextStyle(fontSize = 20.sp),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(end = 5.dp, top = 13.dp)
+                    modifier = Modifier.padding(end = 8.dp, top = 15.dp)
                 )
                 RatingBarComposable()
             }

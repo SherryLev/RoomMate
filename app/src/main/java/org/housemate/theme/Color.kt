@@ -61,3 +61,4 @@ val md_theme_dark_shadow = Color(0xFF000000)
 val md_theme_dark_surfaceTint = Color(0xFFD9B9FF)
 
 val seed = Color(0xFF8100EF)
+val starColor = Color(0xFFfce683)
