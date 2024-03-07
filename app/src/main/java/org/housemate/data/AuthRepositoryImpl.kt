@@ -24,11 +24,11 @@ class AuthRepositoryImpl : AuthRepository {
                     "email" to email
                 )
 
-                // Sotre user details in Firestore
+                // Store user details in Firestore
                 db.collection("users").document(firebaseUser.uid).set(userData).await()
                 Log.d(
                     "main",
-                    "User id ${firebaseUser} created successfully and details stored in Firestore"
+                    "User id ${firebaseUser.uid} created successfully and details stored in Firestore"
                 )
                 return true
             } ?: run {
