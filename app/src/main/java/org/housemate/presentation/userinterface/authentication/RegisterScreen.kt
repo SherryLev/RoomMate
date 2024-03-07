@@ -30,6 +30,7 @@ import org.housemate.theme.*
 fun RegisterScreen(
     onRegisterSuccessNavigation: () -> Unit,
     onNavigateToLoginScreen: () -> Unit,
+    onRegisterFailureNavigation: () -> Unit,
     registerViewModel: RegisterViewModel = hiltViewModel()
 ) {
 
@@ -39,6 +40,14 @@ fun RegisterScreen(
         },
         destination = {
             onRegisterSuccessNavigation()
+        }
+    )
+
+    NavDestinationHelper(shouldNavigate = {
+        !(registerViewModel.registerState.errorMessageRegisterProcess.isNullOrEmpty())
+    },
+        destination = {
+            onRegisterFailureNavigation()
         }
     )
 

@@ -29,6 +29,7 @@ import org.housemate.theme.*
 fun LoginScreen(
     onLoginSuccessNavigation: () -> Unit,
     onNavigateToRegisterScreen: () -> Unit,
+    onLoginFailureNavigation: () -> Unit,
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
 
@@ -38,6 +39,14 @@ fun LoginScreen(
         },
         destination = {
             onLoginSuccessNavigation()
+        }
+    )
+
+    NavDestinationHelper(shouldNavigate = {
+        !(loginViewModel.loginState.errorMessageLoginProcess.isNullOrEmpty())
+    },
+        destination = {
+            onLoginFailureNavigation()
         }
     )
 
@@ -93,7 +102,7 @@ fun LoginScreen(
                 .fillMaxWidth(0.9f)
                 .shadow(5.dp, RoundedCornerShape(15.dp))
                 .background(md_theme_light_primaryContainer, RoundedCornerShape(15.dp))
-                .padding(10.dp,15.dp,10.dp,5.dp)
+                .padding(10.dp, 15.dp, 10.dp, 5.dp)
                 .align(Alignment.TopCenter)
         )
         Row(

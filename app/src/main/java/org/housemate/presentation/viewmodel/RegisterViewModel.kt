@@ -55,9 +55,12 @@ class RegisterViewModel @Inject constructor(
                     email = registerState.emailInput,
                     password = registerState.passwordInput
                 )
+                if (!registerResult) {
+                    registerState = registerState.copy(errorMessageRegisterProcess = "Could not register")
+                }
                 registerState.copy(isSuccessfullyRegistered = registerResult)
             }catch(e: Exception){
-                registerState.copy(errorMessageRegisterProcess = "Could not login")
+                registerState.copy(errorMessageRegisterProcess = "Could not register")
             }finally {
                 registerState = registerState.copy(isLoading = false)
             }

@@ -11,8 +11,6 @@ fun NavDestinationHelper(
     LaunchedEffect(key1 = shouldNavigate()){
         if(shouldNavigate()){
             destination()
-        } else {
-
         }
     }
 }
