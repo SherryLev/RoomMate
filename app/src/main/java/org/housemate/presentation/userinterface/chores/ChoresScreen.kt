@@ -4,6 +4,7 @@ package org.housemate.presentation.userinterface.chores
 import android.widget.GridLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -32,51 +33,100 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import org.housemate.R
 import kotlin.math.sqrt
 var choresList = mutableListOf<Chore>()
 
-
+@Composable /// CITE this https://stackoverflow.com/questions/73948960/jetpack-compose-how-to-create-a-rating-bar
+private fun RatingBarComposable() {
+    var rating by remember { mutableStateOf(0) }
+    val outlinedStar = painterResource(id = R.drawable.outlined_star)
+    val filledStar = painterResource(id = R.drawable.filled_star)
+    Row (
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        repeat(5) { index ->
+            Icon (
+                //imageVector = if (index < rating) Icons.Filled.Star else Icons.Outlined.Star,
+                painter = if (index < rating) filledStar else outlinedStar,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(36.dp)
+                    .clickable {
+                        rating = index + 1
+                    }
+                    .padding(4.dp)
+            )
+        }
+    }
+}
 @Composable
 fun TaskItem(chore: Chore) {
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
     val formattedDateTime = chore.dueDate?.format(formatter)
-    Box(
+    Button(
+        onClick = { },
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray),
         modifier = Modifier
             .width(300.dp)
-            .height(70.dp)
-            .background(Color.LightGray),
-       contentAlignment = Alignment.Center
+            .height(120.dp)
     ) {
-        Text(
-            text = chore.choreName,
-            style = TextStyle(fontSize = 20.sp),
-            textAlign = TextAlign.Center
-            )
-        Spacer(modifier = Modifier.height(8.dp))
-    }
-    /*Card(
-        backgroundColor = Color.LightGray,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = chore.choreName,
-                style = TextStyle(fontSize = 20.sp)
-            )
-            //Text(text = "Due: $formattedDateTime")
-            //Text(text = "Chore: ${chore.choreName}")
-            //Text(text = "Category: ${chore.category}")
-            //Text(text = "Assignee: ${chore.assignee}")
-            Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(start = 5.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.person),
+                    contentDescription = "local",
+                    modifier = Modifier.size(40.dp)
+                )
+                Text(
+                    text = chore.assignee,
+                    style = TextStyle(fontSize = 16.sp),
+                    textAlign = TextAlign.Center
+                )
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = chore.choreName,
+                    style = TextStyle(fontSize = 20.sp),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(end = 5.dp, top = 13.dp)
+                )
+                RatingBarComposable()
+            }
+            /*Text(
+                text = "...",
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier.padding(top = 10.dp, start = 20.dp, bottom = 10.dp)
+            )*/
 
         }
-    }*/
+    }
+
+        Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Composable
 fun TaskDisplayArea(chores: List<Chore>, deleteTask: (Chore) -> Unit) {
-    LazyColumn(modifier = Modifier.padding(16.dp)) {
+    LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
         items(chores){chore ->
             TaskItem(chore)
             Spacer(modifier = Modifier.height(8.dp))
