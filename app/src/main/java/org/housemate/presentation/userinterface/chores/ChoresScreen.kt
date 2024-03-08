@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import org.housemate.R
+import org.housemate.theme.md_theme_light_primary
 import org.housemate.theme.starColor
 import kotlin.math.sqrt
 var choresList = mutableListOf<Chore>()
@@ -173,6 +174,12 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                         isHouse = false
                     },
                     shape = CutCornerShape(percent = 0),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.LightGray,
+                        contentColor = Color.Gray,
+                        disabledBackgroundColor = md_theme_light_primary,
+                        disabledContentColor = Color.White
+                    ),
                     enabled = !isPersonal,
                     modifier = Modifier
                         //.padding(horizontal = 16.dp)
@@ -186,6 +193,12 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                         isPersonal = false
                               },
                     shape = CutCornerShape(percent = 0),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.LightGray,
+                        contentColor = Color.Gray,
+                        disabledBackgroundColor = md_theme_light_primary,
+                        disabledContentColor = Color.White
+                    ),
                     enabled = !isHouse,
                     modifier = Modifier
                         //.padding(horizontal = 16.dp)
