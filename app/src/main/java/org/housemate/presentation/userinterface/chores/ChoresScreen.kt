@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import org.housemate.R
+import org.housemate.theme.md_theme_light_primary
 import org.housemate.theme.starColor
 import kotlin.math.sqrt
 var choresList = mutableListOf<Chore>()
@@ -136,12 +137,25 @@ fun TaskDisplayArea(chores: List<Chore>, deleteTask: (Chore) -> Unit) {
     }
 }
 
-
+@Composable
+fun DayOfWeekText(day: String) {
+    Text(
+        text = day,
+        modifier = Modifier.padding(top = 10.dp, bottom = 45.dp),
+        fontSize = 15.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color.Blue
+    )
+}
 
 @Composable
 fun MainLayout(navController: NavHostController = rememberNavController()) {
     val chores = remember { choresList }
     var showDialog by remember { mutableStateOf(false) }
+    var isPersonal by remember { mutableStateOf(false) }
+    var isHouse by remember { mutableStateOf(true) }
+    val daysOfWeek = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
     Box(
         Modifier
             .fillMaxSize()
@@ -155,9 +169,18 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                 modifier = Modifier.padding(bottom = 8.dp)
             ) {
                 Button(
-                    onClick = { println("pressed") },
+                    onClick = {
+                        isPersonal = true
+                        isHouse = false
+                    },
                     shape = CutCornerShape(percent = 0),
-                    enabled = true,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.LightGray,
+                        contentColor = Color.Gray,
+                        disabledBackgroundColor = md_theme_light_primary,
+                        disabledContentColor = Color.White
+                    ),
+                    enabled = !isPersonal,
                     modifier = Modifier
                         //.padding(horizontal = 16.dp)
                         .fillMaxWidth(0.4f)
@@ -165,9 +188,18 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                     Text("Personal")
                 }
                 Button(
-                    onClick = { println("pressed") },
+                    onClick = {
+                        isHouse = true
+                        isPersonal = false
+                              },
                     shape = CutCornerShape(percent = 0),
-                    enabled = false,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.LightGray,
+                        contentColor = Color.Gray,
+                        disabledBackgroundColor = md_theme_light_primary,
+                        disabledContentColor = Color.White
+                    ),
+                    enabled = !isHouse,
                     modifier = Modifier
                         //.padding(horizontal = 16.dp)
                         .fillMaxWidth(0.6f)
@@ -178,7 +210,28 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
             Column(
                 modifier = Modifier.align(Alignment.Start)
             ) {
-                Text(
+                if(isHouse){
+                    Text(
+                        "House Chores",
+                        modifier = Modifier.padding(top = 10.dp),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    TaskDisplayArea(chores, deleteTask = {chore -> chores.remove(chore) })
+                }else{
+                    Text(
+                        "This week:",
+                        modifier = Modifier.padding(top = 10.dp, bottom = 15.dp),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    for (day in daysOfWeek) {
+                        DayOfWeekText(day = day)
+                    }
+
+
+                }
+                /*Text(
                     "Overdue Chores",
                     modifier = Modifier.padding(top = 10.dp),
                     fontSize = 20.sp
@@ -195,23 +248,24 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                     "Today:",
                     modifier = Modifier.padding(top = 10.dp),
                     fontSize = 20.sp
-                )
-                TaskDisplayArea(chores, deleteTask = {chore -> chores.remove(chore) })
+                )*/
+
             }
         }
-
-        Column(
-            modifier = Modifier.align(Alignment.BottomCenter)
-        ) {
-            Button(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClick = {
-                   // val newTask = Task("New Task")
-                  //  tasks = tasks + listOf(newTask)
-                    showDialog = true
-                }
+        if(isHouse) {
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter)
             ) {
-                Text("+ Create Chore")
+                Button(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = {
+                        // val newTask = Task("New Task")
+                        //  tasks = tasks + listOf(newTask)
+                        showDialog = true
+                    }
+                ) {
+                    Text("+ Create Chore")
+                }
             }
         }
         if (showDialog) {
