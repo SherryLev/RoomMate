@@ -1,9 +1,13 @@
 package org.housemate.presentation.userinterface.authentication
 
+
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -13,19 +17,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import org.housemate.presentation.userinterface.chores.ChoreCreator
+import org.housemate.presentation.userinterface.chores.choresList
 
 
 data class Task(val name: String)
 
 
+
+
 @Composable
 fun MainLayout(navController: NavController) {
     var tasks by remember { mutableStateOf(emptyList<Task>()) }
+    var showDialog by remember { mutableStateOf(false) }
     Box(
         Modifier
             .fillMaxSize()
@@ -43,6 +54,7 @@ fun MainLayout(navController: NavController) {
                 fontSize = 60.sp
             )
 
+
             Text(
                 "Create a New Household",
                 modifier = Modifier
@@ -59,7 +71,7 @@ fun MainLayout(navController: NavController) {
             )
             Button(
                 onClick = {
-                    // Add new page
+                    showDialog = true
                 },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -68,6 +80,32 @@ fun MainLayout(navController: NavController) {
                 Text("Create Household")
             }
         }
+        if (showDialog) {
+            Dialog( onDismissRequest = { showDialog = false }) {
+                Box(
+                    modifier = Modifier
+                        .width(300.dp)
+                        .height(70.dp)
+                        .background(Color.White),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Enter the name of the HouseHold here:",
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        fontSize = 14.sp
+                    )
+                    Button(
+                        onClick = { showDialog = false },
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(bottom = 10.dp, start = 16.dp)
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            }
+        }
+
 
         Column(
             modifier = Modifier
@@ -90,7 +128,6 @@ fun MainLayout(navController: NavController) {
             )
             Button(
                 onClick = {
-                    // Add new page
                 },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -98,9 +135,21 @@ fun MainLayout(navController: NavController) {
             ) {
                 Text("Enter Here")
             }
+
+            Button(
+                onClick = {
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(vertical = 25.dp)
+            ) {
+                Text("Finish Setup")
+            }
         }
     }
 }
+
+
 
 
 @Composable
