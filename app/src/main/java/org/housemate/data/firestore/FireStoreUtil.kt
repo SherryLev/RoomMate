@@ -1,5 +1,4 @@
 package org.housemate.data.firestore
-// FirestoreUtil.kt
 import com.google.firebase.firestore.FirebaseFirestore
 import org.housemate.utils.GroupUtil
 
