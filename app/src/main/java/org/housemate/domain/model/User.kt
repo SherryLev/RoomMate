@@ -10,7 +10,9 @@ data class User (
 ) {
     fun toMap(): Map<String, Any?> {
         return mapOf(
-            "uId" to uid, //user id
+
+            "uId" to uid,
+            "uId" to uid,
             "email" to email,
             "groupCode" to groupCode
         )
