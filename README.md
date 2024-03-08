@@ -6,7 +6,31 @@ HouseMate is designed for university students and young working individuals that
 ## Wiki
 Access our wiki [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Project-Proposal:-HouseMate)
 
-## Release Notes
+## Release Notes Version 1.1.0
+**_What's New_**
+- **Authentication Enhancements:** Redesigned the authentication UI and backend mechanisms to provide a smoother login and sign-up experience, increasing both security and user-friendliness https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/33
+- **Brand Identity:** Introduced our new logo to better reflect our brand identity and values, enhancing the app's aesthetic and user connection. https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/32
+- **User Settings:** Launched a new settings screen UI, allowing users to customize their experience and manage their accounts more effectively. https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/30
+- **Data Management:** Initialized Cloud Firestore for enhanced data storage, retrieval, and real-time updates, ensuring that user data remains secure and accessible. Now, user IDs are also securely stored in the cloud on Firestore, ensuring a seamless and secure user experience. https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/29
+- **System Stability:** Addressed and resolved an issue causing the app to crash, improving overall stability and performance. https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/28
+- **Database Integration:** Successfully connected Firestore, enabling better data synchronization and integrity across the app. https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/26
+- **Create Chore Screen and Flow:** Currently enhancing the process for creating and managing chores within the app. Expected to make task tracking more intuitive and user-friendly. https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/27
+
+**_In Progress (Expected in Next Release)_**
+- **Household Setup Screen:** Improving the setup screen for joining or creating households, aimed at simplifying the process and enhancing user engagement. https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/25
+- **User Profile Management:** Implementing read and update operations for user profiles to provide a more personalized experience. https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/16
+- **Group Management:** Enhancing features to allow users to create and join groups/households more easily, fostering community and collaboration. https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/2
+
+**_Enhancements_**
+- Streamlined navigation and user interface for an improved overall user experience.
+- Enhanced security features to ensure the safety and privacy of user data.
+
+**_Download Installer_**
+Download our installer for HouseMate here: 
+
+For a full list of changes, visit our issues list on GitLab: 
+
+## Release Notes Version 1.0.0
 **_What's New_**
 - **Login screen UI:** Introduced a new login screen, enhancing user experience and security https://git.uwaterloo.ca/gmmoroie/team-101-13/-/work_items/19
 - **Sign up screen UI:** Added a sign-up screen, making it easier for new users to join HouseMate https://git.uwaterloo.ca/gmmoroie/team-101-13/-/work_items/18
