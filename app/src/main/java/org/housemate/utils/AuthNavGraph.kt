@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import org.housemate.presentation.userinterface.authentication.LoginScreen
 import org.housemate.presentation.userinterface.authentication.RegisterScreen
-import org.housemate.presentation.userinterface.authentication.SetupUsernameScreen
+import org.housemate.presentation.userinterface.authentication.SetupScreen
 
 fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
     navigation(
@@ -35,7 +35,7 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             RegisterScreen(
                 onRegisterSuccessNavigation = {
                     navController.popBackStack()
-                    navController.navigate(AuthScreen.SetupUsername.route)
+                    navController.navigate(AuthScreen.SetupScreen.route)
                 },
                 onNavigateToLoginScreen = {
                     navController.navigate(AuthScreen.Login.route){
@@ -49,8 +49,8 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
                 }
             )
         }
-        composable(AuthScreen.SetupUsername.route){
-            SetupUsernameScreen()
+        composable(AuthScreen.SetupScreen.route){
+            SetupScreen()
         }
     }
 }
@@ -58,6 +58,5 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
 sealed class AuthScreen(val route:String){
     object Login:AuthScreen("login_screen")
     object Register:AuthScreen("register_screen")
-    object SetupUsername:AuthScreen("setup_username_screen")
-    object SetupGroupScreen: AppScreenRoutes("setup_group_screen")
+    object SetupScreen:AuthScreen("setup_screen")
 }

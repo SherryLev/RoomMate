@@ -12,7 +12,6 @@ import org.housemate.presentation.userinterface.expenses.ExpensesScreen
 import org.housemate.presentation.userinterface.home.EditUserInfoScreen
 import org.housemate.presentation.userinterface.home.HomeScreenHelper
 import org.housemate.presentation.userinterface.home.SettingsScreen
-import org.housemate.presentation.userinterface.authentication.SetupUsernameScreen
 import org.housemate.presentation.userinterface.stats.StatsScreen
 
 @Composable
