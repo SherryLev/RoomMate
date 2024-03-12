@@ -74,6 +74,19 @@ fun LoginScreen(
                 fontWeight = FontWeight.SemiBold
             )
         }
+
+        AuthButton(
+            text = "Dev Login",
+            backgroundColor = md_theme_light_primary,
+            contentColor = Color.White,
+            enabled = true,
+            modifier = Modifier
+                .height(45.dp)
+                .shadow(5.dp, RoundedCornerShape(25.dp)),
+            isLoading = false,
+            onButtonClick = { onLoginSuccessNavigation() }
+        )
+
         LoginContainer(
             emailValue = {
                 loginViewModel.loginState.emailInput
