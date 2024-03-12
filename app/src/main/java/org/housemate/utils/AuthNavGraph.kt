@@ -50,7 +50,11 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             )
         }
         composable(AuthScreen.SetupScreen.route){
-            SetupScreen()
+            SetupScreen(
+                onNavigateToHomeScreen = {
+                    navController.navigate(Graph.HOME)
+                }
+            )
         }
     }
 }

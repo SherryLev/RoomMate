@@ -34,7 +34,7 @@ data class Task(val name: String)
 
 
 @Composable
-fun MainLayout(navController: NavController) {
+fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController) {
     var tasks by remember { mutableStateOf(emptyList<Task>()) }
     var showDialog by remember { mutableStateOf(false) }
     Box(
@@ -138,6 +138,7 @@ fun MainLayout(navController: NavController) {
 
             Button(
                 onClick = {
+                    onNavigateToHomeScreen()
                 },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -153,11 +154,11 @@ fun MainLayout(navController: NavController) {
 
 
 @Composable
-fun SetupScreen(navController: NavHostController = rememberNavController()) {
+fun SetupScreen( onNavigateToHomeScreen: () -> Unit, navController: NavHostController = rememberNavController()) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        MainLayout(navController = navController)
+        MainLayout(onNavigateToHomeScreen, navController = navController)
     }
 }
