@@ -46,217 +46,236 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import org.housemate.theme.green
 import org.housemate.theme.md_theme_light_error
-import org.housemate.theme.md_theme_light_primaryContainer
+import org.housemate.theme.purple_background
 
 @Composable
 fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        item {
-            // Top title
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
-
-                ) {
-                Text(
-                    text = "House Expenses",
-                    fontSize = 23.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 20.dp)
-                        .padding(bottom = 8.dp)
-                )
-            }
-
-            Box (
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Card(
-                    shape = RoundedCornerShape(8.dp),
-                    elevation = 4.dp,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .width((LocalConfiguration.current.screenWidthDp * 0.80).dp)
-                        .align(Alignment.Center),
-                    backgroundColor = Color.White
-                ) {
-                    // Left and right sides of the box with a divider
-                    Row(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .height(IntrinsicSize.Min),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        // Left side of the box: "You are owed $2"
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                "You are owed",
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text("$2", fontSize = 24.sp, color = green)
-                        }
-                        Column(
-                            modifier = Modifier
-                        ) {
-                            Divider(
-                                color = Color.Gray,
-                                modifier = Modifier
-                                    .height(45.dp)
-                                    .width(1.dp)
-                            )
-                        }
-                        // Right side of the box: "You owe $200"
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                "You owe",
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
-                            )
-                            Text("$200", fontSize = 24.sp, color = md_theme_light_error)
-                        }
-                    }
-                }
-            }
-        }
-
-        item {
-            Box(
-                modifier = Modifier
-                    .padding(10.dp)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-
-                    Text(
-                        buildAnnotatedString {
-                            append("Sally owes you ")
-
-                            withStyle(
-                                style = SpanStyle(
-                                    color = green,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append("$2")
-                            }
-                        },
-                        modifier = Modifier
-                            .padding(6.dp)
-                    )
-
-                    Text(
-                        buildAnnotatedString {
-                            append("You owe Bob ")
-
-                            withStyle(
-                                style = SpanStyle(
-                                    color = md_theme_light_error,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append("$100")
-                            }
-                        },
-                        modifier = Modifier
-                            .padding(6.dp)
-                    )
-
-                    Text(
-                        buildAnnotatedString {
-                            append("You owe Mike ")
-
-                            withStyle(
-                                style = SpanStyle(
-                                    color = md_theme_light_error,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append("$100")
-                            }
-                        },
-                        modifier = Modifier
-                            .padding(6.dp)
-                    )
-
-                    Button(
-                        onClick = { /* Handle settle debts */ },
-                        shape = RoundedCornerShape(5.dp),
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(10.dp)
-                    ) {
-                        Text("Settle debts", fontSize = 16.sp)
-                    }
-                }
-            }
-        }
-
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp)
-            ) {
-                Text(
-                    text = "Expense history",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
-            }
-        }
-        item {
-
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                elevation = 8.dp,
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Column {
-                    repeat(50) {
-                        Text("Expense Item $it", modifier = Modifier.padding(16.dp))
-                    }
-                }
-            }
-        }
-    }
-
     Box(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(0.dp, 15.dp, 0.dp, 0.dp)
     ) {
-        Column(
-            modifier = Modifier.align(Alignment.BottomCenter)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Button(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClick = {}
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+
+                    ) {
+                    Text(
+                        text = "House Expenses",
+                        fontSize = 23.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 20.dp)
+                            .padding(bottom = 8.dp)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Card(
+                        shape = RoundedCornerShape(8.dp),
+                        elevation = 4.dp,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .width((LocalConfiguration.current.screenWidthDp * 0.80).dp)
+                            .align(Alignment.Center),
+                        backgroundColor = Color.White
+                    ) {
+                        // Left and right sides of the box with a divider
+                        Row(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .height(IntrinsicSize.Min),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            // Left side of the box: "You are owed $2"
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    "You are owed",
+                                    fontWeight = FontWeight.Bold, color = Color.DarkGray
+                                )
+                                Text("$2", fontSize = 24.sp, color = green)
+                            }
+                            Column(
+                                modifier = Modifier
+                            ) {
+                                Divider(
+                                    color = Color.Gray,
+                                    modifier = Modifier
+                                        .height(45.dp)
+                                        .width(1.dp)
+                                )
+                            }
+                            // Right side of the box: "You owe $200"
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    "You owe",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.DarkGray,
+                                    textAlign = TextAlign.Center
+                                )
+                                Text("$200", fontSize = 24.sp, color = md_theme_light_error)
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(10.dp)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+
+                        Text(
+                            buildAnnotatedString {
+                                append("Sally owes you ")
+
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = green,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                ) {
+                                    append("$2")
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(6.dp)
+                        )
+
+                        Text(
+                            buildAnnotatedString {
+                                append("You owe Bob ")
+
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = md_theme_light_error,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                ) {
+                                    append("$100")
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(6.dp)
+                        )
+
+                        Text(
+                            buildAnnotatedString {
+                                append("You owe Mike ")
+
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = md_theme_light_error,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                ) {
+                                    append("$100")
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(6.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Button(
+                                onClick = { /* Handle settle debts */ },
+                                shape = RoundedCornerShape(25.dp),
+                                modifier = Modifier
+                                    .padding(10.dp)
+                            ) {
+                                Text("Settle Debts", fontSize = 16.sp)
+                            }
+
+                            Button(
+                                onClick = { /* Handle balances */ },
+                                shape = RoundedCornerShape(25.dp),
+                                modifier = Modifier
+                                    .padding(10.dp)
+                            ) {
+                                Text("Balances", fontSize = 16.sp)
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp)
+                ) {
+                    Text(
+                        text = "Expense history",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
+                }
+            }
+            item {
+
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Column {
+                        repeat(50) {
+                            Text("Expense Item $it", modifier = Modifier.padding(16.dp))
+                        }
+                    }
+                }
+            }
+        }
+
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(0.dp, 15.dp, 0.dp, 0.dp)
+        ) {
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter)
             ) {
-                Text("+ Add Expense")
+                Button(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = {},
+                    shape = RoundedCornerShape(25.dp),
+                ) {
+                    Text("+ Add Expense")
+                }
             }
         }
     }

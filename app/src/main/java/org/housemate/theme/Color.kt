@@ -65,3 +65,4 @@ val starColor = Color(0xFFfce683)
 val Purple = Color(0xFF3c005a)
 
 val green = Color(0xFF2C792F)
+val purple_background = Color(0x999419FF)
