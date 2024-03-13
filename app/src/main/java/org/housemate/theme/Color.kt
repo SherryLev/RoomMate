@@ -63,3 +63,5 @@ val md_theme_dark_surfaceTint = Color(0xFFD9B9FF)
 val seed = Color(0xFF8100EF)
 val starColor = Color(0xFFfce683)
 val Purple = Color(0xFF3c005a)
+
+val green = Color(0xFF2C792F)
