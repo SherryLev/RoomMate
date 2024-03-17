@@ -2,14 +2,22 @@ package org.housemate.presentation.userinterface.chores
 
 
 import android.widget.GridLayout
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.Text
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,12 +41,19 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import org.housemate.R
+import org.housemate.presentation.sharedcomponents.TextEntryModule
+import org.housemate.presentation.userinterface.home.Section
 import org.housemate.theme.md_theme_light_primary
 import org.housemate.theme.starColor
+import java.time.DayOfWeek
 import kotlin.math.sqrt
 var choresList = mutableListOf<Chore>()
 
@@ -50,7 +65,7 @@ private fun RatingBarComposable() {
     Row (
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(2.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
@@ -61,7 +76,7 @@ private fun RatingBarComposable() {
                 contentDescription = null,
                 tint = starColor,
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(30.dp)
                     .clickable {
                         rating = index + 1
                     }
@@ -76,10 +91,14 @@ fun TaskItem(chore: Chore) {
     val formattedDateTime = chore.dueDate?.format(formatter)
     Button(
         onClick = { },
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.White,
+           // contentColor = MaterialTheme.colors. // Set content color if needed
+        ),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .width(300.dp)
-            .height(120.dp)
+            .height(80.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -88,7 +107,7 @@ fun TaskItem(chore: Chore) {
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(start = 5.dp)
+                modifier = Modifier.padding(start = 4.dp, end = 16.dp)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.person),
@@ -108,27 +127,64 @@ fun TaskItem(chore: Chore) {
                     text = chore.choreName,
                     style = TextStyle(fontSize = 20.sp),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(end = 8.dp, top = 15.dp)
+                    modifier = Modifier.padding(start = 24.dp)
                 )
-                RatingBarComposable()
-            }
-            /*Text(
-                text = "...",
-                style = TextStyle(
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                modifier = Modifier.padding(top = 10.dp, start = 20.dp, bottom = 10.dp)
-            )*/
 
+               /* Text(
+                    text = chore.dueDate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: "No due date",
+                    style = TextStyle(fontSize = 10.sp)
+                )*/
+            }
         }
     }
 
         Spacer(modifier = Modifier.height(8.dp))
 }
+@Composable
+fun TaskWeekItem(chore: Chore) {
+    Card(
+       // backgroundColor = Color(lightPurple),
+        modifier = Modifier
+            .width(300.dp)
+            .height(50.dp)
+    ) {
+        Column(
+            //horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(start = 8.dp, end = 16.dp)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.person),
+                contentDescription = "local",
+                modifier = Modifier.size(30.dp)
+            )
+            Text(
+                text = chore.assignee,
+                style = TextStyle(fontSize = 14.sp),
+                textAlign = TextAlign.Center
+            )
+        }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = chore.choreName,
+                style = TextStyle(fontSize = 18.sp),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(start = 24.dp)
+            )
+
+            /* Text(
+                 text = chore.dueDate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: "No due date",
+                 style = TextStyle(fontSize = 10.sp)
+             )*/
+            RatingBarComposable()
+        }
+    }
+    Spacer(modifier = Modifier.height(8.dp))
+}
 
 @Composable
-fun TaskDisplayArea(chores: List<Chore>, deleteTask: (Chore) -> Unit) {
+fun TaskDisplayHouse(chores: List<Chore>, deleteTask: (Chore) -> Unit) {
     LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
         items(chores){chore ->
             TaskItem(chore)
@@ -136,17 +192,18 @@ fun TaskDisplayArea(chores: List<Chore>, deleteTask: (Chore) -> Unit) {
         }
     }
 }
-
 @Composable
-fun DayOfWeekText(day: String) {
-    Text(
-        text = day,
-        modifier = Modifier.padding(top = 10.dp, bottom = 45.dp),
-        fontSize = 15.sp,
-        fontWeight = FontWeight.Bold,
-        color = Color.Blue
-    )
+fun TaskDisplayWeek(chores: List<Chore>, deleteTask: (Chore) -> Unit, day: DayOfWeek) {
+    LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
+        items(chores){chore ->
+            if(chore.dueDate?.dayOfWeek == day){
+                TaskWeekItem(chore)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
 }
+
 
 @Composable
 fun MainLayout(navController: NavHostController = rememberNavController()) {
@@ -154,7 +211,15 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
     var showDialog by remember { mutableStateOf(false) }
     var isPersonal by remember { mutableStateOf(false) }
     var isHouse by remember { mutableStateOf(true) }
-    val daysOfWeek = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    val daysOfWeekList = listOf(
+        DayOfWeek.MONDAY,
+        DayOfWeek.TUESDAY,
+        DayOfWeek.WEDNESDAY,
+        DayOfWeek.THURSDAY,
+        DayOfWeek.FRIDAY,
+        DayOfWeek.SATURDAY,
+        DayOfWeek.SUNDAY
+    )
 
     Box(
         Modifier
@@ -208,48 +273,21 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                 }
             }
             Column(
-                modifier = Modifier.align(Alignment.Start)
+                //modifier = Modifier.align(Alignment.Start)
             ) {
                 if(isHouse){
-                    Text(
-                        "House Chores",
-                        modifier = Modifier.padding(top = 10.dp),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    TaskDisplayArea(chores, deleteTask = {chore -> chores.remove(chore) })
-                }else{
-                    Text(
-                        "This week:",
-                        modifier = Modifier.padding(top = 10.dp, bottom = 15.dp),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    for (day in daysOfWeek) {
-                        DayOfWeekText(day = day)
+                    TaskDisplayHouse(chores, deleteTask = {chore -> chores.remove(chore) })
+                } else {
+                    for (day in daysOfWeekList) {
+                        Column(modifier = Modifier.weight(1f)) { // Set weight to 1
+                            Text(text = day.toString())
+                            Spacer(modifier = Modifier.height(4.dp))
+                            TaskDisplayWeek(chores, deleteTask = { chore -> chores.remove(chore) }, day)
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
                     }
 
-
                 }
-                /*Text(
-                    "Overdue Chores",
-                    modifier = Modifier.padding(top = 10.dp),
-                    fontSize = 20.sp
-                )
-                Box(
-                    modifier = Modifier
-                        .padding(top = 30.dp)
-                        .size(width = 300.dp, height = 150.dp)
-                        .border(width = 2.dp, color = Color.Black, shape = RectangleShape)
-                ) {
-                    // Content of the Box
-                }
-                Text(
-                    "Today:",
-                    modifier = Modifier.padding(top = 10.dp),
-                    fontSize = 20.sp
-                )*/
-
             }
         }
         if(isHouse) {
@@ -291,6 +329,8 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
     }
 }
 
+
+
 @Composable
 fun ChoresScreen(navController: NavHostController = rememberNavController()) {
     Box(
@@ -300,4 +340,5 @@ fun ChoresScreen(navController: NavHostController = rememberNavController()) {
         MainLayout(navController = navController)
     }
 }
+
 
