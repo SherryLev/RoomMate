@@ -41,7 +41,7 @@ fun SelectionDropdown(options: List<String>, label: String, onCategorySelected: 
         OutlinedTextField(
             value = selectedOption,
             onValueChange = { },
-            readOnly = true,
+            readOnly = false,
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { coordinates ->

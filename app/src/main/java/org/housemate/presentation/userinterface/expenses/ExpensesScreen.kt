@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -45,8 +47,13 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import org.housemate.theme.green
+import org.housemate.theme.light_purple
+import org.housemate.theme.md_theme_dark_primary
+import org.housemate.theme.md_theme_dark_secondary
 import org.housemate.theme.md_theme_light_error
+import org.housemate.theme.md_theme_light_primary
 import org.housemate.theme.purple_background
+import org.housemate.utils.AppScreenRoutes
 
 @Composable
 fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
@@ -58,23 +65,11 @@ fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
             modifier = Modifier.fillMaxSize()
         ) {
             item {
-                Box(
+                Spacer(
                     modifier = Modifier
-                        .fillMaxWidth(),
-
-                    ) {
-                    Text(
-                        text = "House Expenses",
-                        fontSize = 23.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 20.dp)
-                            .padding(bottom = 8.dp)
-                    )
-                }
-
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                )
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -88,7 +83,6 @@ fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
                             .align(Alignment.Center),
                         backgroundColor = Color.White
                     ) {
-                        // Left and right sides of the box with a divider
                         Row(
                             modifier = Modifier
                                 .fillMaxHeight()
@@ -96,7 +90,6 @@ fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            // Left side of the box: "You are owed $2"
                             Column(
                                 modifier = Modifier
                                     .weight(1f)
@@ -108,19 +101,18 @@ fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
                                     "You are owed",
                                     fontWeight = FontWeight.Bold, color = Color.DarkGray
                                 )
-                                Text("$2", fontSize = 24.sp, color = green)
+                                Text("$2", fontWeight = FontWeight.Bold, fontSize = 24.sp, color = green)
                             }
                             Column(
                                 modifier = Modifier
                             ) {
                                 Divider(
-                                    color = Color.Gray,
+                                    color = Color.LightGray,
                                     modifier = Modifier
                                         .height(45.dp)
                                         .width(1.dp)
                                 )
                             }
-                            // Right side of the box: "You owe $200"
                             Column(
                                 modifier = Modifier
                                     .weight(1f)
@@ -134,7 +126,7 @@ fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
                                     color = Color.DarkGray,
                                     textAlign = TextAlign.Center
                                 )
-                                Text("$200", fontSize = 24.sp, color = md_theme_light_error)
+                                Text("$200", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = md_theme_light_error)
                             }
                         }
                     }
@@ -144,107 +136,20 @@ fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
             item {
                 Box(
                     modifier = Modifier
-                        .padding(10.dp)
+                        .padding(top = 10.dp)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-
-                        Text(
-                            buildAnnotatedString {
-                                append("Sally owes you ")
-
-                                withStyle(
-                                    style = SpanStyle(
-                                        color = green,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                ) {
-                                    append("$2")
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(6.dp)
-                        )
-
-                        Text(
-                            buildAnnotatedString {
-                                append("You owe Bob ")
-
-                                withStyle(
-                                    style = SpanStyle(
-                                        color = md_theme_light_error,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                ) {
-                                    append("$100")
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(6.dp)
-                        )
-
-                        Text(
-                            buildAnnotatedString {
-                                append("You owe Mike ")
-
-                                withStyle(
-                                    style = SpanStyle(
-                                        color = md_theme_light_error,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                ) {
-                                    append("$100")
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(6.dp)
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Button(
-                                onClick = { /* Handle settle debts */ },
-                                shape = RoundedCornerShape(25.dp),
-                                modifier = Modifier
-                                    .padding(10.dp)
-                            ) {
-                                Text("Settle Debts", fontSize = 16.sp)
-                            }
-
-                            Button(
-                                onClick = { /* Handle balances */ },
-                                shape = RoundedCornerShape(25.dp),
-                                modifier = Modifier
-                                    .padding(10.dp)
-                            ) {
-                                Text("Balances", fontSize = 16.sp)
-                            }
-                        }
+                        BalancesInfoRow(name = "Sally", amount = "$2", youOwe = false)
+                        BalancesInfoRow(name = "Bob", amount = "$100", youOwe = true)
+                        BalancesInfoRow(name = "Mike", amount = "$100", youOwe = true)
                     }
                 }
             }
-
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 20.dp)
-                ) {
-                    Text(
-                        text = "Expense history",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    )
-                }
-            }
-            item {
-
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -253,8 +158,17 @@ fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Column {
+                        Text(
+                            text = "Expense History",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(16.dp)
+                        )
                         repeat(50) {
-                            Text("Expense Item $it", modifier = Modifier.padding(16.dp))
+                            Text(
+                                "Expense Item $it",
+                                modifier = Modifier.padding(16.dp)
+                            )
                         }
                     }
                 }
@@ -271,11 +185,58 @@ fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
             ) {
                 Button(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    onClick = {},
+                    onClick = { navController.navigate(AppScreenRoutes.AddExpenseScreen.route) },
                     shape = RoundedCornerShape(25.dp),
+                    elevation = ButtonDefaults.elevation(0.dp)
                 ) {
                     Text("+ Add Expense")
                 }
+            }
+        }
+    }
+}
+@Composable
+fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean) {
+    Box(
+        modifier = Modifier.padding(horizontal = 40.dp, vertical = 10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = name,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (youOwe) {
+                    Text(text = "you owe", color = md_theme_light_error, fontSize = 14.sp)
+                } else {
+                    Text(text = "owes you", color = green, fontSize = 14.sp)
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = amount,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = if (youOwe) md_theme_light_error else green
+                )
+            }
+            Button(
+                onClick = { /* Handle settle up */ },
+                shape = RoundedCornerShape(25.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = light_purple,
+                    contentColor = md_theme_light_primary
+                    ),
+                elevation = ButtonDefaults.elevation(0.dp)
+            ) {
+                Text(text = "Settle up", fontWeight = FontWeight.Bold)
             }
         }
     }
