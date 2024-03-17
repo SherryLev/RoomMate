@@ -1,7 +1,9 @@
 package org.housemate.presentation.userinterface.chores
 
+import android.app.DatePickerDialog
 import android.text.Selection
 import android.util.Log
+import android.widget.DatePicker
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -14,6 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -22,8 +27,75 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import org.housemate.domain.model.Chore
 import java.time.LocalDateTime
+import java.util.*
 
 var choreIdCount = 1
+@Composable
+fun ReadonlyOutlinedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    label: @Composable () -> Unit
+) {
+    Box {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = modifier.width(120.dp),
+            label = label,
+
+            )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .alpha(0f)
+                .clickable(onClick = onClick),
+        )
+    }
+}
+
+@Composable
+fun TasksDatePicker(onDateSelected: (LocalDateTime) -> Unit): LocalDateTime? {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    // getting today's date fields
+    val year = calendar[Calendar.YEAR]
+    val month = calendar[Calendar.MONTH]
+    val day = calendar[Calendar.DAY_OF_MONTH]
+
+    var selectedDateText by remember { mutableStateOf("") }
+
+    val datePicker =
+        DatePickerDialog(
+            context,
+            { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
+                selectedDateText = "$selectedDay/${selectedMonth + 1}/$selectedYear"
+                onDateSelected(LocalDateTime.of(selectedYear, selectedMonth + 1, selectedDay, 0, 0))
+            },
+            year,
+            month,
+            day,
+        )
+    // can't pick dates in the past
+    datePicker.datePicker.minDate = calendar.timeInMillis
+
+    Column(
+        horizontalAlignment = Alignment.Start
+    ) {
+        ReadonlyOutlinedTextField(
+            value = selectedDateText,
+            onValueChange = { selectedDateText = it },
+            onClick = {
+                datePicker.show()
+            },
+        ) {
+            Text(text = "Start Date")
+        }
+    }
+    return null
+}
 
 @Composable
 fun SelectionDropdown(options: List<String>, label: String, onCategorySelected: (String) -> Unit){
@@ -82,7 +154,8 @@ fun ChoreCreator(addChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit) {
     var choreChoice by remember { mutableStateOf("") }
     var assigneeChoice by remember { mutableStateOf("") }
     val id = choreIdCount
-    var dueDate = LocalDateTime.now()
+
+    val selectedDate = remember { mutableStateOf<LocalDateTime?>(null) }
     choreIdCount++
     Column(
         modifier = Modifier.padding(16.dp)) {
@@ -92,13 +165,12 @@ fun ChoreCreator(addChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
         SelectionDropdown(assignees,labels[2],onCategorySelected = { category -> assigneeChoice = category })
         Spacer(modifier = Modifier.height(16.dp))
-
+        TasksDatePicker { date ->selectedDate.value = date}
         Spacer(modifier = Modifier.padding(top = 10.dp))
         Button(
             onClick = {
-                val chore = Chore(id = id, choreName = choreChoice, category = categoryChoice, assignee = assigneeChoice, dueDate = dueDate)
+                val chore = Chore(id = id, choreName = choreChoice, category = categoryChoice, assignee = assigneeChoice, dueDate = selectedDate.value)
                 addChore(chore)
-                dueDate = LocalDateTime.now()
                 onDialogDismiss()
             },
             modifier = Modifier
