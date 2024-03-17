@@ -36,9 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import org.housemate.theme.light_gray
+import org.housemate.theme.light_purple
+import org.housemate.theme.md_theme_light_primary
 
 @Composable
 fun AddExpenseScreen(navController: NavHostController = rememberNavController()) {
@@ -166,24 +170,26 @@ fun CurrencyDropdown(selectedCurrency: String, onCurrencySelected: (String) -> U
     Box(
         modifier = Modifier
             .padding(15.dp)
-            .size(width = 200.dp, height = 50.dp)
-            .background(color = Color.LightGray, shape = RoundedCornerShape(25.dp))
+            .size(width = 90.dp, height = 40.dp)
+            .background(color = light_gray, shape = RoundedCornerShape(25.dp))
             .clip(RoundedCornerShape(25.dp)) // Clip the clickable area with rounded corners
             .clickable { expanded = !expanded } // Make the whole dropdown clickable
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize()
         ) {
             Text(
                 text = selectedCurrency,
-                color = Color.Black,
+                color = md_theme_light_primary,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
             )
             Icon(
                 imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                 contentDescription = "Dropdown Arrow",
-                tint = Color.Black,
+                tint = md_theme_light_primary,
                 modifier = Modifier
                     .size(30.dp)
                     .padding(4.dp)
@@ -193,7 +199,7 @@ fun CurrencyDropdown(selectedCurrency: String, onCurrencySelected: (String) -> U
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.width(200.dp)
+            modifier = Modifier.width(100.dp)
         ) {
             currencies.forEach { currency ->
                 DropdownMenuItem(
