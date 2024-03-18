@@ -8,16 +8,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -29,17 +27,13 @@ import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -50,9 +44,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
@@ -63,7 +57,6 @@ import androidx.navigation.compose.rememberNavController
 import org.housemate.theme.light_gray
 import org.housemate.theme.light_purple
 import org.housemate.theme.md_theme_light_primary
-import org.housemate.utils.AppScreenRoutes
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -78,7 +71,7 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
     val housemates = listOf("You", "Sally", "Bob", "Mike")
     val split_options = listOf("Equally", "By exact amount", "By %")
 
-    var textFieldValueState by remember {
+    var expenseAmountState by remember {
         mutableStateOf(TextFieldValue(text = ""))
     }
 
@@ -120,8 +113,8 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
                 )
                 Spacer(modifier = Modifier.width(22.dp))
                 TextField(
-                    value = textFieldValueState,
-                    onValueChange = { textFieldValueState = formatAmount(it) },
+                    value = expenseAmountState,
+                    onValueChange = { expenseAmountState = formatAmount(it) },
                     placeholder = {
                         Text(
                             text = "Enter Amount",
@@ -217,21 +210,6 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
             )
         }
 
-//        Row(
-//            verticalAlignment = Alignment.CenterVertically,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
-//        ) {
-//            Text("With", fontWeight = FontWeight.Bold, color = Color.Gray)
-//            Column(
-//                modifier = Modifier.padding(start = 16.dp)
-//            ) {
-//                Checkbox(checked = true, onCheckedChange = { /* handle checkbox state */ })
-//                Checkbox(checked = true, onCheckedChange = { /* handle checkbox state */ })
-//            }
-//        }
-
         Box(
             modifier = Modifier
                 .padding(horizontal = 24.dp)
@@ -240,23 +218,49 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
             when (selectedSplit) {
                 "Equally" -> {
                     splitUi = {
-                        EquallySplitUI(
-                            housemates = housemates,
-                            totalAmount = textFieldValueState.text.toBigDecimalOrNull()
-                                ?: BigDecimal.ZERO,
-                            onAmountChanged = {}
-                        )
+                        Row(
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Text("With", fontWeight = FontWeight.Bold, color = Color.Gray,  modifier = Modifier.padding(vertical = 26.dp))
+                            Spacer(modifier = Modifier.width(50.dp))
+                            Spacer(modifier = Modifier.weight(1f))
+                            EquallySplitUI(
+                                housemates = housemates,
+                                expenseAmountState = expenseAmountState, // Pass textFieldValueState
+                                onAmountChanged = { owingAmounts ->
+                                    // Handle the amount change here, you can print or perform any other action
+                                    println("Owing Amounts: $owingAmounts")
+                                }
+                            )
+                        }
                     }
                 }
 
                 "By exact amount" -> {
                     splitUi = {
-                        ExactAmountSplitUI(
-                            housemates = housemates,
-                            totalAmount = textFieldValueState.text.toBigDecimalOrNull()
-                                ?: BigDecimal.ZERO,
-                            onAmountChanged = { /* Handle amount change */ }
-                        )
+                        Row(
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Text(
+                                "With",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Gray,
+                                modifier = Modifier.padding(vertical = 26.dp)
+                            )
+                            Spacer(modifier = Modifier.width(50.dp))
+                            Spacer(modifier = Modifier.weight(1f))
+                            ExactAmountSplitUI(
+                                housemates = housemates,
+                                expenseAmountState = expenseAmountState,
+                                onAmountChanged = { owingAmounts ->
+                                    println("Owing Amounts: $owingAmounts")
+                                }
+                            )
+                        }
                     }
                 }
                 // Add other cases as needed
@@ -326,31 +330,53 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
         }
     }
 }
-
-
 @Composable
 fun EquallySplitUI(
     housemates: List<String>,
-    totalAmount: BigDecimal,
+    expenseAmountState: TextFieldValue, // Add textFieldValueState parameter
     onAmountChanged: (Map<String, BigDecimal>) -> Unit
 ) {
-    // Map to hold the entered amounts for each housemate
-    val enteredAmounts = remember { mutableStateMapOf<String, BigDecimal>() }
-
+    val amountPerPerson = remember(expenseAmountState) { mutableStateOf(BigDecimal.ZERO) } // observe textFieldValueState
     // Map to hold the checked states for each housemate
     val checkedStates = remember { mutableStateListOf<Boolean>().apply { repeat(housemates.size) { add(false) } } }
-
     // Keep track of the number of selected housemates
     var selectedCount by remember { mutableStateOf(0) }
 
+
+    // Calculate amounts whenever textFieldValueState changes
+    DisposableEffect(expenseAmountState) {
+        val totalAmount = expenseAmountState.text.toBigDecimalOrNull() ?: BigDecimal.ZERO
+        // Recalculate amount per person
+        amountPerPerson.value = if (selectedCount > 0) {
+            expenseAmountState.text.toBigDecimalOrNull()?.let { totalAmount ->
+                totalAmount.divide(BigDecimal(selectedCount), 2, RoundingMode.HALF_UP)
+            } ?: BigDecimal.ZERO
+        } else {
+            BigDecimal.ZERO
+        }
+        // Calculate and return owing amounts
+        val owingAmounts = mutableMapOf<String, BigDecimal>()
+        housemates.forEachIndexed { i, name ->
+            if (checkedStates.getOrNull(i) == true) {
+                owingAmounts[name] = amountPerPerson.value
+            }
+        }
+        onAmountChanged(owingAmounts)
+
+        onDispose { }
+    }
+
+    // Remember the calculated amount per person
     Column(
-        modifier = Modifier.padding(vertical = 8.dp)
+        modifier = Modifier.padding(vertical = 12.dp)
     ) {
         // List of housemates with checkboxes
         housemates.forEachIndexed { index, housemate ->
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Text(text = housemate)
+                Spacer(modifier = Modifier.weight(1f))
                 Checkbox(
                     checked = checkedStates.getOrNull(index) ?: false,
                     onCheckedChange = { checked ->
@@ -360,40 +386,34 @@ fun EquallySplitUI(
                         } else {
                             selectedCount--
                         }
-                        // Notify the amount changed when checkbox state changes
-                        onAmountChanged(enteredAmounts.toMap())
+                        // Recalculate amount per person
+                        amountPerPerson.value = if (selectedCount > 0) {
+                            expenseAmountState.text.toBigDecimalOrNull()?.let { totalAmount ->
+                                totalAmount.divide(BigDecimal(selectedCount), 2, RoundingMode.HALF_UP)
+                            } ?: BigDecimal.ZERO
+                        } else {
+                            BigDecimal.ZERO
+                        }
+                        // Calculate and return owing amounts
+                        val owingAmounts = mutableMapOf<String, BigDecimal>()
+                        housemates.forEachIndexed { i, name ->
+                            if (checkedStates.getOrNull(i) == true) {
+                                owingAmounts[name] = amountPerPerson.value
+                            }
+                        }
+                        onAmountChanged(owingAmounts)
                     },
                     modifier = Modifier.padding(end = 8.dp)
                 )
-                Text(text = housemate)
-            }
-        }
 
-        // Calculate amount per person
-        val amountPerPerson = if (selectedCount > 0) {
-            totalAmount.divide(BigDecimal(selectedCount), 2, RoundingMode.HALF_UP)
-        } else {
-            BigDecimal.ZERO
+            }
         }
 
         // Calculation of how much each person owes
         Text(
-            text = "Amount per person: $amountPerPerson, # people: $selectedCount",
+            text = "Amount per person: ${amountPerPerson.value}, # people: $selectedCount",
             modifier = Modifier.padding(top = 8.dp)
         )
-
-        // Print entered amounts map
-        Button(
-            onClick = {
-                println("Entered amounts:")
-                enteredAmounts.forEach { (housemate, amount) ->
-                    println("$housemate: $amount")
-                }
-            },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text(text = "Print Entered Amounts")
-        }
     }
 }
 
@@ -402,11 +422,13 @@ fun EquallySplitUI(
 @Composable
 fun ExactAmountSplitUI(
     housemates: List<String>,
-    totalAmount: BigDecimal,
+    expenseAmountState: TextFieldValue,
     onAmountChanged: (Map<String, BigDecimal>) -> Unit
 ) {
     // Map to hold the entered amounts for each housemate
     val enteredAmounts = remember { mutableStateMapOf<String, BigDecimal>() }
+
+    val remainingAmountState = remember { mutableStateOf(BigDecimal.ZERO) }
 
     // Map to hold the TextFieldValue state for each housemate
     val textFieldValueStates = remember {
@@ -417,50 +439,67 @@ fun ExactAmountSplitUI(
         }
     }
 
+    // Recalculate entered amounts whenever the total amount changes
+    DisposableEffect(expenseAmountState) {
+        val totalAmount = expenseAmountState.text.toBigDecimalOrNull() ?: BigDecimal.ZERO
+        val sumOfEnteredAmounts = enteredAmounts.values.fold(BigDecimal.ZERO) { acc, value ->
+            acc + value
+        }
+        remainingAmountState.value = expenseAmountState.text.toBigDecimalOrNull()?.minus(sumOfEnteredAmounts) ?: BigDecimal.ZERO
+
+        onAmountChanged(enteredAmounts.toMap())
+
+        onDispose { }
+    }
+
     Column(
         modifier = Modifier.padding(vertical = 8.dp)
     ) {
         // List of housemates with numerical textfields
         housemates.forEach { housemate ->
-            val enteredAmount = enteredAmounts[housemate] ?: BigDecimal.ZERO
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = housemate)
-                Spacer(modifier = Modifier.width(8.dp))
-                TextField(
-                    value = textFieldValueStates[housemate] ?: TextFieldValue(""),
-                    onValueChange = { newValue ->
-                        val formattedValue = formatAmount(newValue)
-                        textFieldValueStates[housemate] = formatAmount(newValue)
-                        val newAmount = formattedValue.text.toBigDecimalOrNull() ?: BigDecimal.ZERO
-                        enteredAmounts[housemate] = newAmount
-                        onAmountChanged(enteredAmounts.toMap())
-                    },
-                    placeholder = {
-                        Text(
-                            text = "Enter Amount",
-                            color = Color.Gray,
-                            fontSize = 16.sp
-                        )
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    textStyle = LocalTextStyle.current.copy(
-                        fontSize = 18.sp,
-                        color = Color.DarkGray,
-                        fontWeight = FontWeight.ExtraBold
-                    ),
-                    modifier = Modifier
-                        .padding(horizontal = 6.dp)
-                        .height(IntrinsicSize.Max)
-                        .background(color = Color.Transparent)
-                )
+                Spacer(modifier = Modifier.weight(1f))
+                Row(
+                    horizontalArrangement = Arrangement.End // Aligns children to the end of the row
+                ) {
+                    TextField(
+                        value = textFieldValueStates[housemate] ?: TextFieldValue(""),
+                        onValueChange = { newValue ->
+                            val formattedValue = formatAmount(newValue)
+                            textFieldValueStates[housemate] = formatAmount(newValue)
+                            val newAmount =
+                                formattedValue.text.toBigDecimalOrNull() ?: BigDecimal.ZERO
+                            enteredAmounts[housemate] = newAmount
+                            onAmountChanged(enteredAmounts.toMap())
+                        },
+                        placeholder = {
+                            Text(
+                                text = "Enter Amount",
+                                color = Color.Gray,
+                                fontSize = 16.sp
+                            )
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = TextFieldDefaults.textFieldColors(
+                            backgroundColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        textStyle = LocalTextStyle.current.copy(
+                            fontSize = 18.sp,
+                            color = Color.DarkGray,
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        modifier = Modifier
+                            .padding(horizontal = 6.dp)
+                            .background(color = Color.Transparent)
+                            .weight(1f)
+                    )
+                }
             }
         }
 
@@ -469,30 +508,17 @@ fun ExactAmountSplitUI(
             acc + value
         }
 
-        // Calculate remaining amount needed to match the total
-        val remainingAmount = totalAmount - sumOfEnteredAmounts
+        remainingAmountState.value = expenseAmountState.text.toBigDecimalOrNull()?.minus(sumOfEnteredAmounts) ?: BigDecimal.ZERO
 
         // Display remaining amount
         Text(
-            text = "Remaining amount: ${if (remainingAmount >= BigDecimal.ZERO) remainingAmount.setScale(2) else BigDecimal.ZERO}",
+            text = "Remaining amount: ${if (remainingAmountState.value >= BigDecimal.ZERO) remainingAmountState.value.setScale(2) else BigDecimal.ZERO}",
             modifier = Modifier.padding(top = 8.dp),
-            color = if (remainingAmount >= BigDecimal.ZERO) Color.Green else Color.Red
+            color = if (remainingAmountState.value >= BigDecimal.ZERO) Color.Green else Color.Red
         )
-
-        // Print entered amounts map
-        Button(
-            onClick = {
-                println("Entered amounts:")
-                enteredAmounts.forEach { (housemate, amount) ->
-                    println("$housemate: $amount")
-                }
-            },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text(text = "Print Entered Amounts")
-        }
     }
 }
+
 
 @Composable
 fun CustomDropdown(
