@@ -184,12 +184,18 @@ fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
                 Button(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(2.dp),
                     onClick = { navController.navigate(AppScreenRoutes.AddExpenseScreen.route) },
                     shape = RoundedCornerShape(25.dp),
                     elevation = ButtonDefaults.elevation(0.dp)
                 ) {
-                    Text("+ Add Expense")
+                    Text(
+                        "+ Add Expense",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 4.dp))
                 }
             }
         }
@@ -236,7 +242,7 @@ fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean) {
                     ),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
-                Text(text = "Settle up", fontWeight = FontWeight.Bold)
+                Text(text = "Settle up", fontWeight = FontWeight.Bold, fontSize = 14.sp)
             }
         }
     }

@@ -5,23 +5,34 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
@@ -36,24 +47,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.theme.light_gray
 import org.housemate.theme.light_purple
 import org.housemate.theme.md_theme_light_primary
+import org.housemate.utils.AppScreenRoutes
 
 @Composable
 fun AddExpenseScreen(navController: NavHostController = rememberNavController()) {
     var selectedPayer by remember { mutableStateOf("You") }
     var selectedSplit by remember { mutableStateOf("Equally") }
-    var selectedCurrency by remember { mutableStateOf(currencies[0]) }
+    var selectedCurrency by remember { mutableStateOf("CAD") }
+    var expenseDescription by remember { mutableStateOf("") }
+
+    val currencies = listOf("CAD", "USD", "EUR", "GBP")
+    val housemates = listOf("You", "Sally", "Bob", "Mike")
+    val split_options = listOf("Equally", "By exact amount", "By %")
+
+    var textFieldValueState by remember {
+        mutableStateOf(TextFieldValue(text = ""))
+    }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(horizontal = 16.dp)
     ) {
         // Raised surface with currency selection and dollar amount text field
         Surface(
@@ -61,36 +88,77 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(vertical = 16.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text("Paid")
-                Spacer(modifier = Modifier.width(16.dp))
-                CurrencyDropdown(selectedCurrency = selectedCurrency) {
-                    selectedCurrency = it
-                }
-
+                Spacer(modifier = Modifier.width(12.dp))
+                Text("Paid", fontWeight = FontWeight.Bold, color = Color.Gray)
+                Spacer(modifier = Modifier.width(22.dp))
+                CustomDropdown(
+                    items = currencies,
+                    selectedItem = selectedCurrency,
+                    onItemSelected = { selectedCurrency = it },
+                    modifier = Modifier,
+                    dropdownWidth = 78.dp
+                )
+                Spacer(modifier = Modifier.width(22.dp))
+                TextField(
+                    value = textFieldValueState,
+                    onValueChange = { textFieldValueState = formatAmount(it) },
+                    placeholder = {
+                        Text(
+                            text = "Enter Amount",
+                            color = Color.Gray,
+                            fontSize = 16.sp
+                        )
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    textStyle = LocalTextStyle.current.copy(
+                        fontSize = 26.sp,
+                        color = Color.DarkGray,
+                        fontWeight = FontWeight.ExtraBold
+                    ),
+                    modifier = Modifier
+                        .padding(horizontal = 6.dp)
+                        .height(IntrinsicSize.Max)
+                        .background(color = Color.Transparent)
+                )
             }
         }
 
-        // Textfield for entering expense description
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
         ) {
-            Text("For")
-            Spacer(modifier = Modifier.width(16.dp))
-            TextField(
-                value = "",
-                onValueChange = { /* handle text change */ },
-                label = { Text("Expense description") }
+            Text("For", fontWeight = FontWeight.Bold, color = Color.Gray)
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            OutlinedTextField(
+                value = expenseDescription,
+                onValueChange = { expenseDescription = it },
+                singleLine = true,
+                label = { Text("Enter expense description") },
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier.width(220.dp)
             )
         }
 
@@ -99,45 +167,47 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
         ) {
-            Text("By")
-            Spacer(modifier = Modifier.width(16.dp))
-            DropdownMenu(
-                expanded = false,
-                onDismissRequest = { /* handle dismiss */ }
-            ) {
-                DropdownMenuItem(onClick = { selectedPayer = "You" }) {
-                    Text("You")
-                }
-            }
+            Text("By", fontWeight = FontWeight.Bold, color = Color.Gray)
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            CustomDropdown(
+                items = housemates,
+                selectedItem = selectedPayer,
+                onItemSelected = { selectedPayer = it },
+                modifier = Modifier,
+                dropdownWidth = 220.dp
+            )
         }
 
-        // Dropdown for selecting split
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
         ) {
-            Text("Split")
-            Spacer(modifier = Modifier.width(16.dp))
-            DropdownMenu(
-                expanded = false,
-                onDismissRequest = { /* handle dismiss */ }
-            ) {
-                DropdownMenuItem(onClick = { selectedSplit = "Equally" }) {
-                    Text("Equally")
-                }
-            }
+            Text("Split", fontWeight = FontWeight.Bold, color = Color.Gray)
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            CustomDropdown(
+                items = split_options,
+                selectedItem = selectedSplit,
+                onItemSelected = { selectedSplit = it },
+                modifier = Modifier,
+                dropdownWidth = 220.dp
+            )
         }
 
-        // Section for selecting people in the group
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
         ) {
-            Text("With")
+            Text("With", fontWeight = FontWeight.Bold, color = Color.Gray)
             Column(
                 modifier = Modifier.padding(start = 16.dp)
             ) {
@@ -145,74 +215,137 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
                 Checkbox(checked = true, onCheckedChange = { /* handle checkbox state */ })
             }
         }
+    }
 
-        // Row for cancel and save buttons
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+    Box(Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 10.dp)
         ) {
-            Button(onClick = { /* handle cancel */ }) {
-                Text("Cancel")
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Button(onClick = { /* handle save */ }) {
-                Text("Save")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Spacer(modifier = Modifier.width(4.dp))
+                Button(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .weight(1f),
+                    onClick = { },
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = light_purple,
+                        contentColor = md_theme_light_primary
+                    ),
+                    elevation = ButtonDefaults.elevation(0.dp)
+                ) {
+                    Text(
+                        "Cancel",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Button(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .weight(1f),
+                    onClick = { },
+                    shape = RoundedCornerShape(25.dp),
+                    elevation = ButtonDefaults.elevation(0.dp)
+                ) {
+                    Text(
+                        "Save",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
             }
         }
     }
 }
-// Define a list of currency codes
-val currencies = listOf("CAD", "USD", "EUR", "GBP")
+
+
 @Composable
-fun CurrencyDropdown(selectedCurrency: String, onCurrencySelected: (String) -> Unit) {
+fun CustomDropdown(
+    items: List<String>,
+    selectedItem: String,
+    onItemSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    dropdownWidth: Dp? = null // Optional width parameter
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
-            .padding(15.dp)
-            .size(width = 90.dp, height = 40.dp)
-            .background(color = light_gray, shape = RoundedCornerShape(25.dp))
-            .clip(RoundedCornerShape(25.dp)) // Clip the clickable area with rounded corners
-            .clickable { expanded = !expanded } // Make the whole dropdown clickable
+        modifier = if (dropdownWidth != null) {
+            Modifier
+                .clip(RoundedCornerShape(25.dp))
+                .background(color = light_gray)
+                .clickable { expanded = !expanded }
+                .padding(8.dp)
+                .width(dropdownWidth)
+        } else {
+            Modifier
+                .clip(RoundedCornerShape(25.dp))
+                .background(color = light_gray)
+                .clickable { expanded = !expanded }
+                .padding(8.dp)
+        }
+
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = selectedCurrency,
+                text = selectedItem,
                 color = md_theme_light_primary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                fontWeight = FontWeight.Bold
             )
+            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.weight(1f))
             Icon(
                 imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                 contentDescription = "Dropdown Arrow",
                 tint = md_theme_light_primary,
                 modifier = Modifier
-                    .size(30.dp)
-                    .padding(4.dp)
+                    .size(24.dp)
+                    .padding(0.dp)
             )
         }
 
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.width(100.dp)
+            modifier = if (dropdownWidth != null) {
+                Modifier
+                    .width(dropdownWidth + 10.dp)
+            } else {
+                Modifier
+            }
         ) {
-            currencies.forEach { currency ->
+            items.forEach { item ->
                 DropdownMenuItem(
                     onClick = {
-                        onCurrencySelected(currency)
+                        onItemSelected(item)
                         expanded = false
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
                 ) {
                     Text(
-                        text = currency,
+                        text = item,
                         color = Color.Black,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
                     )
                 }
             }
@@ -220,3 +353,27 @@ fun CurrencyDropdown(selectedCurrency: String, onCurrencySelected: (String) -> U
     }
 }
 
+
+
+
+private fun formatAmount(input: TextFieldValue): TextFieldValue {
+    var formattedInput = input.text.replace("[^\\d]".toRegex(), "") // Remove any non-digit characters
+
+    // Insert decimal point based on the length of the input
+    when (formattedInput.length) {
+        0 -> formattedInput = ""
+        1 -> formattedInput = "0.0$formattedInput"
+        else -> {
+            val value = formattedInput.substring(0, formattedInput.length - 2)
+            val cents = formattedInput.substring(formattedInput.length - 2)
+            formattedInput = when {
+                value.isEmpty() -> "0.$cents"
+                value == "0" -> "0.$cents"
+                value == "0." -> "0.$cents"
+                value.length > 1 && value.startsWith('0')-> "${value.substring(1)}.$cents"
+                else -> "$value.$cents"
+            }
+        }
+    }
+    return TextFieldValue(text = formattedInput, selection = TextRange(formattedInput.length))
+}
