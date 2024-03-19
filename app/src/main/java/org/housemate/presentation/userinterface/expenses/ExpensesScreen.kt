@@ -151,6 +151,13 @@ fun ExpensesScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
+                        // also need:
+                        // totalYouOwe to each housemate
+                        // totalOwed by each housemate
+                        // totalYouOwe to everyone
+                        // totalOwed by everyone
+                        // this can all be calculated using the expense history, in the viewmodel
+
                         BalancesInfoRow(name = "Sally", amount = "$2", youOwe = false)
                         BalancesInfoRow(name = "Bob", amount = "$100", youOwe = true)
                         BalancesInfoRow(name = "Mike", amount = "$100", youOwe = true)
@@ -162,7 +169,7 @@ fun ExpensesScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    elevation = 8.dp,
+                    elevation = 4.dp,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Column {
@@ -170,14 +177,29 @@ fun ExpensesScreen(
                             text = "Expense History",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(16.dp)
+                            modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
                         )
-                        // Observe the expenseItems list from the ViewModel
-                        expenseItems.forEach { expenseItem ->
-                            Text(
-                                text = expenseItem,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
+
+                        if (expenseItems.isEmpty()) {
+                            Box( modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                                .padding(bottom = 40.dp),
+                                contentAlignment = Alignment.Center){
+                                Text(
+                                    text = "You have no expense history yet",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Gray,
+                                    modifier = Modifier)
+                            }
+                        } else {
+                            // Observe the expenseItems list from the ViewModel
+                            expenseItems.forEach { expenseItem ->
+                                Text(
+                                    text = expenseItem,
+                                    modifier = Modifier.padding(bottom = 8.dp, start = 6.dp, end = 6.dp)
+                                )
+                            }
                         }
                     }
                 }

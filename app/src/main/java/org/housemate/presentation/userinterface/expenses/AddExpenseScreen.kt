@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -46,10 +48,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -93,198 +99,212 @@ fun AddExpenseScreen(
     }
 
 
-    Column(
+    LazyColumn(
     modifier = Modifier
         .fillMaxSize()
         .padding(horizontal = 16.dp)
     ) {
-        // Raised surface with currency selection and dollar amount text field
-        Surface(
-            elevation = 8.dp,
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
+        item {
+            // Raised surface with currency selection and dollar amount text field
+            Surface(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(vertical = 16.dp)
             ) {
-                Spacer(modifier = Modifier.width(12.dp))
-                Text("Paid", fontWeight = FontWeight.Bold, color = Color.Gray)
-                Spacer(modifier = Modifier.width(22.dp))
-                CustomDropdown(
-                    items = currencies,
-                    selectedItem = selectedCurrency,
-                    onItemSelected = { selectedCurrency = it },
-                    modifier = Modifier,
-                    dropdownWidth = 78.dp
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text("Paid", fontWeight = FontWeight.Bold, color = Color.Gray)
+                    Spacer(modifier = Modifier.width(22.dp))
+                    CustomDropdown(
+                        items = currencies,
+                        selectedItem = selectedCurrency,
+                        onItemSelected = { selectedCurrency = it },
+                        modifier = Modifier,
+                        dropdownWidth = 78.dp
+                    )
+                    Spacer(modifier = Modifier.width(22.dp))
+                    TextField(
+                        value = expenseAmountState,
+                        onValueChange = {
+                            expenseAmountState = formatAmount(it)
+                            expenseViewModel.setExpenseAmount(
+                                expenseAmountState.text.toBigDecimalOrNull() ?: BigDecimal.ZERO
+                            )
+                        },
+                        placeholder = {
+                            Text(
+                                text = "Enter Amount",
+                                color = Color.Gray,
+                                fontSize = 16.sp
+                            )
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = TextFieldDefaults.textFieldColors(
+                            backgroundColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        textStyle = LocalTextStyle.current.copy(
+                            fontSize = 26.sp,
+                            color = Color.DarkGray,
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        modifier = Modifier
+                            .padding(horizontal = 6.dp)
+                            .height(IntrinsicSize.Max)
+                            .background(color = Color.Transparent)
+                    )
+                }
+            }
+        }
+
+        item {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
+            ) {
+                Text(
+                    "For",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 8.dp)
                 )
-                Spacer(modifier = Modifier.width(22.dp))
-                TextField(
-                    value = expenseAmountState,
-                    onValueChange = {
-                        expenseAmountState = formatAmount(it)
-                        expenseViewModel.setExpenseAmount(expenseAmountState.text.toBigDecimalOrNull() ?: BigDecimal.ZERO)
-                                    },
-                    placeholder = {
-                        Text(
-                            text = "Enter Amount",
-                            color = Color.Gray,
-                            fontSize = 16.sp
-                        )
-                    },
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                OutlinedTextField(
+                    value = expenseDescription,
+                    onValueChange = { expenseViewModel.setExpenseDescription(it) },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    label = { Text("Enter expense description") },
                     colors = TextFieldDefaults.textFieldColors(
                         backgroundColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
-                    textStyle = LocalTextStyle.current.copy(
-                        fontSize = 26.sp,
-                        color = Color.DarkGray,
-                        fontWeight = FontWeight.ExtraBold
-                    ),
                     modifier = Modifier
-                        .padding(horizontal = 6.dp)
-                        .height(IntrinsicSize.Max)
-                        .background(color = Color.Transparent)
+                        .width(240.dp)
                 )
             }
-        }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
-        ) {
-            Text(
-                "For",
-                fontWeight = FontWeight.Bold,
-                color = Color.Gray,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            OutlinedTextField(
-                value = expenseDescription,
-                onValueChange = { expenseViewModel.setExpenseDescription(it) },
-                singleLine = true,
-                label = { Text("Enter expense description") },
-                colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
+            // Dropdown for selecting who paid for the expense
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .width(240.dp)
-            )
-        }
+                    .fillMaxWidth()
+                    .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
+            ) {
+                Text("By", fontWeight = FontWeight.Bold, color = Color.Gray)
 
-        // Dropdown for selecting who paid for the expense
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
-        ) {
-            Text("By", fontWeight = FontWeight.Bold, color = Color.Gray)
+                Spacer(modifier = Modifier.weight(1f))
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            CustomDropdown(
-                items = housemates,
-                selectedItem = selectedPayer,
-                onItemSelected = { expenseViewModel.setSelectedPayer(it) },
-                modifier = Modifier,
-                dropdownWidth = 220.dp
-            )
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
-        ) {
-            Text("Split", fontWeight = FontWeight.Bold, color = Color.Gray)
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            CustomDropdown(
-                items = split_options,
-                selectedItem = selectedSplit,
-                onItemSelected = { selectedSplit = it },
-                modifier = Modifier,
-                dropdownWidth = 220.dp
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-        ) {
-            // Update splitUi based on selected split option
-            when (selectedSplit) {
-                "Equally" -> {
-                    splitUi = {
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            Text("With", fontWeight = FontWeight.Bold, color = Color.Gray,  modifier = Modifier.padding(vertical = 26.dp))
-                            Spacer(modifier = Modifier.width(50.dp))
-                            Spacer(modifier = Modifier.weight(1f))
-                            EquallySplitUI(
-                                housemates = housemates,
-                                expenseAmountState = expenseAmountState, // Pass textFieldValueState
-                                onAmountChanged = { owingAmounts ->
-                                    // Handle the amount change here, you can print or perform any other action
-                                    println("Owing Amounts: $owingAmounts")
-                                    expenseViewModel.setOwingAmount(owingAmounts["You"] ?: BigDecimal.ZERO)
-                                }
-                            )
-                        }
-                    }
-                }
-
-                "By exact amount" -> {
-                    splitUi = {
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            Text(
-                                "With",
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Gray,
-                                modifier = Modifier.padding(vertical = 26.dp)
-                            )
-                            Spacer(modifier = Modifier.width(50.dp))
-                            Spacer(modifier = Modifier.weight(1f))
-                            ExactAmountSplitUI(
-                                housemates = housemates,
-                                expenseAmountState = expenseAmountState,
-                                onAmountChanged = { owingAmounts ->
-                                    println("Owing Amounts: $owingAmounts")
-                                }
-                            )
-                        }
-                    }
-                }
-                // Add other cases as needed
+                CustomDropdown(
+                    items = housemates,
+                    selectedItem = selectedPayer,
+                    onItemSelected = { expenseViewModel.setSelectedPayer(it) },
+                    modifier = Modifier,
+                    dropdownWidth = 220.dp
+                )
             }
-            splitUi()
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
+            ) {
+                Text("Split", fontWeight = FontWeight.Bold, color = Color.Gray)
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                CustomDropdown(
+                    items = split_options,
+                    selectedItem = selectedSplit,
+                    onItemSelected = { selectedSplit = it },
+                    modifier = Modifier,
+                    dropdownWidth = 220.dp
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+            ) {
+                // Update splitUi based on selected split option
+                when (selectedSplit) {
+                    "Equally" -> {
+                        splitUi = {
+                            Row(
+                                verticalAlignment = Alignment.Top,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Text(
+                                    "With",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Gray,
+                                    modifier = Modifier.padding(vertical = 26.dp)
+                                )
+                                Spacer(modifier = Modifier.width(50.dp))
+                                Spacer(modifier = Modifier.weight(1f))
+                                EquallySplitUI(
+                                    housemates = housemates,
+                                    expenseAmountState = expenseAmountState, // Pass textFieldValueState
+                                    onAmountChanged = { owingAmounts ->
+                                        // Handle the amount change here, you can print or perform any other action
+                                        println("Owing Amounts: $owingAmounts")
+                                        expenseViewModel.setOwingAmount(
+                                            owingAmounts["You"] ?: BigDecimal.ZERO
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    "By exact amount" -> {
+                        splitUi = {
+                            Row(
+                                verticalAlignment = Alignment.Top,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Text(
+                                    "With",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Gray,
+                                    modifier = Modifier.padding(vertical = 26.dp)
+                                )
+                                Spacer(modifier = Modifier.width(50.dp))
+                                Spacer(modifier = Modifier.weight(1f))
+                                ExactAmountSplitUI(
+                                    housemates = housemates,
+                                    expenseAmountState = expenseAmountState,
+                                    onAmountChanged = { owingAmounts ->
+                                        println("Owing Amounts: $owingAmounts")
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    // Add other cases as needed
+                }
+                splitUi()
+            }
         }
     }
+
 
     Box(Modifier.fillMaxSize()) {
         Column(
@@ -333,6 +353,22 @@ fun AddExpenseScreen(
                         .weight(1f),
                     onClick = {
 
+                        // also need:
+                        // totalYouOwe to each housemate
+                        // totalOwed by each housemate
+                        // totalYouOwe to everyone
+                        // totalOwed by everyone
+                        // this can all be calculated using the expense history, in the viewmodel
+
+                        // for each expense
+                        // settledup = false
+                        // date of expense
+
+                        // when you click settle up, you should be able to
+                        // see how much you owe that person or how much they owe you
+                        // you can write a smaller amount
+                        // then this should appear in the expense history as a payment
+
                         expenseViewModel.addExpense(selectedPayer, expenseDescription, expenseAmount, owingAmount)
 
                         println(selectedPayer)
@@ -365,6 +401,7 @@ fun AddExpenseScreen(
         }
     }
 }
+
 @Composable
 fun EquallySplitUI(
     housemates: List<String>,
@@ -401,7 +438,7 @@ fun EquallySplitUI(
 
     // Remember the calculated amount per person
     Column(
-        modifier = Modifier.padding(vertical = 12.dp)
+        modifier = Modifier.padding(vertical = 12.dp),
     ) {
         // List of housemates with checkboxes
         housemates.forEachIndexed { index, housemate ->
@@ -437,19 +474,49 @@ fun EquallySplitUI(
                         }
                         onAmountChanged(owingAmounts)
                     },
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = md_theme_light_primary,
+                        uncheckedColor = Color.Gray
+                    )
                 )
 
             }
         }
+        Box(modifier = Modifier.height(80.dp)) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 26.dp)
+            ) {
+                // Calculation of how much each person owes
+                val text = AnnotatedString.Builder().apply {
+                    withStyle(style = SpanStyle(color = md_theme_light_primary, fontWeight = FontWeight.Bold)) {
+                        append("$${amountPerPerson.value}")
+                    }
+                    withStyle(style = SpanStyle(color = Color.Gray, fontWeight = FontWeight.Bold)) {
+                        append("/person\n")
+                    }
+                    withStyle(style = SpanStyle(color = md_theme_light_primary, fontWeight = FontWeight.Bold)) {
+                        append("$selectedCount")
+                    }
+                    withStyle(style = SpanStyle(color = Color.Gray, fontWeight = FontWeight.Bold)) {
+                        append(" people")
+                    }
 
-        // Calculation of how much each person owes
-        Text(
-            text = "Amount per person: ${amountPerPerson.value}, # people: $selectedCount",
-            modifier = Modifier.padding(top = 8.dp)
-        )
+                }.toAnnotatedString()
+
+                Text(
+                    text = text,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
     }
 }
+
 
 
 
@@ -487,18 +554,20 @@ fun ExactAmountSplitUI(
     }
 
     Column(
-        modifier = Modifier.padding(vertical = 8.dp)
+        modifier = Modifier.padding(vertical = 8.dp),
     ) {
         // List of housemates with numerical textfields
         housemates.forEach { housemate ->
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.height(50.dp)
             ) {
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(text = housemate)
                 Spacer(modifier = Modifier.weight(1f))
                 Row(
-                    horizontalArrangement = Arrangement.End // Aligns children to the end of the row
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.padding(vertical = 0.dp) // Adjust the vertical spacing here
                 ) {
                     TextField(
                         value = textFieldValueStates[housemate] ?: TextFieldValue(""),
