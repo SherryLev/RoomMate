@@ -483,7 +483,7 @@ fun EquallySplitUI(
 
             }
         }
-        Box(modifier = Modifier.height(80.dp)) {
+        Box(modifier = Modifier.height(110.dp)) {
             Column(
                 modifier = Modifier
                     .align(Alignment.TopStart)
