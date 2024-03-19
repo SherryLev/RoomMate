@@ -85,7 +85,7 @@ fun AddExpenseScreen(
     var selectedCurrency by remember { mutableStateOf("CAD") }
 
     val currencies = listOf("CAD", "USD", "EUR", "GBP")
-    val housemates = listOf("You", "Sally", "Bob", "Mike")
+    val housemates = listOf("You", "Sally", "Bob", "Mike", "Steve", "John")
     val split_options = listOf("Equally", "By exact amount", "By %")
 
     var expenseAmountState by remember {
@@ -486,9 +486,10 @@ fun EquallySplitUI(
         Box(modifier = Modifier.height(80.dp)) {
             Column(
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
+                    .align(Alignment.TopStart)
                     .padding(start = 26.dp)
             ) {
+                Spacer(modifier = Modifier.height(20.dp))
                 // Calculation of how much each person owes
                 val text = AnnotatedString.Builder().apply {
                     withStyle(style = SpanStyle(color = md_theme_light_primary, fontWeight = FontWeight.Bold)) {
