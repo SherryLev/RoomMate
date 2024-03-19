@@ -182,7 +182,8 @@ fun AddExpenseScreen(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
                 ),
-                modifier = Modifier.width(240.dp)
+                modifier = Modifier
+                    .width(240.dp)
             )
         }
 
@@ -364,15 +365,13 @@ fun EquallySplitUI(
 ) {
     val amountPerPerson = remember(expenseAmountState) { mutableStateOf(BigDecimal.ZERO) } // observe textFieldValueState
     // Map to hold the checked states for each housemate
-    val checkedStates = remember { mutableStateListOf<Boolean>().apply { repeat(housemates.size) { add(false) } } }
+    val checkedStates = remember { mutableStateListOf<Boolean>().apply { repeat(housemates.size) { add(true) } } }
     // Keep track of the number of selected housemates
-    var selectedCount by remember { mutableStateOf(0) }
+    var selectedCount by remember { mutableStateOf(housemates.size) }
 
 
     // Calculate amounts whenever textFieldValueState changes
     DisposableEffect(expenseAmountState) {
-        val totalAmount = expenseAmountState.text.toBigDecimalOrNull() ?: BigDecimal.ZERO
-        // Recalculate amount per person
         amountPerPerson.value = if (selectedCount > 0) {
             expenseAmountState.text.toBigDecimalOrNull()?.let { totalAmount ->
                 totalAmount.divide(BigDecimal(selectedCount), 2, RoundingMode.HALF_UP)
