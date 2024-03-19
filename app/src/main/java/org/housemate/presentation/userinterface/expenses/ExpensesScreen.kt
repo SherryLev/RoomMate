@@ -41,11 +41,14 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.material.Divider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_purple
 import org.housemate.theme.md_theme_dark_primary
@@ -56,7 +59,12 @@ import org.housemate.theme.purple_background
 import org.housemate.utils.AppScreenRoutes
 
 @Composable
-fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
+fun ExpensesScreen(
+    navController: NavHostController = rememberNavController(),
+    expenseViewModel: ExpenseViewModel = hiltViewModel()
+) {
+    val expenseItems by expenseViewModel.expenseItems.collectAsState(emptyList())
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -164,10 +172,11 @@ fun ExpensesScreen(navController: NavHostController = rememberNavController()) {
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(16.dp)
                         )
-                        repeat(50) {
+                        // Observe the expenseItems list from the ViewModel
+                        expenseItems.forEach { expenseItem ->
                             Text(
-                                "Expense Item $it",
-                                modifier = Modifier.padding(16.dp)
+                                text = expenseItem,
+                                modifier = Modifier.padding(bottom = 8.dp)
                             )
                         }
                     }

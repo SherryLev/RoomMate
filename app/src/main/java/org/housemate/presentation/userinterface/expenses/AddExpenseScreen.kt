@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -52,20 +53,30 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import org.housemate.presentation.viewmodel.ExpenseViewModel
+import org.housemate.presentation.viewmodel.LoginViewModel
 import org.housemate.theme.light_gray
 import org.housemate.theme.light_purple
 import org.housemate.theme.md_theme_light_primary
+import org.housemate.utils.AppScreenRoutes
 import java.math.BigDecimal
 import java.math.RoundingMode
 
 @Composable
-fun AddExpenseScreen(navController: NavHostController = rememberNavController()) {
-    var selectedPayer by remember { mutableStateOf("You") }
+fun AddExpenseScreen(
+    navController: NavHostController = rememberNavController(),
+    expenseViewModel: ExpenseViewModel = hiltViewModel()
+) {
+    val selectedPayer by expenseViewModel.selectedPayer.collectAsState()
+    val expenseDescription by expenseViewModel.expenseDescription.collectAsState()
+    val expenseAmount by expenseViewModel.expenseAmount.collectAsState()
+    val owingAmount by expenseViewModel.owingAmount.collectAsState()
+
     var selectedSplit by remember { mutableStateOf("Equally") }
     var selectedCurrency by remember { mutableStateOf("CAD") }
-    var expenseDescription by remember { mutableStateOf("") }
 
     val currencies = listOf("CAD", "USD", "EUR", "GBP")
     val housemates = listOf("You", "Sally", "Bob", "Mike")
@@ -80,6 +91,7 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
             { EmptyComposable() }
         )
     }
+
 
     Column(
     modifier = Modifier
@@ -114,7 +126,10 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
                 Spacer(modifier = Modifier.width(22.dp))
                 TextField(
                     value = expenseAmountState,
-                    onValueChange = { expenseAmountState = formatAmount(it) },
+                    onValueChange = {
+                        expenseAmountState = formatAmount(it)
+                        expenseViewModel.setExpenseAmount(expenseAmountState.text.toBigDecimalOrNull() ?: BigDecimal.ZERO)
+                                    },
                     placeholder = {
                         Text(
                             text = "Enter Amount",
@@ -159,7 +174,7 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
 
             OutlinedTextField(
                 value = expenseDescription,
-                onValueChange = { expenseDescription = it },
+                onValueChange = { expenseViewModel.setExpenseDescription(it) },
                 singleLine = true,
                 label = { Text("Enter expense description") },
                 colors = TextFieldDefaults.textFieldColors(
@@ -185,7 +200,7 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
             CustomDropdown(
                 items = housemates,
                 selectedItem = selectedPayer,
-                onItemSelected = { selectedPayer = it },
+                onItemSelected = { expenseViewModel.setSelectedPayer(it) },
                 modifier = Modifier,
                 dropdownWidth = 220.dp
             )
@@ -232,6 +247,7 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
                                 onAmountChanged = { owingAmounts ->
                                     // Handle the amount change here, you can print or perform any other action
                                     println("Owing Amounts: $owingAmounts")
+                                    expenseViewModel.setOwingAmount(owingAmounts["You"] ?: BigDecimal.ZERO)
                                 }
                             )
                         }
@@ -265,13 +281,7 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
                 }
                 // Add other cases as needed
             }
-
-            // Existing code...
-
-            // Render the dynamic split UI
             splitUi()
-
-            // Existing code...
         }
     }
 
@@ -290,7 +300,7 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
                     modifier = Modifier
                         .padding(2.dp)
                         .weight(1f),
-                    onClick = { },
+                    onClick = { navController.popBackStack() },
                     shape = RoundedCornerShape(25.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = light_purple,
@@ -312,7 +322,23 @@ fun AddExpenseScreen(navController: NavHostController = rememberNavController())
                     modifier = Modifier
                         .padding(2.dp)
                         .weight(1f),
-                    onClick = { },
+                    onClick = {
+
+                        expenseViewModel.addExpense(selectedPayer, expenseDescription, expenseAmount, owingAmount)
+
+                        println(selectedPayer)
+                        println(expenseDescription)
+                        println(expenseAmount)
+                        println(owingAmount)
+
+                        // clear the form fields after saving the expense
+                        expenseViewModel.setSelectedPayer("You")
+                        expenseViewModel.setExpenseDescription("")
+                        expenseViewModel.setExpenseAmount(BigDecimal.ZERO)
+                        expenseViewModel.setOwingAmount(BigDecimal.ZERO)
+
+                        navController.popBackStack()
+                              },
                     shape = RoundedCornerShape(25.dp),
                     elevation = ButtonDefaults.elevation(0.dp)
                 ) {
@@ -375,6 +401,7 @@ fun EquallySplitUI(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(text = housemate)
                 Spacer(modifier = Modifier.weight(1f))
                 Checkbox(
@@ -460,6 +487,7 @@ fun ExactAmountSplitUI(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(text = housemate)
                 Spacer(modifier = Modifier.weight(1f))
                 Row(
@@ -477,7 +505,7 @@ fun ExactAmountSplitUI(
                         },
                         placeholder = {
                             Text(
-                                text = "Enter Amount",
+                                text = "0.00",
                                 color = Color.Gray,
                                 fontSize = 16.sp
                             )
@@ -495,9 +523,8 @@ fun ExactAmountSplitUI(
                             fontWeight = FontWeight.ExtraBold
                         ),
                         modifier = Modifier
-                            .padding(horizontal = 6.dp)
                             .background(color = Color.Transparent)
-                            .weight(1f)
+                            .width(100.dp)
                     )
                 }
             }

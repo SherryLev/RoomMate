@@ -1,6 +1,8 @@
 package org.housemate.utils
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -14,6 +16,7 @@ import org.housemate.presentation.userinterface.home.EditUserInfoScreen
 import org.housemate.presentation.userinterface.home.HomeScreenHelper
 import org.housemate.presentation.userinterface.home.SettingsScreen
 import org.housemate.presentation.userinterface.stats.StatsScreen
+import org.housemate.presentation.viewmodel.ExpenseViewModel
 
 @Composable
 fun HomeNavGraph(navController: NavHostController) {
@@ -38,10 +41,19 @@ fun HomeNavGraph(navController: NavHostController) {
             CalendarScreen()
         }
         composable(AppScreenRoutes.ExpensesScreen.route){
-            ExpensesScreen(navController)
+                backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(AppScreenRoutes.ExpensesScreen.route)
+            }
+            val parentViewModel: ExpenseViewModel = hiltViewModel(parentEntry)
+            ExpensesScreen(navController, parentViewModel)
         }
-        composable(AppScreenRoutes.AddExpenseScreen.route) {
-            AddExpenseScreen()
+        composable(AppScreenRoutes.AddExpenseScreen.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(AppScreenRoutes.ExpensesScreen.route)
+            }
+            val parentViewModel: ExpenseViewModel = hiltViewModel(parentEntry)
+            AddExpenseScreen(navController, parentViewModel)
         }
         composable(AppScreenRoutes.StatsScreen.route){
             StatsScreen()
