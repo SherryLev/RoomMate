@@ -301,7 +301,15 @@ fun AddExpenseScreen(
                     modifier = Modifier
                         .padding(2.dp)
                         .weight(1f),
-                    onClick = { navController.popBackStack() },
+                    onClick = {
+                        // clear the form fields after saving the expense
+                        expenseViewModel.setSelectedPayer("You")
+                        expenseViewModel.setExpenseDescription("")
+                        expenseViewModel.setExpenseAmount(BigDecimal.ZERO)
+                        expenseViewModel.setOwingAmount(BigDecimal.ZERO)
+
+                        navController.popBackStack()
+                              },
                     shape = RoundedCornerShape(25.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = light_purple,
