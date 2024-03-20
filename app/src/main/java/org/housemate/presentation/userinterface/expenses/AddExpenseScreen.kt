@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
@@ -64,8 +65,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.presentation.viewmodel.LoginViewModel
+import org.housemate.theme.green
 import org.housemate.theme.light_gray
 import org.housemate.theme.light_purple
+import org.housemate.theme.md_theme_dark_error
 import org.housemate.theme.md_theme_light_primary
 import org.housemate.utils.AppScreenRoutes
 import java.math.BigDecimal
@@ -98,7 +101,40 @@ fun AddExpenseScreen(
         )
     }
 
+    // AlertDialog for displaying error message
+    val showErrorDialog = remember { mutableStateOf(false) }
+    if (showErrorDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                // Dismiss the dialog
+                showErrorDialog.value = false
+            },
+            title = { Text("Error") },
+            text = {
+                Text(
+                    "Please fill in all fields.",
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // Dismiss the dialog
+                        showErrorDialog.value = false
+                    },
+                    modifier = Modifier
+                        .padding(8.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    elevation = ButtonDefaults.elevation(0.dp)
+                ) {
+                    Text("OK")
+                }
+            },
+            modifier = Modifier.padding(16.dp)
+        )
+    }
 
+    // Start of content
     LazyColumn(
     modifier = Modifier
         .fillMaxSize()
@@ -352,38 +388,49 @@ fun AddExpenseScreen(
                         .padding(2.dp)
                         .weight(1f),
                     onClick = {
+                        // Check if the expense description or amount is empty
+                        if (expenseDescription.isEmpty() || expenseAmount == BigDecimal.ZERO) {
+                            // Show the error dialog
+                            showErrorDialog.value = true
+                        } else {
 
-                        // also need:
-                        // totalYouOwe to each housemate
-                        // totalOwed by each housemate
-                        // totalYouOwe to everyone
-                        // totalOwed by everyone
-                        // this can all be calculated using the expense history, in the viewmodel
+                            // also need:
+                            // totalYouOwe to each housemate
+                            // totalOwed by each housemate
+                            // totalYouOwe to everyone
+                            // totalOwed by everyone
+                            // this can all be calculated using the expense history, in the viewmodel
 
-                        // for each expense
-                        // settledup = false
-                        // date of expense
+                            // for each expense
+                            // settledup = false
+                            // date of expense
 
-                        // when you click settle up, you should be able to
-                        // see how much you owe that person or how much they owe you
-                        // you can write a smaller amount
-                        // then this should appear in the expense history as a payment
+                            // when you click settle up, you should be able to
+                            // see how much you owe that person or how much they owe you
+                            // you can write a smaller amount
+                            // then this should appear in the expense history as a payment
 
-                        expenseViewModel.addExpense(selectedPayer, expenseDescription, expenseAmount, owingAmount)
+                            expenseViewModel.addExpense(
+                                selectedPayer,
+                                expenseDescription,
+                                expenseAmount,
+                                owingAmount
+                            )
 
-                        println(selectedPayer)
-                        println(expenseDescription)
-                        println(expenseAmount)
-                        println(owingAmount)
+                            println(selectedPayer)
+                            println(expenseDescription)
+                            println(expenseAmount)
+                            println(owingAmount)
 
-                        // clear the form fields after saving the expense
-                        expenseViewModel.setSelectedPayer("You")
-                        expenseViewModel.setExpenseDescription("")
-                        expenseViewModel.setExpenseAmount(BigDecimal.ZERO)
-                        expenseViewModel.setOwingAmount(BigDecimal.ZERO)
+                            // clear the form fields after saving the expense
+                            expenseViewModel.setSelectedPayer("You")
+                            expenseViewModel.setExpenseDescription("")
+                            expenseViewModel.setExpenseAmount(BigDecimal.ZERO)
+                            expenseViewModel.setOwingAmount(BigDecimal.ZERO)
 
-                        navController.popBackStack()
-                              },
+                            navController.popBackStack()
+                        }
+                    },
                     shape = RoundedCornerShape(25.dp),
                     elevation = ButtonDefaults.elevation(0.dp)
                 ) {
@@ -614,12 +661,52 @@ fun ExactAmountSplitUI(
 
         remainingAmountState.value = expenseAmountState.text.toBigDecimalOrNull()?.minus(sumOfEnteredAmounts) ?: BigDecimal.ZERO
 
-        // Display remaining amount
-        Text(
-            text = "Remaining amount: ${if (remainingAmountState.value >= BigDecimal.ZERO) remainingAmountState.value.setScale(2) else BigDecimal.ZERO}",
-            modifier = Modifier.padding(top = 8.dp),
-            color = if (remainingAmountState.value >= BigDecimal.ZERO) Color.Green else Color.Red
-        )
+        Box(modifier = Modifier.height(112.dp)) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+            ) {
+                Spacer(modifier = Modifier.height(22.dp))
+                // Calculation of how much each person owes
+                val remainingAmount = remainingAmountState.value
+                val text = AnnotatedString.Builder().apply {
+                    val remainingText = when {
+                        remainingAmount > BigDecimal.ZERO -> {
+                            withStyle(style = SpanStyle(color = Color.Gray, fontWeight = FontWeight.Bold)) {
+                                append("Remaining amount: ")
+                            }
+                            withStyle(style = SpanStyle(color = md_theme_light_primary, fontWeight = FontWeight.Bold)) {
+                                append("$${remainingAmount.setScale(2)}")
+                            }
+                        }
+                        remainingAmount == (BigDecimal.ZERO.setScale(2)) -> {
+                            withStyle(style = SpanStyle(color = Color.Gray, fontWeight = FontWeight.Bold)) {
+                                append("Remaining amount: ")
+                            }
+                            withStyle(style = SpanStyle(color = green, fontWeight = FontWeight.Bold)) {
+                                append("$${remainingAmount.setScale(2)}")
+                            }
+                        }
+                        remainingAmount < BigDecimal.ZERO -> {
+                            withStyle(style = SpanStyle(color = md_theme_dark_error, fontWeight = FontWeight.Bold)) {
+                                append("Oops! The amounts do not add up to the total.")
+                            }
+                        }
+                        else -> {
+                            withStyle(style = SpanStyle(color = Color.Gray, fontWeight = FontWeight.Bold)) {
+                                append("Remaining amount: ")
+                            }
+                        }
+                    }
+                }.toAnnotatedString()
+
+                Text(
+                    text = text,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 
