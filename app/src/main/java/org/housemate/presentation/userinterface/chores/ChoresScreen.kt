@@ -57,6 +57,7 @@ import java.time.DayOfWeek
 import kotlin.math.sqrt
 var choresList = mutableListOf<Chore>()
 
+
 @Composable /// CITE this https://stackoverflow.com/questions/73948960/jetpack-compose-how-to-create-a-rating-bar
 private fun RatingBarComposable() {
     var rating by remember { mutableStateOf(0) }
@@ -85,8 +86,9 @@ private fun RatingBarComposable() {
         }
     }
 }
+
 @Composable
-fun TaskItem(chore: Chore) {
+fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
     val formattedDateTime = chore.dueDate?.format(formatter)
     Button(
@@ -107,7 +109,7 @@ fun TaskItem(chore: Chore) {
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(start = 4.dp, end = 16.dp)
+                modifier = Modifier.padding(start = 4.dp)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.person),
@@ -120,25 +122,45 @@ fun TaskItem(chore: Chore) {
                     textAlign = TextAlign.Center
                 )
             }
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = chore.choreName,
-                    style = TextStyle(fontSize = 20.sp),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(start = 24.dp)
-                )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 40.dp) // Adjust the padding here
+            )  {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = chore.choreName,
+                        style = TextStyle(fontSize = 20.sp),
+                        textAlign = TextAlign.Center,
 
-               /* Text(
-                    text = chore.dueDate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: "No due date",
-                    style = TextStyle(fontSize = 10.sp)
-                )*/
+                    )
+                }
+            }
+            Box(modifier = Modifier.padding(end = 5.dp)) {
+                Button(
+                    onClick = {
+                        deleteTask(chore)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.Red, // Set a non-transparent color
+                    ),
+                    modifier = Modifier
+                        .width(30.dp)
+                        .height(30.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.delete),
+                        contentDescription = "garbage",
+                        modifier = Modifier.size(50.dp), // Adjust the size if needed
+                        tint = Color.White // Set icon color
+                    )
+                }
             }
         }
     }
-
-        Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(8.dp))
 }
 @Composable
 fun TaskWeekItem(chore: Chore) {
@@ -172,11 +194,6 @@ fun TaskWeekItem(chore: Chore) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(start = 24.dp)
             )
-
-            /* Text(
-                 text = chore.dueDate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: "No due date",
-                 style = TextStyle(fontSize = 10.sp)
-             )*/
             RatingBarComposable()
         }
     }
@@ -186,10 +203,13 @@ fun TaskWeekItem(chore: Chore) {
 @Composable
 fun TaskDisplayHouse(chores: List<Chore>, deleteTask: (Chore) -> Unit) {
     LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
-        items(chores){chore ->
-            TaskItem(chore)
+        items(chores) { chore ->
+            TaskItem(chore) {
+                deleteTask(chore)
+            }
             Spacer(modifier = Modifier.height(8.dp))
         }
+
     }
 }
 @Composable
@@ -207,7 +227,8 @@ fun TaskDisplayWeek(chores: List<Chore>, deleteTask: (Chore) -> Unit, day: DayOf
 
 @Composable
 fun MainLayout(navController: NavHostController = rememberNavController()) {
-    val chores = remember { choresList }
+    //val chores = remember { choresList }
+    //val (chores, setChores) = remember { mutableStateOf(choresList) }
     var showDialog by remember { mutableStateOf(false) }
     var isPersonal by remember { mutableStateOf(false) }
     var isHouse by remember { mutableStateOf(true) }
@@ -220,6 +241,11 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
         DayOfWeek.SATURDAY,
         DayOfWeek.SUNDAY
     )
+    var chores by remember { mutableStateOf(choresList) }
+
+    val deleteTask: (Chore) -> Unit = { choreToDelete ->
+        chores = chores.toMutableList().apply { remove(choreToDelete) }
+    }
 
     Box(
         Modifier
@@ -276,7 +302,7 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                 //modifier = Modifier.align(Alignment.Start)
             ) {
                 if(isHouse){
-                    TaskDisplayHouse(chores, deleteTask = {chore -> chores.remove(chore) })
+                    TaskDisplayHouse(chores, deleteTask)
                 } else {
                     for (day in daysOfWeekList) {
                         Column(modifier = Modifier.weight(1f)) { // Set weight to 1
@@ -314,7 +340,9 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                         .background(Color.White)
                     //.padding(16.dp)
                 ) {
-                    ChoreCreator(addChore = { chore -> choresList.add(chore) }, onDialogDismiss = { showDialog = false })
+                    ChoreCreator(addChore = { chore ->
+                        chores = chores.toMutableList().apply { add(chore) }
+                    }, onDialogDismiss = { showDialog = false })
                     Button(
                         onClick = { showDialog = false },
                         modifier = Modifier
