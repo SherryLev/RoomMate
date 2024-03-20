@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -51,19 +52,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_purple
+import org.housemate.theme.md_theme_dark_error
 import org.housemate.theme.md_theme_dark_primary
 import org.housemate.theme.md_theme_dark_secondary
 import org.housemate.theme.md_theme_light_error
 import org.housemate.theme.md_theme_light_primary
 import org.housemate.theme.purple_background
 import org.housemate.utils.AppScreenRoutes
+import java.math.BigDecimal
+import java.text.SimpleDateFormat
+import java.util.Locale
+import kotlin.math.abs
 
 @Composable
 fun ExpensesScreen(
     navController: NavHostController = rememberNavController(),
     expenseViewModel: ExpenseViewModel = hiltViewModel()
 ) {
-    val expenseItems by expenseViewModel.expenseItems.collectAsState(emptyList())
+    val expenses by expenseViewModel.expenseItems.collectAsState()
+    val isExpenseHistoryLoading by expenseViewModel.isExpenseHistoryLoading.collectAsState()
 
     Box(
         modifier = Modifier
@@ -172,33 +179,155 @@ fun ExpensesScreen(
                     elevation = 4.dp,
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Column {
+                    Column (
+                        modifier = Modifier
+                            .padding(16.dp)
+                    ) {
                         Text(
                             text = "Expense History",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                            modifier = Modifier.padding(bottom = 8.dp)
                         )
 
-                        if (expenseItems.isEmpty()) {
-                            Box( modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp)
-                                .padding(bottom = 40.dp),
-                                contentAlignment = Alignment.Center){
-                                Text(
-                                    text = "You have no expense history yet",
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Gray,
-                                    modifier = Modifier)
+                        if (isExpenseHistoryLoading) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(300.dp)
+                                    .padding(bottom = 40.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         } else {
-                            // Observe the expenseItems list from the ViewModel
-                            expenseItems.forEach { expenseItem ->
-                                Text(
-                                    text = expenseItem,
-                                    modifier = Modifier.padding(bottom = 8.dp, start = 6.dp, end = 6.dp)
-                                )
+                            if (expenses.isEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(300.dp)
+                                        .padding(bottom = 40.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "You have no expense history yet",
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Gray,
+                                        modifier = Modifier
+                                    )
+                                }
+                            } else {
+                                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                                    // Observe the expenseItems list from the ViewModel
+                                    expenses.forEach { expense ->
+                                        val timestamp =
+                                            expense.timestamp.toDate() // Convert Firestore timestamp to Date
+
+                                        val dateFormatter = SimpleDateFormat(
+                                            "MMM",
+                                            Locale.getDefault()
+                                        ) // Format for month (e.g., "Dec")
+                                        val month =
+                                            dateFormatter.format(timestamp)
+
+                                        val dayOfMonth = SimpleDateFormat(
+                                            "dd",
+                                            Locale.getDefault()
+                                        ).format(timestamp)
+
+                                        val amountLentOrBorrowed: Double =
+                                            if (expense.payer == "You") {
+                                                // Calculate sum of what others owe you
+                                                expense.owingAmounts.values.sum() - (expense.owingAmounts["You"]
+                                                    ?: 0.00)
+                                            } else {
+                                                // Get the amount that you owe
+                                                -(expense.owingAmounts["You"] ?: 0.00)
+                                            }
+
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.padding(
+                                                vertical = 8.dp
+                                            )
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.Start,
+                                                modifier = Modifier.weight(2f)
+                                            ) {
+                                                Text(
+                                                    text = month,
+                                                    color = Color.Gray,
+                                                    fontSize = 14.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                )
+                                                Text(
+                                                    text = dayOfMonth,
+                                                    color = md_theme_light_primary,
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+
+                                            Column(
+                                                modifier = Modifier.weight(6f)
+                                            ) {
+                                                Text(
+                                                    text = expense.description
+                                                )
+                                                Text(
+                                                    text = "${expense.payer} paid $${
+                                                        "%.2f".format(
+                                                            expense.amount
+                                                        )
+                                                    }",
+                                                    textAlign = TextAlign.Left,
+                                                    fontSize = 14.sp,
+                                                    color = Color.Gray,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+
+                                            val lentOrBorrowedText = when {
+                                                amountLentOrBorrowed < 0 -> "you borrowed"
+                                                amountLentOrBorrowed > 0 -> "you lent"
+                                                else -> "not involved"
+                                            }
+
+                                            val lentOrBorrowedColor = when {
+                                                amountLentOrBorrowed < 0 -> md_theme_light_error
+                                                amountLentOrBorrowed > 0 -> green
+                                                else -> Color.Gray
+                                            }
+
+                                            Column(
+                                                modifier = Modifier.weight(3f),
+                                                horizontalAlignment = Alignment.End
+                                            ) {
+                                                Text(
+                                                    text = lentOrBorrowedText,
+                                                    fontSize = 14.sp,
+                                                    textAlign = TextAlign.End,
+                                                    color = lentOrBorrowedColor,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    text = "$${
+                                                        "%.2f".format(
+                                                            abs(
+                                                                amountLentOrBorrowed
+                                                            )
+                                                        )
+                                                    }",
+                                                    textAlign = TextAlign.End,
+                                                    color = lentOrBorrowedColor
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

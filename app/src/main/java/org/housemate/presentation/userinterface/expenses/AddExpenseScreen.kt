@@ -96,7 +96,7 @@ fun AddExpenseScreen(
         mutableStateOf(TextFieldValue(text = ""))
     }
 
-    var remainingAmountState = remember { mutableStateOf(BigDecimal.ZERO) }
+    var remainingAmountState = remember { mutableStateOf(BigDecimal.ZERO.setScale(2)) }
 
 
     var splitUi by remember {
@@ -431,12 +431,9 @@ fun AddExpenseScreen(
                         if (expenseDescription.isEmpty() || expenseAmount == BigDecimal.ZERO) {
                             // Show the error dialog
                             showEmptyFieldsErrorDialog.value = true
-                        }
-                        val remainingAmount = remainingAmountState.value
-                        if (remainingAmount != BigDecimal.ZERO.setScale(2)) {
-                            showIncorrectAmountErrorDialog.value = true
-                        }
-                        else {
+                        } else if (remainingAmountState.value != BigDecimal.ZERO.setScale(2)) {
+                                showIncorrectAmountErrorDialog.value = true
+                        } else {
 
                             // also need:
                             // totalYouOwe to each housemate
@@ -459,12 +456,6 @@ fun AddExpenseScreen(
                                 expenseAmount,
                                 owingAmounts
                             )
-
-                            println(selectedPayer)
-                            println(expenseDescription)
-                            println(expenseAmount)
-                            println(owingAmounts)
-
                             // clear the form fields after saving the expense
                             expenseViewModel.setSelectedPayer("You")
                             expenseViewModel.setExpenseDescription("")
@@ -635,7 +626,7 @@ fun ExactAmountSplitUI(
         val sumOfEnteredAmounts = enteredAmounts.values.fold(BigDecimal.ZERO) { acc, value ->
             acc + value
         }
-        remainingAmountState.value = expenseAmountState.text.toBigDecimalOrNull()?.minus(sumOfEnteredAmounts) ?: BigDecimal.ZERO
+        remainingAmountState.value = expenseAmountState.text.toBigDecimalOrNull()?.minus(sumOfEnteredAmounts) ?: BigDecimal.ZERO.setScale(2)
 
         onAmountChanged(enteredAmounts.toMap())
 
@@ -700,7 +691,7 @@ fun ExactAmountSplitUI(
             acc + value
         }
 
-        remainingAmountState.value = expenseAmountState.text.toBigDecimalOrNull()?.minus(sumOfEnteredAmounts) ?: BigDecimal.ZERO
+        remainingAmountState.value = expenseAmountState.text.toBigDecimalOrNull()?.minus(sumOfEnteredAmounts) ?: BigDecimal.ZERO.setScale(2)
 
         Box(modifier = Modifier.height(112.dp)) {
             Column(
