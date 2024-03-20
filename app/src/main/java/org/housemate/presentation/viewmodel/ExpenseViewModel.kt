@@ -22,18 +22,18 @@ class ExpenseViewModel @Inject constructor(): ViewModel() {
     private val _expenseAmount = MutableStateFlow(BigDecimal.ZERO)
     val expenseAmount = _expenseAmount.asStateFlow()
 
-    private val _owingAmount = MutableStateFlow(BigDecimal.ZERO)
-    val owingAmount = _owingAmount.asStateFlow()
+    private val _owingAmounts = MutableStateFlow<Map<String, BigDecimal>>(emptyMap())
+    val owingAmounts = _owingAmounts.asStateFlow()
 
     private val _expenseItems = MutableStateFlow<List<String>>(emptyList())
     val expenseItems = _expenseItems.asStateFlow()
 
     // Function to add an expense with the selected payer's name
-    fun addExpense(payer: String, description: String, expenseAmount: BigDecimal, owingAmount: BigDecimal) {
-        val newExpense = "$payer paid $expenseAmount for $description\n you owe $owingAmount"
+    fun addExpense(payer: String, description: String, expenseAmount: BigDecimal, owingAmounts: Map<String, BigDecimal>) {
+        val youOwe = owingAmounts["You"]
+        val newExpense = "$payer paid $expenseAmount for $description\n you owe $youOwe"
         _expenseItems.value = _expenseItems.value + newExpense
     }
-
     // Functions to update the state
     fun setSelectedPayer(payer: String) {
         _selectedPayer.value = payer
@@ -47,7 +47,7 @@ class ExpenseViewModel @Inject constructor(): ViewModel() {
         _expenseAmount.value = amount
     }
 
-    fun setOwingAmount(amount: BigDecimal) {
-        _owingAmount.value = amount
+    fun setOwingAmounts(owingAmounts: Map<String, BigDecimal>) {
+        _owingAmounts.value = owingAmounts
     }
 }

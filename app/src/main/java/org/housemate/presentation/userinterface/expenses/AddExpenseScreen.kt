@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -82,7 +83,7 @@ fun AddExpenseScreen(
     val selectedPayer by expenseViewModel.selectedPayer.collectAsState()
     val expenseDescription by expenseViewModel.expenseDescription.collectAsState()
     val expenseAmount by expenseViewModel.expenseAmount.collectAsState()
-    val owingAmount by expenseViewModel.owingAmount.collectAsState()
+    val owingAmounts by expenseViewModel.owingAmounts.collectAsState()
 
     var selectedSplit by remember { mutableStateOf("Equally") }
     var selectedCurrency by remember { mutableStateOf("CAD") }
@@ -95,6 +96,9 @@ fun AddExpenseScreen(
         mutableStateOf(TextFieldValue(text = ""))
     }
 
+    var remainingAmountState = remember { mutableStateOf(BigDecimal.ZERO) }
+
+
     var splitUi by remember {
         mutableStateOf<@Composable () -> Unit>(
             { EmptyComposable() }
@@ -102,12 +106,12 @@ fun AddExpenseScreen(
     }
 
     // AlertDialog for displaying error message
-    val showErrorDialog = remember { mutableStateOf(false) }
-    if (showErrorDialog.value) {
+    val showEmptyFieldsErrorDialog = remember { mutableStateOf(false) }
+    if (showEmptyFieldsErrorDialog.value) {
         AlertDialog(
             onDismissRequest = {
                 // Dismiss the dialog
-                showErrorDialog.value = false
+                showEmptyFieldsErrorDialog.value = false
             },
             title = { Text("Error") },
             text = {
@@ -120,7 +124,39 @@ fun AddExpenseScreen(
                 Button(
                     onClick = {
                         // Dismiss the dialog
-                        showErrorDialog.value = false
+                        showEmptyFieldsErrorDialog.value = false
+                    },
+                    modifier = Modifier
+                        .padding(8.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    elevation = ButtonDefaults.elevation(0.dp)
+                ) {
+                    Text("OK")
+                }
+            },
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+
+    val showIncorrectAmountErrorDialog = remember { mutableStateOf(false) }
+    if (showIncorrectAmountErrorDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                // Dismiss the dialog
+                showIncorrectAmountErrorDialog.value = false
+            },
+            title = { Text("Error") },
+            text = {
+                Text(
+                    "Oops! The amounts do not add up to the total. Please double-check the amounts for each housemate.",
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // Dismiss the dialog
+                        showIncorrectAmountErrorDialog.value = false
                     },
                     modifier = Modifier
                         .padding(8.dp),
@@ -300,8 +336,8 @@ fun AddExpenseScreen(
                                     onAmountChanged = { owingAmounts ->
                                         // Handle the amount change here, you can print or perform any other action
                                         println("Owing Amounts: $owingAmounts")
-                                        expenseViewModel.setOwingAmount(
-                                            owingAmounts["You"] ?: BigDecimal.ZERO
+                                        expenseViewModel.setOwingAmounts(
+                                            owingAmounts
                                         )
                                     }
                                 )
@@ -327,8 +363,12 @@ fun AddExpenseScreen(
                                 ExactAmountSplitUI(
                                     housemates = housemates,
                                     expenseAmountState = expenseAmountState,
+                                    remainingAmountState = remainingAmountState,
                                     onAmountChanged = { owingAmounts ->
                                         println("Owing Amounts: $owingAmounts")
+                                        expenseViewModel.setOwingAmounts(
+                                            owingAmounts
+                                        )
                                     }
                                 )
                             }
@@ -340,7 +380,6 @@ fun AddExpenseScreen(
             }
         }
     }
-
 
     Box(Modifier.fillMaxSize()) {
         Column(
@@ -362,7 +401,7 @@ fun AddExpenseScreen(
                         expenseViewModel.setSelectedPayer("You")
                         expenseViewModel.setExpenseDescription("")
                         expenseViewModel.setExpenseAmount(BigDecimal.ZERO)
-                        expenseViewModel.setOwingAmount(BigDecimal.ZERO)
+                        expenseViewModel.setOwingAmounts(emptyMap())
 
                         navController.popBackStack()
                               },
@@ -391,8 +430,13 @@ fun AddExpenseScreen(
                         // Check if the expense description or amount is empty
                         if (expenseDescription.isEmpty() || expenseAmount == BigDecimal.ZERO) {
                             // Show the error dialog
-                            showErrorDialog.value = true
-                        } else {
+                            showEmptyFieldsErrorDialog.value = true
+                        }
+                        val remainingAmount = remainingAmountState.value
+                        if (remainingAmount != BigDecimal.ZERO.setScale(2)) {
+                            showIncorrectAmountErrorDialog.value = true
+                        }
+                        else {
 
                             // also need:
                             // totalYouOwe to each housemate
@@ -409,24 +453,23 @@ fun AddExpenseScreen(
                             // see how much you owe that person or how much they owe you
                             // you can write a smaller amount
                             // then this should appear in the expense history as a payment
-
                             expenseViewModel.addExpense(
                                 selectedPayer,
                                 expenseDescription,
                                 expenseAmount,
-                                owingAmount
+                                owingAmounts
                             )
 
                             println(selectedPayer)
                             println(expenseDescription)
                             println(expenseAmount)
-                            println(owingAmount)
+                            println(owingAmounts)
 
                             // clear the form fields after saving the expense
                             expenseViewModel.setSelectedPayer("You")
                             expenseViewModel.setExpenseDescription("")
                             expenseViewModel.setExpenseAmount(BigDecimal.ZERO)
-                            expenseViewModel.setOwingAmount(BigDecimal.ZERO)
+                            expenseViewModel.setOwingAmounts(emptyMap())
 
                             navController.popBackStack()
                         }
@@ -572,12 +615,11 @@ fun EquallySplitUI(
 fun ExactAmountSplitUI(
     housemates: List<String>,
     expenseAmountState: TextFieldValue,
+    remainingAmountState: MutableState<BigDecimal>,
     onAmountChanged: (Map<String, BigDecimal>) -> Unit
 ) {
     // Map to hold the entered amounts for each housemate
     val enteredAmounts = remember { mutableStateMapOf<String, BigDecimal>() }
-
-    val remainingAmountState = remember { mutableStateOf(BigDecimal.ZERO) }
 
     // Map to hold the TextFieldValue state for each housemate
     val textFieldValueStates = remember {
@@ -590,7 +632,6 @@ fun ExactAmountSplitUI(
 
     // Recalculate entered amounts whenever the total amount changes
     DisposableEffect(expenseAmountState) {
-        val totalAmount = expenseAmountState.text.toBigDecimalOrNull() ?: BigDecimal.ZERO
         val sumOfEnteredAmounts = enteredAmounts.values.fold(BigDecimal.ZERO) { acc, value ->
             acc + value
         }
@@ -689,7 +730,7 @@ fun ExactAmountSplitUI(
                         }
                         remainingAmount < BigDecimal.ZERO -> {
                             withStyle(style = SpanStyle(color = md_theme_dark_error, fontWeight = FontWeight.Bold)) {
-                                append("Oops! The amounts do not add up to the total.")
+                                append("Oops! The amounts add up to more than the total.")
                             }
                         }
                         else -> {
