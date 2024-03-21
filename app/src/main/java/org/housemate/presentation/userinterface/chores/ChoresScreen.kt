@@ -57,7 +57,7 @@ import org.housemate.theme.starColor
 import java.time.DayOfWeek
 import kotlin.math.sqrt
 import org.housemate.data.firestore.UserRepositoryImpl
-import org.housemate.domain.repositories.UserRepository
+import com.google.firebase.firestore.FirebaseFirestore
 var choresList = mutableListOf<Chore>()
 
 
@@ -347,7 +347,7 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                         chores = chores.toMutableList().apply { add(chore) }
                     }, onDialogDismiss = { showDialog = false },
                         choreRepository = ChoreRepositoryImpl(),
-                        userRepository = UserRepositoryImpl()
+                        userRepository = UserRepositoryImpl(FirebaseFirestore.getInstance())
                     )
                     Button(
                         onClick = { showDialog = false },

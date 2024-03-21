@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import org.housemate.domain.model.BottomNavItem
 import org.housemate.presentation.sharedcomponents.BottomNavigationBar
 import org.housemate.utils.AppScreenRoutes
+import org.housemate.utils.AuthScreen
 import org.housemate.utils.HomeNavGraph
 import org.housemate.utils.SettingsScreenRoutes
 
@@ -30,7 +31,9 @@ import org.housemate.utils.SettingsScreenRoutes
 fun HomeScreen(navController: NavHostController = rememberNavController()) {
     Scaffold(
         bottomBar = {
-            if (currentRoute(navController) != SettingsScreenRoutes.SettingsScreen.route) {
+            if (currentRoute(navController) != SettingsScreenRoutes.SettingsScreen.route &&
+                currentRoute(navController) != AuthScreen.Login.route &&
+                currentRoute(navController) != AuthScreen.Register.route) {
                 BottomNavigationBar(
                     items = listOf(
                         BottomNavItem(
