@@ -153,10 +153,11 @@ fun ChoreCreator(addChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit) {
     var categoryChoice by remember { mutableStateOf("") }
     var choreChoice by remember { mutableStateOf("") }
     var assigneeChoice by remember { mutableStateOf("") }
-    val id = choreIdCount
+    //val id = choreIdCount
 
     val selectedDate = remember { mutableStateOf<LocalDateTime?>(null) }
-    choreIdCount++
+    val choreId = "chore${choreIdCount++}" // Generate unique chore ID
+
     Column(
         modifier = Modifier.padding(16.dp)) {
         SelectionDropdown(choreList,labels[0], onCategorySelected = { category -> choreChoice = category })
@@ -169,7 +170,15 @@ fun ChoreCreator(addChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit) {
         Spacer(modifier = Modifier.padding(top = 10.dp))
         Button(
             onClick = {
-                val chore = Chore(id = id, choreName = choreChoice, category = categoryChoice, assignee = assigneeChoice, dueDate = selectedDate.value)
+                val chore = Chore(
+                    choreId = choreId,
+                    choreName = choreChoice,
+                    category = categoryChoice,
+                    assignee = assigneeChoice,
+                    dueDate = selectedDate.value,
+                    userRating = emptyList(),
+                    votedUser = emptyList()
+                )
                 addChore(chore)
                 onDialogDismiss()
             },

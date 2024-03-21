@@ -9,6 +9,7 @@ import androidx.navigation.navigation
 import org.housemate.presentation.userinterface.authentication.LoginScreen
 import org.housemate.presentation.userinterface.authentication.RegisterScreen
 import org.housemate.presentation.userinterface.authentication.SetupScreen
+import org.housemate.data.firestore.GroupRepositoryImpl
 
 fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
     navigation(
@@ -59,7 +60,9 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             SetupScreen(
                 onNavigateToHomeScreen = {
                     navController.navigate(Graph.HOME)
-                }
+                },
+                groupRepository = GroupRepositoryImpl()
+
             )
         }
     }
