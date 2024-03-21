@@ -16,24 +16,15 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.RemoveRedEye
-import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -41,7 +32,6 @@ import androidx.navigation.compose.rememberNavController
 import org.housemate.presentation.sharedcomponents.TextEntryModule
 import org.housemate.theme.md_theme_light_error
 import org.housemate.theme.md_theme_light_primary
-import org.housemate.utils.HomeNavGraph
 
 @Composable
 fun SettingsScreen(navController: NavHostController = rememberNavController()) {

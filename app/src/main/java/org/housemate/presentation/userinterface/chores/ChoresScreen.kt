@@ -276,7 +276,7 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                         //.padding(horizontal = 16.dp)
                         .fillMaxWidth(0.4f)
                 ) {
-                    Text("Personal")
+                    Text("This week")
                 }
                 Button(
                     onClick = {
@@ -295,7 +295,7 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                         //.padding(horizontal = 16.dp)
                         .fillMaxWidth(0.6f)
                 ) {
-                    Text("House")
+                    Text("All Chores")
                 }
             }
             Column(
