@@ -1,6 +1,7 @@
 package org.housemate.data.firestore
 
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import org.housemate.domain.model.User
@@ -28,5 +29,9 @@ class UserRepositoryImpl (
             Log.e("UserRepository", "Error fetching user", e)
             null
         }
+    }
+
+    override suspend fun getCurrentUserId():String? {
+        return FirebaseAuth.getInstance().currentUser?.uid
     }
 }

@@ -12,7 +12,7 @@ class ChoreRepositoryImpl : ChoreRepository{
 
     override fun createChore(chore: Chore): Task<Void> {
         return db.collection("chores")
-            .document(chore.assignee)
+            .document(chore.userId)
             .collection("userChores")
             .document(chore.choreId)
             .set(chore.toMap())
