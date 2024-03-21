@@ -32,7 +32,7 @@ class AuthRepositoryImpl (
                     val newUser = User(
                         uid = currentUser.uid,
                         email = email,
-                        isLoggedIn = true
+                        loggedIn = true
                     )
                     userRepository.addUser(newUser)
                 }
@@ -61,7 +61,7 @@ class AuthRepositoryImpl (
             currentUser?.let { firebaseUser ->
                 // Update isLoggedIn field in Firestore for the logged-in user
                 firestore.collection("users").document(firebaseUser.uid)
-                    .update("isLoggedIn", true)
+                    .update("loggedIn", true)
                     .await()
                 Log.d(
                     "main",
@@ -83,7 +83,7 @@ class AuthRepositoryImpl (
                 val userId = user.uid
                 // Update isLoggedIn field to false in Firestore
                 firestore.collection("users").document(userId)
-                    .update("isLoggedIn", false)
+                    .update("loggedIn", false)
                     .await()
                 return true
             }
@@ -91,6 +91,22 @@ class AuthRepositoryImpl (
             return false
         } catch (e: Exception) {
             Log.e("AuthRepository", "Error logging out user", e)
+            return false
+        }
+    }
+    override suspend fun getLoginState(): Boolean {
+        try {
+            val currentUser = auth.currentUser
+            if (currentUser != null) {
+                val userDocument =
+                    firestore.collection("users").document(currentUser.uid).get().await()
+                return userDocument.getBoolean("loggedIn") ?: false
+            } else {
+                // If currentUser is null, the user is not logged in
+                return false
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Error getting login state", e)
             return false
         }
     }

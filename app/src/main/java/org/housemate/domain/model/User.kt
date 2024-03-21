@@ -8,5 +8,5 @@ data class User (
     val uid: String = "",
     val username: String = "",
     val groupCode: String? = null, // nullable since when a user joins they are not in a gorup
-    val isLoggedIn: Boolean = false
+    val loggedIn: Boolean = false
 )
