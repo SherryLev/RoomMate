@@ -26,8 +26,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import org.housemate.domain.model.Chore
+import org.housemate.domain.model.User
 import java.time.LocalDateTime
 import java.util.*
+import org.housemate.domain.repositories.ChoreRepository
+import org.housemate.domain.repositories.UserRepository
 
 var choreIdCount = 1
 @Composable
@@ -145,7 +148,7 @@ fun SelectionDropdown(options: List<String>, label: String, onCategorySelected: 
 }
 
 @Composable
-fun ChoreCreator(addChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit) {
+fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, choreRepository: ChoreRepository, userRepository: UserRepository){
     val categories = listOf( "Kitchen", "Living Room", "Dining Room", "Staircase", "Backyard")
     val choreList = listOf( "Clean dishes", "Sweep Floors", "Clean Toilet", "Vaccum Floor")
     val assignees = listOf( "Bob", "Marlee", "Shawn", "Ben", "Laura")
@@ -153,10 +156,17 @@ fun ChoreCreator(addChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit) {
     var categoryChoice by remember { mutableStateOf("") }
     var choreChoice by remember { mutableStateOf("") }
     var assigneeChoice by remember { mutableStateOf("") }
-    val id = choreIdCount
+    //val id = choreIdCount
 
     val selectedDate = remember { mutableStateOf<LocalDateTime?>(null) }
-    choreIdCount++
+    val choreId = "chore${choreIdCount++}" // Generate unique chore ID
+
+    var userId by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(key1 = "userId") {
+        userId = userRepository.getCurrentUserId()
+    }
+
     Column(
         modifier = Modifier.padding(16.dp)) {
         SelectionDropdown(choreList,labels[0], onCategorySelected = { category -> choreChoice = category })
@@ -169,9 +179,25 @@ fun ChoreCreator(addChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit) {
         Spacer(modifier = Modifier.padding(top = 10.dp))
         Button(
             onClick = {
-                val chore = Chore(id = id, choreName = choreChoice, category = categoryChoice, assignee = assigneeChoice, dueDate = selectedDate.value)
-                addChore(chore)
-                onDialogDismiss()
+                val chore = Chore(
+                    userId = userId ?: "",
+                    choreId = choreId,
+                    choreName = choreChoice,
+                    category = categoryChoice,
+                    assignee = assigneeChoice,
+                    dueDate = selectedDate.value,
+                    userRating = emptyList(),
+                    votedUser = emptyList()
+                )
+                createChore(chore)
+                choreRepository.createChore(chore)
+                    .addOnSuccessListener {
+                        Log.d("ChoreCreation", "Chore successfully added to Firestore")
+                        onDialogDismiss()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("ChoreCreation", "Error adding chore to Firestore", e)
+                    }
             },
             modifier = Modifier
                 .align(Alignment.End),

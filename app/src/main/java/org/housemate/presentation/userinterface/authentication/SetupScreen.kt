@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,9 +25,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import org.housemate.domain.repositories.GroupRepository
 import org.housemate.presentation.userinterface.chores.ChoreCreator
 import org.housemate.presentation.userinterface.chores.choresList
-
+import org.housemate.domain.model.Group
+import kotlinx.coroutines.launch
 
 data class Task(val name: String)
 
@@ -34,9 +37,20 @@ data class Task(val name: String)
 
 
 @Composable
-fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController) {
+fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController, groupRepository: GroupRepository) {
     var tasks by remember { mutableStateOf(emptyList<Task>()) }
     var showDialog by remember { mutableStateOf(false) }
+    var coroutineScope = rememberCoroutineScope()
+
+    // States for new group creation
+    var groupName by remember { mutableStateOf("")}
+    var showGroupCodeDialog by remember { mutableStateOf(false) }
+    var groupCode by remember { mutableStateOf("") }
+    var errorCreatingGroup by remember { mutableStateOf<String?>(null) }
+
+    var showSuccessMessage by remember { mutableStateOf(false)}
+    var showErrorMessage by remember { mutableStateOf("")}
+
     Box(
         Modifier
             .fillMaxSize()
@@ -71,7 +85,24 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
             )
             Button(
                 onClick = {
-                    showDialog = true
+
+                    // Initiate the process to create a new group
+                    coroutineScope.launch {
+                        val newGroup = Group("", "groupName", "creatorId", listOf())
+                        try {
+                            val success = groupRepository.createGroup(newGroup)
+                            if (success) {
+                                showSuccessMessage = true
+                                // HAVE TO CHANGE THIS SO THE GROUP CODE WILL BE SHOWN
+
+                            } else {
+                                showErrorMessage = "Failed to create group. Please try again"
+                            }
+                        } catch (e: Exception) {
+                            showErrorMessage = "An error occured: ${e.message}"
+                        }
+                    }
+                    //showDialog = true
                 },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -154,11 +185,11 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
 
 
 @Composable
-fun SetupScreen( onNavigateToHomeScreen: () -> Unit, navController: NavHostController = rememberNavController()) {
+fun SetupScreen( onNavigateToHomeScreen: () -> Unit, navController: NavHostController = rememberNavController(), groupRepository: GroupRepository) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        MainLayout(onNavigateToHomeScreen, navController = navController)
+        MainLayout(onNavigateToHomeScreen, navController = navController, groupRepository = groupRepository)
     }
 }

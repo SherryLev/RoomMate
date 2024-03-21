@@ -49,12 +49,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import org.housemate.R
+import org.housemate.data.firestore.ChoreRepositoryImpl
 import org.housemate.presentation.sharedcomponents.TextEntryModule
 import org.housemate.presentation.userinterface.home.Section
 import org.housemate.theme.md_theme_light_primary
 import org.housemate.theme.starColor
 import java.time.DayOfWeek
 import kotlin.math.sqrt
+import org.housemate.data.firestore.UserRepositoryImpl
+import org.housemate.domain.repositories.UserRepository
 var choresList = mutableListOf<Chore>()
 
 
@@ -340,9 +343,12 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                         .background(Color.White)
                     //.padding(16.dp)
                 ) {
-                    ChoreCreator(addChore = { chore ->
+                    ChoreCreator(createChore = { chore ->
                         chores = chores.toMutableList().apply { add(chore) }
-                    }, onDialogDismiss = { showDialog = false })
+                    }, onDialogDismiss = { showDialog = false },
+                        choreRepository = ChoreRepositoryImpl(),
+                        userRepository = UserRepositoryImpl()
+                    )
                     Button(
                         onClick = { showDialog = false },
                         modifier = Modifier
