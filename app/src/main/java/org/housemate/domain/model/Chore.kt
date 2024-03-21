@@ -3,6 +3,7 @@ package org.housemate.domain.model
 import java.time.LocalDateTime
 
 data class Chore(
+    val userId: String,
     val choreId: String,
     val choreName: String,
     val assignee: String,
