@@ -7,7 +7,7 @@ import org.housemate.domain.repositories.GroupRepository
 class GroupRepositoryImpl : GroupRepository {
     private val db = FirebaseFirestore.getInstance()
 
-    override suspend fun CreateGroup(group: Group): Boolean {
+    override suspend fun createGroup(group: Group): Boolean {
         return try {
             db.collection("groups").document(group.groupCode).set(
                 hashMapOf(
