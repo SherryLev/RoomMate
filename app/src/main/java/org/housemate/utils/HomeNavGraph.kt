@@ -1,5 +1,7 @@
 package org.housemate.utils
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,12 +70,21 @@ fun NavGraphBuilder.settingsNavGraph(navController: NavHostController) {
         startDestination = SettingsScreenRoutes.SettingsScreen.route
     ) {
         composable(route = SettingsScreenRoutes.SettingsScreen.route) {
-            SettingsScreen(navController)
+            SettingsScreen(
+                navController = navController,
+                onNavigateToAuthScreen = {
+                navController.navigate(Graph.AUTHENTICATION){
+                    popUpTo(Graph.AUTHENTICATION) {
+                        inclusive = true
+                    }
+                }
+            })
         }
         composable(route = SettingsScreenRoutes.EditUserInfoScreen.route) {
             EditUserInfoScreen()
         }
     }
+    authNavGraph(navController = navController)
 }
 
 

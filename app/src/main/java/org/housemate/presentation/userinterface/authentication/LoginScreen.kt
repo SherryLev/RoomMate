@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import org.housemate.presentation.sharedcomponents.*
 import org.housemate.presentation.viewmodel.LoginViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import org.housemate.theme.*
 
 @Composable

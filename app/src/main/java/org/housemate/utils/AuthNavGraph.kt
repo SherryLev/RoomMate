@@ -1,5 +1,7 @@
 package org.housemate.utils
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -14,6 +16,10 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
         startDestination = AuthScreen.Login.route
     ) {
         composable(route = AuthScreen.Login.route){
+            BackHandler(true) {
+                // Or do nothing
+                Log.i("LOG_TAG", "Clicked back")
+            }
             LoginScreen(
                 onLoginSuccessNavigation = {
                     navController.popBackStack()

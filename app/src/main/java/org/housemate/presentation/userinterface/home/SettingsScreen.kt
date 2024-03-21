@@ -22,19 +22,39 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.presentation.sharedcomponents.TextEntryModule
+import org.housemate.presentation.viewmodel.ExpenseViewModel
+import org.housemate.presentation.viewmodel.SettingsViewModel
 import org.housemate.theme.md_theme_light_error
 import org.housemate.theme.md_theme_light_primary
+import org.housemate.utils.AuthScreen
+import org.housemate.utils.Graph
 
 @Composable
-fun SettingsScreen(navController: NavHostController = rememberNavController()) {
+fun SettingsScreen(
+    navController: NavHostController = rememberNavController(),
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
+    onNavigateToAuthScreen: () -> Unit
+) {
+
+    val logoutState by settingsViewModel.logoutState.collectAsState()
+
+    // Observe logout state
+    if (logoutState == true) {
+        onNavigateToAuthScreen()
+        settingsViewModel.resetLogoutState()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -144,7 +164,6 @@ fun SettingsScreen(navController: NavHostController = rememberNavController()) {
                     }
                 }
 
-
                 item {
                     Section("Log out of your account") {
                         Spacer(
@@ -153,7 +172,7 @@ fun SettingsScreen(navController: NavHostController = rememberNavController()) {
                                 .padding(8.dp)
                         )
                         Button(
-                            onClick = { /* Handle log out */ },
+                            onClick = { settingsViewModel.logout() },
                             shape = RoundedCornerShape(25.dp),
                             modifier = Modifier
                                 .fillMaxWidth()

@@ -13,7 +13,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.housemate.data.ExpenseRepositoryImpl
+import org.housemate.data.firestore.UserRepositoryImpl
 import org.housemate.domain.repositories.ExpenseRepository
+import org.housemate.domain.repositories.UserRepository
 import javax.inject.Singleton
 
 @Module
@@ -33,8 +35,20 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthRepository():AuthRepository{
-        return AuthRepositoryImpl()
+    fun provideUserRepository(
+        firestore: FirebaseFirestore
+    ) : UserRepository {
+        return UserRepositoryImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        userRepository: UserRepository,
+        firestore: FirebaseFirestore,
+        auth: FirebaseAuth
+    ):AuthRepository{
+        return AuthRepositoryImpl(userRepository, firestore, auth)
     }
 
     @Singleton
