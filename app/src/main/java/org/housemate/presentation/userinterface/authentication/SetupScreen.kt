@@ -29,7 +29,12 @@ import org.housemate.domain.repositories.GroupRepository
 import org.housemate.presentation.userinterface.chores.ChoreCreator
 import org.housemate.presentation.userinterface.chores.choresList
 import org.housemate.domain.model.Group
+import org.housemate.domain.repositories.UserRepository
+import org.housemate.data.firestore.UserRepositoryImpl
 import kotlinx.coroutines.launch
+import java.util.UUID
+import androidx.compose.runtime.LaunchedEffect
+
 
 data class Task(val name: String)
 
@@ -37,7 +42,7 @@ data class Task(val name: String)
 
 
 @Composable
-fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController, groupRepository: GroupRepository) {
+fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController, groupRepository: GroupRepository, userRepository: UserRepository) {
     var tasks by remember { mutableStateOf(emptyList<Task>()) }
     var showDialog by remember { mutableStateOf(false) }
     var coroutineScope = rememberCoroutineScope()
@@ -50,6 +55,13 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
 
     var showSuccessMessage by remember { mutableStateOf(false)}
     var showErrorMessage by remember { mutableStateOf("")}
+
+    var userId by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        userId = userRepository.getCurrentUserId()
+    }
+
 
     Box(
         Modifier
@@ -88,12 +100,16 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
 
                     // Initiate the process to create a new group
                     coroutineScope.launch {
-                        val newGroup = Group("", "groupName", "creatorId", listOf())
+                        //val userId = userRepository.getCurrentUserId()
+                        val uniqueGroupCode = UUID.randomUUID().toString()
+
+                        val newGroup = Group(uniqueGroupCode, "groupName", userId, listOf())
                         try {
                             val success = groupRepository.createGroup(newGroup)
                             if (success) {
                                 showSuccessMessage = true
-                                // HAVE TO CHANGE THIS SO THE GROUP CODE WILL BE SHOWN
+                                groupCode = uniqueGroupCode
+                                showGroupCodeDialog = true
 
                             } else {
                                 showErrorMessage = "Failed to create group. Please try again"
@@ -185,11 +201,17 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
 
 
 @Composable
-fun SetupScreen( onNavigateToHomeScreen: () -> Unit, navController: NavHostController = rememberNavController(), groupRepository: GroupRepository) {
+fun SetupScreen( onNavigateToHomeScreen: () -> Unit,
+                 navController: NavHostController = rememberNavController(),
+                 groupRepository: GroupRepository,
+                 userRepository: UserRepository) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        MainLayout(onNavigateToHomeScreen, navController = navController, groupRepository = groupRepository)
+        MainLayout(onNavigateToHomeScreen,
+            navController = navController,
+            groupRepository = groupRepository,
+            userRepository = userRepository)
     }
 }
