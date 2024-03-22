@@ -6,6 +6,7 @@ import org.housemate.domain.model.Expense
 import org.housemate.domain.repositories.ExpenseRepository
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.Query
 
 class ExpenseRepositoryImpl(
     private val firestore: FirebaseFirestore,
@@ -39,6 +40,7 @@ class ExpenseRepositoryImpl(
             val userId = currentUser?.uid
             if (userId != null) {
                 val querySnapshot = firestore.collection("expenses")
+                    .orderBy("timestamp", Query.Direction.DESCENDING)
                     .get()
                     .await()
 
