@@ -29,7 +29,7 @@ Access our wiki [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Pro
 - App does not crash anymore when a user is logged in for too long
 
 **_Download Installer_**
-Download out installer for HouseMate here: 
+Download out installer for HouseMate here: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/blob/main/housemate_sprint3.apk?ref_type=heads
 
 For a full list of the changes visit our issues list on GitLab
 
