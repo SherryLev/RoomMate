@@ -101,7 +101,7 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
                     // Initiate the process to create a new group
                     coroutineScope.launch {
                         val uniqueGroupCode = UUID.randomUUID().toString().replace("-","").substring(0,4)
-
+                        // group code will be of length 4
                         val newGroup = Group(uniqueGroupCode, "groupName", userId, listOf())
                         try {
                             val success = groupRepository.createGroup(newGroup)
