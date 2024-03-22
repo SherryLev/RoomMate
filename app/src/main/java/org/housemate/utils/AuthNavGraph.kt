@@ -6,10 +6,12 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.google.firebase.firestore.FirebaseFirestore
 import org.housemate.presentation.userinterface.authentication.LoginScreen
 import org.housemate.presentation.userinterface.authentication.RegisterScreen
 import org.housemate.presentation.userinterface.authentication.SetupScreen
 import org.housemate.data.firestore.GroupRepositoryImpl
+import org.housemate.data.firestore.UserRepositoryImpl
 
 fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
     navigation(
@@ -61,8 +63,8 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
                 onNavigateToHomeScreen = {
                     navController.navigate(Graph.HOME)
                 },
-                groupRepository = GroupRepositoryImpl()
-
+                groupRepository = GroupRepositoryImpl(),
+                userRepository = UserRepositoryImpl(FirebaseFirestore.getInstance())
             )
         }
     }

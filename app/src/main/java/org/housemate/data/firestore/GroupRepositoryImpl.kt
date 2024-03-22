@@ -3,6 +3,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import org.housemate.domain.model.Group
 import org.housemate.domain.repositories.GroupRepository
+import android.util.Log
 
 class GroupRepositoryImpl : GroupRepository {
     private val db = FirebaseFirestore.getInstance()
@@ -18,6 +19,7 @@ class GroupRepositoryImpl : GroupRepository {
             ).await()
             true
         } catch (e: Exception){
+            Log.e("CreateGroup", "Failed to create group", e)
             false
         }
     }
