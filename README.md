@@ -6,6 +6,33 @@ HouseMate is designed for university students and young working individuals that
 ## Wiki
 Access our wiki [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Project-Proposal:-HouseMate)
 
+## Release Notes Version 1.2.0
+**_What's New_**
+- **Stats Screen UI:** We designed our statistics screen, enhancing our user experience https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/42
+- **Expenses UI:** We designed our expenses screen and an add expenses function to enhance our user experience https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/20
+- **Connected Expenses UI to Firestore:** We connected our expenses to the firestore, all of our users can store their expenses data on the cloud https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/39
+- **Logout Feature:** User's can now log out of our app https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/15
+- **Group Creation:** Groups can now be created with their unique group code and group information being stored in the Firestore https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/38
+- **Chore Creation:** Chores can now be created and stored in the Firestore https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/37
+- **Chore Repeatability:** Chores can now be selected to be repeated weekly and monthly
+
+**_In Progress (Expected in Next Release)_**
+- **Joining Groups:** Implementing the ability for a user to join a group through a group code https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/38
+- **Group Code Displayed:** Implementing group codes to be displayed once a user creates a group https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/38
+- **Stats Screen Graphics:** Displaying user trends in chore completion and expenses 
+- **Chore Ratings:** Implementing the ability for a user to both rate a chore and view the ratings on their chores
+- **Home Screen:** Improving the UI for the current home screen 
+
+
+**_Enhancements_**
+- Created more efficient Firestore access calls for users, groups, chores and expenses
+- App does not crash anymore when a user is logged in for too long
+
+**_Download Installer_**
+Download out installer for HouseMate here: 
+
+For a full list of the changes visit our issues list on GitLab
+
 ## Release Notes Version 1.1.0
 **_What's New_**
 - **Authentication Enhancements:** Redesigned the authentication UI and backend mechanisms to provide a smoother login and sign-up experience, increasing both security and user-friendliness https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/33
