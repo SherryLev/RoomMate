@@ -22,6 +22,8 @@ class LoginViewModel @Inject constructor(
     var loginState by mutableStateOf(LoginState())
         private set
 
+    var showErrorDialog by mutableStateOf(false)
+
     fun onEmailInputChange(newValue: String){
         loginState = loginState.copy(emailInput = newValue)
         checkInputValidation()
@@ -45,11 +47,18 @@ class LoginViewModel @Inject constructor(
                     password = loginState.passwordInput
                 )
                 if (!loginResult) {
-                    loginState = loginState.copy(errorMessageLoginProcess = "Could not login")
-                }
+                    showErrorDialog = true
+                    loginState = loginState.copy(
+                        errorMessageLoginProcess = "Could not login",
+                        isLoading = false
+                    )}
                 loginState.copy(isSuccessfullyLoggedIn = loginResult)
             }catch(e: Exception){
-                loginState.copy(errorMessageLoginProcess = "Could not login")
+                showErrorDialog = true
+                loginState.copy(
+                    errorMessageLoginProcess = "Could not login",
+                    isLoading = false
+                )
             } finally {
                 loginState = loginState.copy(isLoading = false)
             }

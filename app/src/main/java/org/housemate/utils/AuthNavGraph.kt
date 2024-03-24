@@ -32,11 +32,6 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
                     navController.navigate(AuthScreen.Register.route){
                         popUpTo(0)
                     }
-                },
-                onLoginFailureNavigation = {
-                    navController.navigate(AuthScreen.Login.route){
-                        popUpTo(0)
-                    }
                 }
             )
         }
@@ -48,11 +43,6 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
                 },
                 onNavigateToLoginScreen = {
                     navController.navigate(AuthScreen.Login.route){
-                        popUpTo(0)
-                    }
-                },
-                onRegisterFailureNavigation = {
-                    navController.navigate(AuthScreen.Register.route){
                         popUpTo(0)
                     }
                 }

@@ -18,6 +18,7 @@ class RegisterViewModel @Inject constructor(
     private val validateRegisterInputUseCase: ValidateRegisterInputUseCase,
     private val authRepository: AuthRepository
 ): ViewModel() {
+    var showErrorDialog by mutableStateOf(false)
 
     var registerState by mutableStateOf(RegisterState())
         private set
@@ -46,7 +47,6 @@ class RegisterViewModel @Inject constructor(
             isPasswordRepeatedShown = !registerState.isPasswordRepeatedShown
         )
     }
-
     fun onRegisterClick(){
         registerState = registerState.copy(isLoading = true)
         viewModelScope.launch {
@@ -56,11 +56,17 @@ class RegisterViewModel @Inject constructor(
                     password = registerState.passwordInput
                 )
                 if (!registerResult) {
-                    registerState = registerState.copy(errorMessageRegisterProcess = "Could not register")
+                    showErrorDialog = true
+                    registerState = registerState.copy(
+                        errorMessageRegisterProcess = "Could not register",
+                        isLoading = false
+                    )
                 }
                 registerState.copy(isSuccessfullyRegistered = registerResult)
             }catch(e: Exception){
-                registerState.copy(errorMessageRegisterProcess = "Could not register")
+                registerState.copy(
+                    errorMessageRegisterProcess = "Could not register",
+                    isLoading = false)
             }finally {
                 registerState = registerState.copy(isLoading = false)
             }

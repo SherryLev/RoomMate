@@ -8,6 +8,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -30,7 +32,6 @@ import org.housemate.theme.*
 fun RegisterScreen(
     onRegisterSuccessNavigation: () -> Unit,
     onNavigateToLoginScreen: () -> Unit,
-    onRegisterFailureNavigation: () -> Unit,
     registerViewModel: RegisterViewModel = hiltViewModel()
 ) {
 
@@ -43,13 +44,22 @@ fun RegisterScreen(
         }
     )
 
-    NavDestinationHelper(shouldNavigate = {
-        !(registerViewModel.registerState.errorMessageRegisterProcess.isNullOrEmpty())
-    },
-        destination = {
-            onRegisterFailureNavigation()
-        }
-    )
+    // Show error dialog if needed
+    if (registerViewModel.showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { registerViewModel.showErrorDialog = false },
+            title = { Text("Registration Error") },
+            text = { Text("Could not register. Please verify that you don't have an account under this email address.\nIf you don't have an account, please verify your internet connection, and try again.") },
+            confirmButton = {
+                Button(ain
+                    onClick = { registerViewModel.showErrorDialog = false },
+                    shape = RoundedCornerShape(25.dp)
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 
     Box(
         modifier = Modifier

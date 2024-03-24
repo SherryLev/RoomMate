@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -30,9 +32,25 @@ import org.housemate.theme.*
 fun LoginScreen(
     onLoginSuccessNavigation: () -> Unit,
     onNavigateToRegisterScreen: () -> Unit,
-    onLoginFailureNavigation: () -> Unit,
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
+
+    // Show error dialog if needed
+    if (loginViewModel.showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { loginViewModel.showErrorDialog = false },
+            title = { Text("Login Error") },
+            text = { Text("Could not login. Please check your email and password, and your internet connection.") },
+            confirmButton = {
+                Button(
+                    onClick = { loginViewModel.showErrorDialog = false },
+                    shape = RoundedCornerShape(25.dp),
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 
     NavDestinationHelper(
         shouldNavigate = {
@@ -43,13 +61,14 @@ fun LoginScreen(
         }
     )
 
-    NavDestinationHelper(shouldNavigate = {
-        !(loginViewModel.loginState.errorMessageLoginProcess.isNullOrEmpty())
-    },
-        destination = {
-            onLoginFailureNavigation()
-        }
-    )
+//    NavDestinationHelper(
+//        shouldNavigate = {
+//        !(loginViewModel.loginState.errorMessageLoginProcess.isNullOrEmpty())
+//    },
+//        destination = {
+//            onLoginFailureNavigation()
+//        }
+//    )
 
     Box(
         modifier = Modifier
