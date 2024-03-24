@@ -47,11 +47,6 @@ fun HomeScreen(navController: NavHostController = rememberNavController()) {
                             icon = Icons.AutoMirrored.Filled.Assignment
                         ),
                         BottomNavItem(
-                            name = "Calendar",
-                            route = AppScreenRoutes.CalendarScreen.route,
-                            icon = Icons.Default.CalendarToday
-                        ),
-                        BottomNavItem(
                             name = "Expenses",
                             route = AppScreenRoutes.ExpensesScreen.route,
                             icon = Icons.Default.AttachMoney

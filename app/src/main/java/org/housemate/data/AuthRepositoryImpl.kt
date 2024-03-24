@@ -1,9 +1,10 @@
 package org.housemate.data
 
 import android.util.Log
-import com.google.firebase.Firebase
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
 import org.housemate.domain.repositories.AuthRepository
@@ -11,6 +12,7 @@ import org.housemate.domain.repositories.AuthRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import org.housemate.domain.model.User
 import org.housemate.domain.repositories.UserRepository
+import org.housemate.presentation.viewmodel.DeleteAccountResult
 
 
 class AuthRepositoryImpl (
@@ -108,6 +110,34 @@ class AuthRepositoryImpl (
         } catch (e: Exception) {
             Log.e("AuthRepository", "Error getting login state", e)
             return false
+        }
+    }
+
+    override suspend fun deleteAccount(userPassword: String): DeleteAccountResult {
+        try {
+            val currentUser = auth.currentUser
+            if (currentUser != null) {
+                val credential = EmailAuthProvider.getCredential(currentUser.email!!, userPassword)
+                currentUser.reauthenticate(credential).await()
+
+                val userId = currentUser.uid
+                userRepository.deleteUserById(userId)
+                currentUser.delete().await()
+                return DeleteAccountResult.Success
+            } else {
+                Log.e("AuthRepository", "No user logged in.")
+                return DeleteAccountResult.Error
+            }
+        } catch (e: FirebaseAuthRecentLoginRequiredException) {
+            Log.e("AuthRepository", "User needs to reauthenticate", e)
+            return DeleteAccountResult.Error
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            // Incorrect password provided by the user
+            Log.e("AuthRepository", "Incorrect password", e)
+            return DeleteAccountResult.IncorrectPassword
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Error deleting account", e)
+            return DeleteAccountResult.Error
         }
     }
 }
