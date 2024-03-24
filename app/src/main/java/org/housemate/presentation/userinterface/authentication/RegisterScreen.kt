@@ -51,7 +51,7 @@ fun RegisterScreen(
             title = { Text("Registration Error") },
             text = { Text("Could not register. Please verify that you don't have an account under this email address.\nIf you don't have an account, please verify your internet connection, and try again.") },
             confirmButton = {
-                Button(ain
+                Button(
                     onClick = { registerViewModel.showErrorDialog = false },
                     shape = RoundedCornerShape(25.dp)
                 ) {
