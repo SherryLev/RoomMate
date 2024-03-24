@@ -40,7 +40,7 @@ class UserRepositoryImpl (
             firestore.collection("users").document(userId).delete().await()
             true
         } catch (e: Exception) {
-            Log.e("UserRepository", "Error deleting user", e)
+            Log.e("UserRepository", "Error deleting user from firestore", e)
             false
         }
     }

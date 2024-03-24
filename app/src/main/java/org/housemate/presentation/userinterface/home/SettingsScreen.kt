@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
@@ -16,25 +17,38 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.presentation.sharedcomponents.TextEntryModule
+import org.housemate.presentation.viewmodel.DeleteAccountResult
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.presentation.viewmodel.SettingsViewModel
+import org.housemate.theme.light_purple
 import org.housemate.theme.md_theme_light_error
 import org.housemate.theme.md_theme_light_primary
 import org.housemate.utils.AuthScreen
@@ -46,8 +60,11 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     onNavigateToAuthScreen: () -> Unit
 ) {
+    val deleteAccountState by settingsViewModel.deleteAccountState.collectAsState()
 
     val logoutState by settingsViewModel.logoutState.collectAsState()
+
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
 
     // Observe logout state
     if (logoutState == true) {
@@ -195,7 +212,7 @@ fun SettingsScreen(
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
                         Button(
-                            onClick = { /* Handle account deletion */ },
+                            onClick = { showDeleteAccountDialog = true },
                             shape = RoundedCornerShape(25.dp),
                             colors = ButtonDefaults.buttonColors(
                                 backgroundColor = md_theme_light_error,
@@ -212,6 +229,15 @@ fun SettingsScreen(
                                 .fillMaxWidth()
                                 .padding(10.dp)
                         )
+                        DeleteAccountDialog(
+                            showDialog = showDeleteAccountDialog,
+                            onConfirm = { password -> settingsViewModel.deleteAccount(password) },
+                            deleteAccountState = deleteAccountState,
+                            onDismiss = {
+                                settingsViewModel.resetDeleteAccountState()
+                                showDeleteAccountDialog = false
+                            }
+                        )
                     }
                 }
             }
@@ -219,6 +245,99 @@ fun SettingsScreen(
     )
 }
 
+@Composable
+fun DeleteAccountDialog(
+    showDialog: Boolean,
+    onConfirm: (String) -> Unit,
+    deleteAccountState: DeleteAccountResult?,
+    onDismiss: () -> Unit
+) {
+    var showIncorrectPasswordError by remember { mutableStateOf(false) }
+    LaunchedEffect(deleteAccountState) {
+        if (deleteAccountState == DeleteAccountResult.IncorrectPassword) {
+            showIncorrectPasswordError = true
+        } else if (deleteAccountState == DeleteAccountResult.Success) {
+
+        }
+    }
+    if (showDialog) {
+        var password by remember { mutableStateOf("") }
+        var passwordVisibility by remember { mutableStateOf(false) }
+
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Delete Account") },
+            text = {
+                Column {
+                    Text(
+                        text = "Deleting your account will permanently remove all your data. This cannot be undone. If you are sure, you can enter your password to confirm account deletion.",
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(6.dp)
+                    )
+                    TextEntryModule(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        description = "Password",
+                        hint = "Enter password",
+                        textValue = password,
+                        textColor = Color.Gray,
+                        cursorColor = md_theme_light_primary,
+                        onValueChanged = { password = it },
+                        trailingIcon = Icons.Default.RemoveRedEye,
+                        onTrailingIconClick = {
+                            passwordVisibility = !passwordVisibility
+                        },
+                        leadingIcon = Icons.Default.VpnKey,
+                        visualTransformation = if (passwordVisibility) {
+                            VisualTransformation.None
+                        } else PasswordVisualTransformation(),
+                        keyboardType = KeyboardType.Password
+                    )
+                    // Show error message if delete account state indicates incorrect password
+                    if (showIncorrectPasswordError) {
+                        Text(
+                            text = "Incorrect password. Please try again.",
+                            color = md_theme_light_error,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onConfirm(password)
+                    },
+                    shape = RoundedCornerShape(25.dp),
+                    enabled = password.isNotEmpty()
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        showIncorrectPasswordError = false
+                        onDismiss()
+                              },
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = light_purple,
+                        contentColor = md_theme_light_primary
+                    ),
+                    elevation = ButtonDefaults.elevation(0.dp)
+                ) {
+                    Text("Cancel")
+                }
+            }
+
+        )
+    }
+}
 
 @Composable
 fun Section(title: String, content: @Composable () -> Unit) {
