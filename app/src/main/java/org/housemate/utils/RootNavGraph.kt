@@ -41,7 +41,7 @@ fun RootNavigationGraph(navController: NavHostController) {
     )
 
     // Remember the logged-in state
-    val loggedInState = remember { mutableStateOf(false) }
+    val loggedInState = remember { mutableStateOf<Boolean?>(null) }
 
     // Use LaunchedEffect to trigger the login state check
     LaunchedEffect(true) {
@@ -50,11 +50,11 @@ fun RootNavigationGraph(navController: NavHostController) {
     }
 
     val startDestination = when {
-        loggedInState.value -> Graph.HOME
+        loggedInState.value == true -> Graph.HOME
         else -> Graph.AUTHENTICATION
     }
 
-    if (!loggedInState.value) {
+    if (loggedInState.value == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
