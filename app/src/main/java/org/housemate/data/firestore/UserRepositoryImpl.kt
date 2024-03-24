@@ -34,4 +34,14 @@ class UserRepositoryImpl (
     override suspend fun getCurrentUserId():String? {
         return FirebaseAuth.getInstance().currentUser?.uid
     }
+
+    override suspend fun deleteUserById(userId: String): Boolean {
+        return try {
+            firestore.collection("users").document(userId).delete().await()
+            true
+        } catch (e: Exception) {
+            Log.e("UserRepository", "Error deleting user", e)
+            false
+        }
+    }
 }

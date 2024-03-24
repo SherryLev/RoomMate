@@ -5,4 +5,6 @@ interface UserRepository {
     suspend fun addUser(user: User): Boolean
     suspend fun getUserById(userId: String): User?
     suspend fun getCurrentUserId():String?
-}
+
+    suspend fun deleteUserById(userId: String): Boolean
+    }

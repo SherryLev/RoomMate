@@ -5,4 +5,5 @@ interface AuthRepository {
     suspend fun register(email:String, password: String):Boolean
     suspend fun logout(): Boolean
     suspend fun getLoginState():Boolean
+    suspend fun deleteAccount(): Boolean
 }

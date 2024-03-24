@@ -10,7 +10,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import org.housemate.presentation.userinterface.calendar.CalendarScreen
 import org.housemate.presentation.userinterface.chores.ChoresScreen
 import org.housemate.presentation.userinterface.expenses.AddExpenseScreen
 import org.housemate.presentation.userinterface.expenses.ExpensesScreen
@@ -38,9 +37,6 @@ fun HomeNavGraph(navController: NavHostController) {
         }
         composable(AppScreenRoutes.ChoresScreen.route){
             ChoresScreen()
-        }
-        composable(AppScreenRoutes.CalendarScreen.route){
-            CalendarScreen()
         }
         composable(AppScreenRoutes.ExpensesScreen.route){
                 backStackEntry ->
@@ -97,7 +93,6 @@ sealed class SettingsScreenRoutes(val route: String) {
 sealed class AppScreenRoutes(val route:String){
     object HomeScreen: AppScreenRoutes("home_screen")
     object ChoresScreen: AppScreenRoutes("chores_screen")
-    object CalendarScreen: AppScreenRoutes("calendar_screen")
     object ExpensesScreen: AppScreenRoutes("expenses_screen")
     object AddExpenseScreen: AppScreenRoutes("add_expense_screen")
     object StatsScreen: AppScreenRoutes("stats_screen")

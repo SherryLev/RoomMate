@@ -110,4 +110,24 @@ class AuthRepositoryImpl (
             return false
         }
     }
+
+    override suspend fun deleteAccount(): Boolean {
+        try {
+            val currentUser = auth.currentUser
+            if (currentUser != null) {
+                val userId = currentUser.uid
+                // Delete user document from Firestore
+                userRepository.deleteUserById(userId)
+                // Delete user account from Firebase Authentication
+                currentUser.delete().await()
+                return true
+            } else {
+                Log.e("AuthRepository", "No user logged in.")
+                return false
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Error deleting account", e)
+            return false
+        }
+    }
 }
