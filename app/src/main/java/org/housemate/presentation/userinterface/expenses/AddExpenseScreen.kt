@@ -87,7 +87,7 @@ fun AddExpenseScreen(
 
     var selectedSplit by remember { mutableStateOf("Equally") }
 
-    val housemates = listOf("You", "Sally", "Bob", "Mike", "Hi", "john", "Mary", "Peter")
+    val housemates = listOf("You", "Sally", "Bob", "Mike")
     val split_options = listOf("Equally", "By exact amount")
 
     var expenseAmountState by remember {
@@ -192,7 +192,7 @@ fun AddExpenseScreen(
                 ) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Text("Paid", fontWeight = FontWeight.Bold, color = Color.Gray)
-                    Spacer(modifier = Modifier.width(22.dp))
+                    Spacer(modifier = Modifier.width(26.dp))
                     TextField(
                         value = expenseAmountState,
                         onValueChange = {
