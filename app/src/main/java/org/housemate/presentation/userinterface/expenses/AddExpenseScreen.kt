@@ -86,10 +86,8 @@ fun AddExpenseScreen(
     val owingAmounts by expenseViewModel.owingAmounts.collectAsState()
 
     var selectedSplit by remember { mutableStateOf("Equally") }
-    var selectedCurrency by remember { mutableStateOf("CAD") }
 
-    val currencies = listOf("CAD", "USD", "EUR", "GBP")
-    val housemates = listOf("You", "Sally", "Bob", "Mike")
+    val housemates = listOf("You", "Sally", "Bob", "Mike", "Hi", "john", "Mary", "Peter")
     val split_options = listOf("Equally", "By exact amount")
 
     var expenseAmountState by remember {
@@ -194,14 +192,6 @@ fun AddExpenseScreen(
                 ) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Text("Paid", fontWeight = FontWeight.Bold, color = Color.Gray)
-                    Spacer(modifier = Modifier.width(22.dp))
-                    CustomDropdown(
-                        items = currencies,
-                        selectedItem = selectedCurrency,
-                        onItemSelected = { selectedCurrency = it },
-                        modifier = Modifier,
-                        dropdownWidth = 78.dp
-                    )
                     Spacer(modifier = Modifier.width(22.dp))
                     TextField(
                         value = expenseAmountState,
@@ -553,6 +543,25 @@ fun EquallySplitUI(
                                 owingAmounts[name] = amountPerPerson.value
                             }
                         }
+
+                        var totalOwingAmounts = BigDecimal.ZERO
+                        for (value in owingAmounts.values) {
+                            totalOwingAmounts = totalOwingAmounts.add(value)
+                        }
+
+                        val totalAmount = expenseAmountState.text.toBigDecimalOrNull() ?: BigDecimal.ZERO
+                        if (totalOwingAmounts > totalAmount) {
+                            // If total owing amounts exceed the total amount, subtract the difference from the last person
+                            val difference = totalOwingAmounts - totalAmount
+                            val lastPerson = owingAmounts.keys.last()
+                            owingAmounts[lastPerson] = owingAmounts[lastPerson]!! - difference
+                        } else if (totalOwingAmounts < totalAmount) {
+                            // If total owing amounts are less than the total amount, add the difference to the last person
+                            val difference = totalAmount - totalOwingAmounts
+                            val lastPerson = owingAmounts.keys.last()
+                            owingAmounts[lastPerson] = owingAmounts[lastPerson]!! + difference
+                        }
+
                         onAmountChanged(owingAmounts)
                     },
                     modifier = Modifier.padding(end = 8.dp),
