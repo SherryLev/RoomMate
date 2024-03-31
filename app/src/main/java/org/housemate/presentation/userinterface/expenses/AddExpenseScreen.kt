@@ -431,8 +431,9 @@ fun AddExpenseScreen(
                         if (expenseDescription.isEmpty() || expenseAmount == BigDecimal.ZERO) {
                             // Show the error dialog
                             showEmptyFieldsErrorDialog.value = true
-                        } else if (remainingAmountState.value != BigDecimal.ZERO.setScale(2)) {
-                                showIncorrectAmountErrorDialog.value = true
+                        } else if (selectedSplit == "By exact amount" && remainingAmountState.value != BigDecimal.ZERO.setScale(2)) {
+                            println("remaining: ${remainingAmountState.value}")
+                            showIncorrectAmountErrorDialog.value = true
                         } else {
 
                             // also need:
@@ -443,7 +444,6 @@ fun AddExpenseScreen(
                             // this can all be calculated using the expense history, in the viewmodel
 
                             // for each expense
-                            // settledup = false
                             // date of expense
 
                             // when you click settle up, you should be able to
