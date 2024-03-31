@@ -13,6 +13,7 @@ import androidx.navigation.navigation
 import org.housemate.presentation.userinterface.chores.ChoresScreen
 import org.housemate.presentation.userinterface.expenses.AddExpenseScreen
 import org.housemate.presentation.userinterface.expenses.ExpensesScreen
+import org.housemate.presentation.userinterface.expenses.SettleUpScreen
 import org.housemate.presentation.userinterface.home.EditUserInfoScreen
 import org.housemate.presentation.userinterface.home.HomeScreenHelper
 import org.housemate.presentation.userinterface.home.SettingsScreen
@@ -52,6 +53,13 @@ fun HomeNavGraph(navController: NavHostController) {
             }
             val parentViewModel: ExpenseViewModel = hiltViewModel(parentEntry)
             AddExpenseScreen(navController, parentViewModel)
+        }
+        composable(AppScreenRoutes.SettleUpScreen.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(AppScreenRoutes.ExpensesScreen.route)
+            }
+            val parentViewModel: ExpenseViewModel = hiltViewModel(parentEntry)
+            SettleUpScreen(navController, parentViewModel)
         }
         composable(AppScreenRoutes.StatsScreen.route){
             StatsScreen()
@@ -95,5 +103,7 @@ sealed class AppScreenRoutes(val route:String){
     object ChoresScreen: AppScreenRoutes("chores_screen")
     object ExpensesScreen: AppScreenRoutes("expenses_screen")
     object AddExpenseScreen: AppScreenRoutes("add_expense_screen")
+
+    object SettleUpScreen: AppScreenRoutes("settle_up_screen")
     object StatsScreen: AppScreenRoutes("stats_screen")
 }

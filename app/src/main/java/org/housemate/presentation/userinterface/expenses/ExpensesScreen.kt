@@ -165,9 +165,9 @@ fun ExpensesScreen(
                         // totalOwed by everyone
                         // this can all be calculated using the expense history, in the viewmodel
 
-                        BalancesInfoRow(name = "Sally", amount = "$2", youOwe = false)
-                        BalancesInfoRow(name = "Bob", amount = "$100", youOwe = true)
-                        BalancesInfoRow(name = "Mike", amount = "$100", youOwe = true)
+                        BalancesInfoRow(name = "Sally", amount = "$2", youOwe = false, navController)
+                        BalancesInfoRow(name = "Bob", amount = "$100", youOwe = true, navController)
+                        BalancesInfoRow(name = "Mike", amount = "$100", youOwe = true, navController)
                     }
                 }
             }
@@ -362,7 +362,7 @@ fun ExpensesScreen(
     }
 }
 @Composable
-fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean) {
+fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean, navController: NavController) {
     Box(
         modifier = Modifier.padding(horizontal = 40.dp, vertical = 10.dp)
     ) {
@@ -394,7 +394,7 @@ fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean) {
                 )
             }
             Button(
-                onClick = { /* Handle settle up */ },
+                onClick = { navController.navigate(AppScreenRoutes.SettleUpScreen.route) },
                 shape = RoundedCornerShape(25.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = light_purple,
