@@ -94,19 +94,17 @@ private fun RatingBarComposable() {
 fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
     val formattedDateTime = chore.dueDate?.format(formatter)
-    Button(
-        onClick = { },
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.White,
-           // contentColor = MaterialTheme.colors. // Set content color if needed
-        ),
+    Surface(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .width(300.dp)
-            .height(80.dp)
+            .height(80.dp),
+        elevation = 5.dp
     ) {
         Row(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
 
         ) {
@@ -142,23 +140,15 @@ fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
                 }
             }
             Box(modifier = Modifier.padding(end = 5.dp)) {
-                Button(
+                IconButton(
                     onClick = {
                         deleteTask(chore)
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color.Red, // Set a non-transparent color
-                    ),
                     modifier = Modifier
                         .width(30.dp)
-                        .height(30.dp),
+                        .height(30.dp)
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.delete),
-                        contentDescription = "garbage",
-                        modifier = Modifier.size(50.dp), // Adjust the size if needed
-                        tint = Color.White // Set icon color
-                    )
+                    Icon(painterResource(R.drawable.edit), "Edit")
                 }
             }
         }
