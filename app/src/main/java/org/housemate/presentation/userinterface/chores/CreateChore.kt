@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.text.Selection
 import android.util.Log
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -188,51 +189,65 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
             )
         }
         Spacer(modifier = Modifier.padding(top = 10.dp))
+        var isErrorVisible by remember { mutableStateOf(false) }
         Button(
             onClick = {
-                val dueDate = selectedDate.value ?: return@Button // Ensure due date is not null
+                val allFieldsSelected =
+                    choreChoice.isNotEmpty() &&
+                            categoryChoice.isNotEmpty() &&
+                            assigneeChoice.isNotEmpty() &&
+                            selectedDate.value != null &&
+                            repetitionChoice != "None"
+                if (allFieldsSelected) {
+                    val dueDate = selectedDate.value ?: return@Button // Ensure due date is not null
 
-                val repetitions = when (repetitionChoice) {
-                    "Every Day" -> {
-                        val endDate = dueDate.plusMonths(4) // Get the end date 4 months from the due date
-                        val daysBetween = ChronoUnit.DAYS.between(dueDate, endDate)
-                        (daysBetween / 7) * 7 // 7 times per week for 4 months
+                    val repetitions = when (repetitionChoice) {
+                        "Every Day" -> {
+                            val endDate = dueDate.plusMonths(4) // Get the end date 4 months from the due date
+                            val daysBetween = ChronoUnit.DAYS.between(dueDate, endDate)
+                            (daysBetween / 7) * 7 // 7 times per week for 4 months
+                        }
+
+                        "Week" -> 16 // Once per week for 4 months (4 weeks * 4 months)
+                        "2 Weeks" -> 8 // Once per two weeks for 4 months (2 weeks * 4 months)
+                        "3 Weeks" -> 4 // Once per three weeks for 4 months (1 week * 4 months)
+                        "4 Weeks" -> 4 // Once per four weeks for 4 months (1 week * 4 months)
+                        else -> 1 // Default to one-time chore
                     }
-                    "Week" -> 16 // Once per week for 4 months (4 weeks * 4 months)
-                    "2 Weeks" -> 8 // Once per two weeks for 4 months (2 weeks * 4 months)
-                    "3 Weeks" -> 4 // Once per three weeks for 4 months (1 week * 4 months)
-                    "4 Weeks" -> 4 // Once per four weeks for 4 months (1 week * 4 months)
-                    else -> 1 // Default to one-time chore
-                }
 
-                repeat(repetitions.toInt()) {
-                    val choreDueDate = when (repetitionChoice) {
-                        "Every Day" -> dueDate.plusDays(it.toLong()) // Add days for "Every Day"
-                        else -> dueDate.plusWeeks(it.toLong()) // Add weeks for other repetitions
-                    }
+                    repeat(repetitions.toInt()) {
+                        val choreDueDate = when (repetitionChoice) {
+                            "Every Day" -> dueDate.plusDays(it.toLong()) // Add days for "Every Day"
+                            else -> dueDate.plusWeeks(it.toLong()) // Add weeks for other repetitions
+                        }
 
-                    val chore = Chore(
-                        userId = userId ?: "",
-                        choreId = "$choreId-$it", // Ensure unique ID for each chore
-                        choreName = choreChoice,
-                        category = categoryChoice,
-                        assignee = assigneeChoice,
-                        dueDate = choreDueDate, // Assign due date for the chore
-                        userRating = emptyList(),
-                        votedUser = emptyList()
-                    )
-                    createChore(chore)
-                    choreRepository.createChore(chore)
-                        .addOnSuccessListener {
-                            Log.d("ChoreCreation", "Chore successfully added to Firestore")
-                            choreCounter++
-                            if (choreCounter == repetitions.toInt()) {
-                                onDialogDismiss()
+                        val chore = Chore(
+                            userId = userId ?: "",
+                            choreId = "$choreId-$it", // Ensure unique ID for each chore
+                            choreName = choreChoice,
+                            category = categoryChoice,
+                            assignee = assigneeChoice,
+                            dueDate = choreDueDate, // Assign due date for the chore
+                            userRating = emptyList(),
+                            votedUser = emptyList()
+                        )
+                        createChore(chore)
+                        choreRepository.createChore(chore)
+                            .addOnSuccessListener {
+                                Log.d("ChoreCreation", "Chore successfully added to Firestore")
+                                choreCounter++
+                                if (choreCounter == repetitions.toInt()) {
+                                    onDialogDismiss()
+                                }
                             }
-                        }
-                        .addOnFailureListener { e ->
-                            Log.w("ChoreCreation", "Error adding chore to Firestore", e)
-                        }
+                            .addOnFailureListener { e ->
+                                Log.w("ChoreCreation", "Error adding chore to Firestore", e)
+                            }
+                    }
+
+
+                }else {
+                    isErrorVisible = true
                 }
             },
             modifier = Modifier
@@ -248,6 +263,18 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
+            )
+        }
+        if (isErrorVisible) {
+            AlertDialog(
+                onDismissRequest = { isErrorVisible = false },
+                title = { Text("Missing Fields!") },
+                text = { Text("Please select all fields before creating a chore.") },
+                confirmButton = {
+                    TextButton(onClick = { isErrorVisible = false }) {
+                        Text("Okay")
+                    }
+                }
             )
         }
     }
