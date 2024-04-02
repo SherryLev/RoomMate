@@ -72,6 +72,11 @@ fun ExpensesScreen(
     val expenses by expenseViewModel.expenseItems.collectAsState()
     val isExpenseHistoryLoading by expenseViewModel.isExpenseHistoryLoading.collectAsState()
 
+    val totalAmountOwedToYou by expenseViewModel.totalAmountOwedToYou.collectAsState()
+    val totalAmountYouOwe by expenseViewModel.totalAmountYouOwe.collectAsState()
+    val housematesOweYou by expenseViewModel.housematesOweYou.collectAsState()
+    val youOweHousemates by expenseViewModel.youOweHousemates.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -116,7 +121,8 @@ fun ExpensesScreen(
                                     "You are owed",
                                     fontWeight = FontWeight.Bold, color = Color.DarkGray
                                 )
-                                Text("$2", fontWeight = FontWeight.Bold, fontSize = 24.sp, color = green)
+                                // instead of hard coded values, use calculated amounts from viewmodel
+                                Text("$${totalAmountOwedToYou}", fontWeight = FontWeight.Bold, fontSize = 24.sp, color = green)
                             }
                             Column(
                                 modifier = Modifier
@@ -141,7 +147,8 @@ fun ExpensesScreen(
                                     color = Color.DarkGray,
                                     textAlign = TextAlign.Center
                                 )
-                                Text("$200", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = md_theme_light_error)
+                                // instead of hard coded values, use calculated amounts from viewmodel
+                                Text("$${totalAmountYouOwe}", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = md_theme_light_error)
                             }
                         }
                     }
@@ -158,16 +165,13 @@ fun ExpensesScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        // also need:
-                        // totalYouOwe to each housemate
-                        // totalOwed by each housemate
-                        // totalYouOwe to everyone
-                        // totalOwed by everyone
-                        // this can all be calculated using the expense history, in the viewmodel
-
-                        BalancesInfoRow(name = "Sally", amount = "$2", youOwe = false, navController)
-                        BalancesInfoRow(name = "Bob", amount = "$100", youOwe = true, navController)
-                        BalancesInfoRow(name = "Mike", amount = "$100", youOwe = true, navController)
+                        // instead of hard coded values, use calculated amounts from viewmodel
+                        housematesOweYou.forEach { (housemate, amount) ->
+                            BalancesInfoRow(name = housemate, amount = "$${amount}", youOwe = false, navController)
+                        }
+                        youOweHousemates.forEach { (housemate, amount) ->
+                            BalancesInfoRow(name = housemate, amount = "$${amount}", youOwe = true, navController)
+                        }
                     }
                 }
             }

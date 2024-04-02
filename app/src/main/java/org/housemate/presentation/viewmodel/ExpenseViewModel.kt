@@ -1,13 +1,8 @@
 package org.housemate.presentation.viewmodel
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FieldValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +12,7 @@ import org.housemate.domain.model.Expense
 import org.housemate.domain.repositories.ExpenseRepository
 import java.math.BigDecimal
 import javax.inject.Inject
+import kotlin.math.absoluteValue
 
 @HiltViewModel
 class ExpenseViewModel @Inject constructor(
@@ -42,10 +38,25 @@ class ExpenseViewModel @Inject constructor(
     private val _isExpenseHistoryLoading = MutableStateFlow(false)
     val isExpenseHistoryLoading: StateFlow<Boolean> = _isExpenseHistoryLoading
 
+    private val _totalAmountOwedToYou = MutableStateFlow(BigDecimal.ZERO)
+    val totalAmountOwedToYou: StateFlow<BigDecimal> = _totalAmountOwedToYou
+
+    private val _totalAmountYouOwe = MutableStateFlow(BigDecimal.ZERO)
+    val totalAmountYouOwe: StateFlow<BigDecimal> = _totalAmountYouOwe
+
+    // Total amounts each housemate owes you
+    private val _housematesOweYou = MutableStateFlow<Map<String, BigDecimal>>(emptyMap())
+    val housematesOweYou: StateFlow<Map<String, BigDecimal>> = _housematesOweYou
+
+    // Total amounts you owe to each housemate
+    private val _youOweHousemates = MutableStateFlow<Map<String, BigDecimal>>(emptyMap())
+    val youOweHousemates: StateFlow<Map<String, BigDecimal>> = _youOweHousemates
+
     init {
         // Fetch expenses from the repository when the ViewModel is initialized
         fetchExpenses()
     }
+
     private fun fetchExpenses() {
         viewModelScope.launch {
             try {
@@ -54,6 +65,8 @@ class ExpenseViewModel @Inject constructor(
                 val fetchedExpenses = expenseRepository.getExpenses()
                 // Update the _expenses StateFlow object with the fetched expenses
                 _expenseItems.value = fetchedExpenses
+
+                calculateTotalAmounts()
             } catch (e: Exception) {
                 // Handle the exception
                 println("Failed to fetch expenses: ${e.message}")
@@ -61,6 +74,38 @@ class ExpenseViewModel @Inject constructor(
                 _isExpenseHistoryLoading.value = false
             }
         }
+    }
+
+    private fun calculateTotalAmounts() {
+        var totalOwedToYou = 0.00
+        var totalYouOwe = 0.00
+        val housematesOweYou = mutableMapOf<String, Double>()
+        val youOweHousemates = mutableMapOf<String, Double>()
+
+        _expenseItems.value.forEach { expense ->
+            // Check if you owe or are owed money
+            val youOweAmount = expense.owingAmounts["You"] ?: 0.00
+            val othersOweAmount = (expense.owingAmounts.values.sum()) - (youOweAmount)
+
+            // Update total amounts owed to you and total amounts you owe
+            totalOwedToYou += othersOweAmount
+            totalYouOwe += youOweAmount
+
+            // Update amounts each housemate owes you and you owe to each housemate
+            expense.owingAmounts.forEach { (housemate, amount) ->
+                if (housemate != "You") {
+                    if (amount > 0.00) {
+                        housematesOweYou[housemate] = (housematesOweYou[housemate] ?: 0.00) + amount
+                    } else {
+                        youOweHousemates[housemate] = (youOweHousemates[housemate] ?: 0.00) + amount.absoluteValue
+                    }
+                }
+            }
+        }
+        _totalAmountOwedToYou.value = BigDecimal.valueOf(totalOwedToYou)
+        _totalAmountYouOwe.value = BigDecimal.valueOf(totalYouOwe)
+        _housematesOweYou.value = housematesOweYou.mapValues { (_, value) -> BigDecimal.valueOf(value) }
+        _youOweHousemates.value = youOweHousemates.mapValues { (_, value) -> BigDecimal.valueOf(value) }
     }
 
     // Function to add an expense with the selected payer's name

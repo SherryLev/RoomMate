@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
@@ -65,13 +63,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.presentation.viewmodel.ExpenseViewModel
-import org.housemate.presentation.viewmodel.LoginViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_gray
 import org.housemate.theme.light_purple
 import org.housemate.theme.md_theme_dark_error
 import org.housemate.theme.md_theme_light_primary
-import org.housemate.utils.AppScreenRoutes
 import java.math.BigDecimal
 import java.math.RoundingMode
 
