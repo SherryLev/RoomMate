@@ -31,6 +31,7 @@ import java.time.LocalDateTime
 import java.util.*
 import org.housemate.domain.repositories.ChoreRepository
 import org.housemate.domain.repositories.UserRepository
+import java.time.temporal.ChronoUnit
 
 var choreIdCount = 1
 @Composable
@@ -156,9 +157,11 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
     var categoryChoice by remember { mutableStateOf("") }
     var choreChoice by remember { mutableStateOf("") }
     var assigneeChoice by remember { mutableStateOf("") }
-    //val id = choreIdCount
 
     val selectedDate = remember { mutableStateOf<LocalDateTime?>(null) }
+    val repetitionOptions = listOf("None", "Every Day", "Week", "2 Weeks", "3 Weeks", "4 Weeks")
+    var repetitionChoice by remember { mutableStateOf("None") }
+    var choreCounter by remember { mutableStateOf(0) }
     val choreId = "chore${choreIdCount++}" // Generate unique chore ID
 
     var userId by remember { mutableStateOf<String?>(null) }
@@ -175,29 +178,62 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
         Spacer(modifier = Modifier.height(16.dp))
         SelectionDropdown(assignees,labels[2],onCategorySelected = { category -> assigneeChoice = category })
         Spacer(modifier = Modifier.height(16.dp))
-        TasksDatePicker { date ->selectedDate.value = date}
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TasksDatePicker { date ->selectedDate.value = date}
+            Spacer(modifier = Modifier.width(16.dp))
+            SelectionDropdown(
+                options = repetitionOptions,
+                label = "Repeat",
+                onCategorySelected = { repetitionChoice = it }
+            )
+        }
         Spacer(modifier = Modifier.padding(top = 10.dp))
         Button(
             onClick = {
-                val chore = Chore(
-                    userId = userId ?: "",
-                    choreId = choreId,
-                    choreName = choreChoice,
-                    category = categoryChoice,
-                    assignee = assigneeChoice,
-                    dueDate = selectedDate.value,
-                    userRating = emptyList(),
-                    votedUser = emptyList()
-                )
-                createChore(chore)
-                choreRepository.createChore(chore)
-                    .addOnSuccessListener {
-                        Log.d("ChoreCreation", "Chore successfully added to Firestore")
-                        onDialogDismiss()
+                val dueDate = selectedDate.value ?: return@Button // Ensure due date is not null
+
+                val repetitions = when (repetitionChoice) {
+                    "Every Day" -> {
+                        val endDate = dueDate.plusMonths(4) // Get the end date 4 months from the due date
+                        val daysBetween = ChronoUnit.DAYS.between(dueDate, endDate)
+                        (daysBetween / 7) * 7 // 7 times per week for 4 months
                     }
-                    .addOnFailureListener { e ->
-                        Log.w("ChoreCreation", "Error adding chore to Firestore", e)
+                    "Week" -> 16 // Once per week for 4 months (4 weeks * 4 months)
+                    "2 Weeks" -> 8 // Once per two weeks for 4 months (2 weeks * 4 months)
+                    "3 Weeks" -> 4 // Once per three weeks for 4 months (1 week * 4 months)
+                    "4 Weeks" -> 4 // Once per four weeks for 4 months (1 week * 4 months)
+                    else -> 1 // Default to one-time chore
+                }
+
+                repeat(repetitions.toInt()) {
+                    val choreDueDate = when (repetitionChoice) {
+                        "Every Day" -> dueDate.plusDays(it.toLong()) // Add days for "Every Day"
+                        else -> dueDate.plusWeeks(it.toLong()) // Add weeks for other repetitions
                     }
+
+                    val chore = Chore(
+                        userId = userId ?: "",
+                        choreId = "$choreId-$it", // Ensure unique ID for each chore
+                        choreName = choreChoice,
+                        category = categoryChoice,
+                        assignee = assigneeChoice,
+                        dueDate = choreDueDate, // Assign due date for the chore
+                        userRating = emptyList(),
+                        votedUser = emptyList()
+                    )
+                    createChore(chore)
+                    choreRepository.createChore(chore)
+                        .addOnSuccessListener {
+                            Log.d("ChoreCreation", "Chore successfully added to Firestore")
+                            choreCounter++
+                            if (choreCounter == repetitions.toInt()) {
+                                onDialogDismiss()
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("ChoreCreation", "Error adding chore to Firestore", e)
+                        }
+                }
             },
             modifier = Modifier
                 .align(Alignment.End),

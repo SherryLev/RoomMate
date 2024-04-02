@@ -143,6 +143,7 @@ fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
                 IconButton(
                     onClick = {
                         deleteTask(chore)
+                        //deleteChore(chore.choreId, userId: String)
                     },
                     modifier = Modifier
                         .width(30.dp)
@@ -205,6 +206,7 @@ fun TaskDisplayHouse(chores: List<Chore>, deleteTask: (Chore) -> Unit) {
 
     }
 }
+
 @Composable
 fun TaskDisplayWeek(chores: List<Chore>, deleteTask: (Chore) -> Unit, day: DayOfWeek) {
     LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
@@ -314,14 +316,22 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
                 Button(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(2.dp),
+
                     onClick = {
-                        // val newTask = Task("New Task")
-                        //  tasks = tasks + listOf(newTask)
                         showDialog = true
-                    }
+                    },
+                    shape = RoundedCornerShape(25.dp),
+                    elevation = ButtonDefaults.elevation(0.dp)
                 ) {
-                    Text("+ Create Chore")
+                    Text(
+                        "+ Create Chore",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
                 }
             }
         }

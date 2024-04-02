@@ -9,7 +9,7 @@ data class Chore(
     val assignee: String,
     val category: String,
     val dueDate: LocalDateTime? = null,
-    val userRating : List<Int>?, // nullable
+    val userRating :  List<Int> = emptyList(),  // nullable
     val votedUser: List<String>? // nullable
 ) {
     fun toMap(): Map<String, Any?> {
