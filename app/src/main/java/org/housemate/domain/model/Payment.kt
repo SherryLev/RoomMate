@@ -7,7 +7,6 @@ data class Payment(
     val payerId: String = "",
     val payeeName: String = "",
     val payeeId: String = "",
-    val amount: Double = 0.0,
-    val timestamp: Timestamp = Timestamp.now()
-) {
-}
+    override val amount: Double = 0.0,
+    override val timestamp: Timestamp = Timestamp.now()
+) : ExpenseOrPayment

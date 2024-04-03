@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.housemate.domain.model.Expense
+import org.housemate.domain.model.ExpenseOrPayment
 import org.housemate.domain.model.Payment
 import org.housemate.domain.repositories.ExpenseRepository
 import java.math.BigDecimal
@@ -62,6 +63,12 @@ class ExpenseViewModel @Inject constructor(
                 val fetchedExpenses = expenseRepository.getExpenses()
                 // Update the _expenses StateFlow object with the fetched expenses
                 _expenseItems.value = fetchedExpenses
+
+                // Convert fetched expenses to ExpenseOrPayment items
+                val expenseOrPayments = fetchedExpenses.map { it }
+                // Update combined list of expenses and payments
+                updateExpenseAndPaymentItems(expenseOrPayments)
+
 
                 calculateTotalAmounts()
             } catch (e: Exception) {
@@ -146,6 +153,12 @@ class ExpenseViewModel @Inject constructor(
                 val fetchedPayments = expenseRepository.getPayments()
                 // Update the _paymentItems StateFlow object with the fetched payments
                 _paymentItems.value = fetchedPayments
+
+                // Convert fetched payments to ExpenseOrPayment items
+                val expenseOrPayments = fetchedPayments.map { it }
+                // Update combined list of expenses and payments
+                updateExpenseAndPaymentItems(expenseOrPayments)
+
             } catch (e: Exception) {
                 // Handle the exception
                 println("Failed to fetch payments: ${e.message}")
@@ -159,7 +172,7 @@ class ExpenseViewModel @Inject constructor(
             try {
                 val paymentAmountDouble = amount.toDouble()
                 // Create the Payment object
-                val payment = Payment(payerId, payerName, payeeId, payeeName, paymentAmountDouble, Timestamp.now())
+                val payment = Payment(payerName, payerId, payeeName, payeeId, paymentAmountDouble, Timestamp.now())
                 // Call the addPayment function from the repository to add the payment to Firestore
                 expenseRepository.addPayment(payment)
                 // After adding the payment, fetch the updated list of payments
@@ -170,6 +183,18 @@ class ExpenseViewModel @Inject constructor(
             }
         }
     }
+
+    // Define StateFlow objects to hold the combined list of expenses and payments
+    private val _expenseAndPaymentItems = MutableStateFlow<List<ExpenseOrPayment>>(emptyList())
+    val expenseAndPaymentItems: StateFlow<List<ExpenseOrPayment>> = _expenseAndPaymentItems
+
+    // Combine and sort expenses and payments by timestamp, then update StateFlow
+    private fun updateExpenseAndPaymentItems(newItems: List<ExpenseOrPayment>) {
+        val currentItems = _expenseAndPaymentItems.value
+        val combinedList = (currentItems + newItems).sortedByDescending { it.timestamp }
+        _expenseAndPaymentItems.value = combinedList
+    }
+
 
     private val _selectedHousemate = MutableStateFlow("")
     val selectedHousemate: StateFlow<String> = _selectedHousemate

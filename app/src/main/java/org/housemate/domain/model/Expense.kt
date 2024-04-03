@@ -5,7 +5,7 @@ import com.google.firebase.Timestamp
 data class Expense(
     val payer: String = "",
     val description: String = "",
-    val amount: Double = 0.0,
+    override val amount: Double = 0.0,
     val owingAmounts: Map<String, Double> = emptyMap(),
-    val timestamp: Timestamp = Timestamp.now()
-)
+    override val timestamp: Timestamp = Timestamp.now()
+) : ExpenseOrPayment

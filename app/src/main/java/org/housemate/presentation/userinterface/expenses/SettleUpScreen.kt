@@ -284,26 +284,11 @@ fun SettleUpScreen(
                                 payeeName,
                                 paymentAmount
                             )
+                            // clear the form fields after saving the payment
+                            expenseViewModel.setPaymentAmount(BigDecimal.ZERO)
+
+                            navController.popBackStack()
                         }
-//                        else {
-//
-//                            // when you click settle up, you should be able to
-//                            // see how much you owe that person or how much they owe you
-//                            // you can write a smaller amount
-//                            // then this should appear in the expense history as a payment
-//                            expenseViewModel.addExpense(
-//                                selectedPayer,
-//                                expenseDescription,
-//                                expenseAmount,
-//                                owingAmounts
-//                            )
-//                            // clear the form fields after saving the expense
-//                            expenseViewModel.setSelectedPayer("You")
-//                            expenseViewModel.setExpenseDescription("")
-//                            expenseViewModel.setExpenseAmount(java.math.BigDecimal.ZERO)
-//                            expenseViewModel.setOwingAmounts(emptyMap())
-//
-//                            navController.popBackStack()
                     },
                     shape = RoundedCornerShape(25.dp),
                     elevation = ButtonDefaults.elevation(0.dp)
