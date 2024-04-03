@@ -74,8 +74,7 @@ fun ExpensesScreen(
 
     val totalAmountOwedToYou by expenseViewModel.totalAmountOwedToYou.collectAsState()
     val totalAmountYouOwe by expenseViewModel.totalAmountYouOwe.collectAsState()
-    val housematesOweYou by expenseViewModel.housematesOweYou.collectAsState()
-    val youOweHousemates by expenseViewModel.youOweHousemates.collectAsState()
+    val netAmountOwed by expenseViewModel.netAmountOwed.collectAsState()
 
     Box(
         modifier = Modifier
@@ -166,11 +165,12 @@ fun ExpensesScreen(
                             .fillMaxWidth()
                     ) {
                         // instead of hard coded values, use calculated amounts from viewmodel
-                        housematesOweYou.forEach { (housemate, amount) ->
-                            BalancesInfoRow(name = housemate, amount = "$${amount}", youOwe = false, navController)
-                        }
-                        youOweHousemates.forEach { (housemate, amount) ->
-                            BalancesInfoRow(name = housemate, amount = "$${amount}", youOwe = true, navController)
+                        netAmountOwed.forEach { (housemate, amount) ->
+                            var youOwe = false
+                            if (amount < BigDecimal.ZERO) {
+                                youOwe = true
+                            }
+                            BalancesInfoRow(name = housemate, amount = "$${amount.abs()}", youOwe = youOwe, navController)
                         }
                     }
                 }

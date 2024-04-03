@@ -12,7 +12,6 @@ import org.housemate.domain.model.Expense
 import org.housemate.domain.repositories.ExpenseRepository
 import java.math.BigDecimal
 import javax.inject.Inject
-import kotlin.math.absoluteValue
 
 @HiltViewModel
 class ExpenseViewModel @Inject constructor(
@@ -44,13 +43,9 @@ class ExpenseViewModel @Inject constructor(
     private val _totalAmountYouOwe = MutableStateFlow(BigDecimal.ZERO)
     val totalAmountYouOwe: StateFlow<BigDecimal> = _totalAmountYouOwe
 
-    // Total amounts each housemate owes you
-    private val _housematesOweYou = MutableStateFlow<Map<String, BigDecimal>>(emptyMap())
-    val housematesOweYou: StateFlow<Map<String, BigDecimal>> = _housematesOweYou
-
     // Total amounts you owe to each housemate
-    private val _youOweHousemates = MutableStateFlow<Map<String, BigDecimal>>(emptyMap())
-    val youOweHousemates: StateFlow<Map<String, BigDecimal>> = _youOweHousemates
+    private val _netAmountOwed = MutableStateFlow<Map<String, BigDecimal>>(emptyMap())
+    val netAmountOwed: StateFlow<Map<String, BigDecimal>> = _netAmountOwed
 
     init {
         // Fetch expenses from the repository when the ViewModel is initialized
@@ -79,8 +74,7 @@ class ExpenseViewModel @Inject constructor(
     private fun calculateTotalAmounts() {
         var totalOwedToYou = BigDecimal.ZERO
         var totalYouOwe = BigDecimal.ZERO
-        val housematesOweYou = mutableMapOf<String, BigDecimal>()
-        val youOweHousemates = mutableMapOf<String, BigDecimal>()
+        val netAmountOwed = mutableMapOf<String, BigDecimal>()
 
         _expenseItems.value.forEach { expense ->
             // Convert all values in owingAmounts to BigDecimal
@@ -92,16 +86,19 @@ class ExpenseViewModel @Inject constructor(
             val othersOweAmount = owingAmountsBigDecimal.values.sumOf { it } - youOweAmount
 
             // Update total amounts owed to you and total amounts you owe
-            totalOwedToYou += othersOweAmount
-            totalYouOwe += youOweAmount
 
-            // Update amounts each housemate owes you and you owe to each housemate
-            owingAmountsBigDecimal.forEach { (housemate, amount) ->
-                if (housemate != "You" && housemate != payer) {
-                    if (amount > BigDecimal.ZERO) {
-                        housematesOweYou[housemate] = (housematesOweYou[housemate] ?: BigDecimal.ZERO) + amount
-                    } else {
-                        youOweHousemates[housemate] = (youOweHousemates[housemate] ?: BigDecimal.ZERO) + amount.abs()
+            if (payer == "You") {
+                totalOwedToYou += othersOweAmount
+            } else {
+                totalYouOwe += youOweAmount
+            }
+
+            if (payer != "You") {
+                netAmountOwed[payer] = (netAmountOwed[payer] ?: BigDecimal.ZERO) + youOweAmount
+            } else {
+                owingAmountsBigDecimal.forEach { (housemate, amount) ->
+                    if (housemate != "You") {
+                        netAmountOwed[housemate] = (netAmountOwed[housemate] ?: BigDecimal.ZERO) + amount.negate()
                     }
                 }
             }
@@ -110,8 +107,7 @@ class ExpenseViewModel @Inject constructor(
         // Update StateFlow values with the calculated totals
         _totalAmountOwedToYou.value = totalOwedToYou
         _totalAmountYouOwe.value = totalYouOwe
-        _housematesOweYou.value = housematesOweYou
-        _youOweHousemates.value = youOweHousemates
+        _netAmountOwed.value = netAmountOwed
     }
 
     // Function to add an expense with the selected payer's name
