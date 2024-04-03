@@ -478,8 +478,8 @@ fun ExpensePopupDialog(
 
     Box(
         modifier = Modifier
-            .width(250.dp)
-            .padding(horizontal = 16.dp)
+            .width(260.dp)
+            .padding(horizontal = 20.dp)
     ) {
         AlertDialog(
             onDismissRequest = {
@@ -517,7 +517,7 @@ fun ExpensePopupDialog(
                         Text(text = "Delete Expense")
                     }
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             },
             text = {
                 Column(
