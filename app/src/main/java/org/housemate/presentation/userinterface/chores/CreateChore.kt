@@ -217,8 +217,7 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
                     choreChoice.isNotEmpty() &&
                             categoryChoice.isNotEmpty() &&
                             assigneeChoice.isNotEmpty() &&
-                            selectedDate.value != null &&
-                            repetitionChoice != "None"
+                            selectedDate.value != null
                 if (allFieldsSelected) {
                     val dueDate = selectedDate.value ?: return@Button // Ensure due date is not null
 
