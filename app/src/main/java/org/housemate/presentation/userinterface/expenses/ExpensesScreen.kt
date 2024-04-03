@@ -75,6 +75,13 @@ fun ExpensesScreen(
     val payments by expenseViewModel.paymentItems.collectAsState()
     val expenseAndPaymentItems by expenseViewModel.expenseAndPaymentItems.collectAsState()
 
+    val dialogDismissed by expenseViewModel.dialogDismissed.collectAsState()
+
+    // Observe dialogDismissed and trigger recomposition
+    if (dialogDismissed) {
+        expenseViewModel.resetDialogDismissed()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -257,7 +264,11 @@ fun ExpensesScreen(
                                                         expense = item,
                                                         onEditExpense = { navController.navigate(AppScreenRoutes.AddExpenseScreen.route) },
                                                         onDeleteExpense = { expenseViewModel.deleteExpenseById(item.id) },
-                                                        onDismiss = { showDialog.value = false } // Dismiss the dialog when needed
+
+                                                        onDismiss = {
+                                                            showDialog.value = false
+                                                            expenseViewModel.dismissDialog()
+                                                        } // Dismiss the dialog when needed
                                                     )
                                                 }
                                                 Row(
@@ -458,7 +469,6 @@ fun ExpensePopupDialog(
     onDeleteExpense: () -> Unit,
     onDismiss: () -> Unit
 )  {
-
     val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     val formattedDate = dateFormatter.format(expense.timestamp.toDate())
 
@@ -477,7 +487,10 @@ fun ExpensePopupDialog(
                 TextButton(onClick = { onEditExpense() }) {
                     Text(text = "Edit")
                 }
-                TextButton(onClick = { onDeleteExpense() }) {
+                TextButton(
+                    onClick = {
+                        onDeleteExpense()
+                    }) {
                     Text(text = "Delete")
                 }
             }

@@ -56,6 +56,7 @@ class ExpenseRepositoryImpl(
             } else {
                 throw IllegalStateException("User is not authenticated.")
             }
+            Log.d(TAG, "Expenses retrieved successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Error getting expenses", e)
             // You can handle the exception here, e.g., return an empty list or throw it to be handled by the caller

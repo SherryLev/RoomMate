@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,11 +32,9 @@ class ExpenseViewModel @Inject constructor(
     private val _owingAmounts = MutableStateFlow<Map<String, BigDecimal>>(emptyMap())
     val owingAmounts = _owingAmounts.asStateFlow()
 
-    // Define a StateFlow or LiveData object to hold the list of expenses
     private val _expenseItems = MutableStateFlow<List<Expense>>(emptyList())
     val expenseItems: StateFlow<List<Expense>> = _expenseItems
 
-    // Define a StateFlow or LiveData object to hold the loading state
     private val _isExpenseHistoryLoading = MutableStateFlow(false)
     val isExpenseHistoryLoading: StateFlow<Boolean> = _isExpenseHistoryLoading
 
@@ -49,26 +48,39 @@ class ExpenseViewModel @Inject constructor(
     private val _netAmountOwed = MutableStateFlow<Map<String, BigDecimal>>(emptyMap())
     val netAmountOwed: StateFlow<Map<String, BigDecimal>> = _netAmountOwed
 
+    private val _expenseAndPaymentItems = MutableStateFlow<List<ExpenseOrPayment>>(emptyList())
+    val expenseAndPaymentItems: StateFlow<List<ExpenseOrPayment>> = _expenseAndPaymentItems
+
     init {
         // Fetch expenses from the repository when the ViewModel is initialized
         fetchExpenses()
         fetchPayments()
     }
 
+    private val _dialogDismissed = MutableStateFlow(false)
+    val dialogDismissed: StateFlow<Boolean> = _dialogDismissed
+    fun dismissDialog() {
+        // Update a state variable to trigger recomposition
+        _dialogDismissed.value = true
+    }
+
+    fun resetDialogDismissed() {
+        _dialogDismissed.value = false
+    }
+
     private fun fetchExpenses() {
         viewModelScope.launch {
             try {
-                // Call the getExpenses function from the repository to fetch expenses
                 _isExpenseHistoryLoading.value = true
                 val fetchedExpenses = expenseRepository.getExpenses()
-                // Update the _expenses StateFlow object with the fetched expenses
                 _expenseItems.value = fetchedExpenses
+                println("Fetched expenses: $fetchedExpenses") // Print statement added
 
-                // Convert fetched expenses to ExpenseOrPayment items
                 val expenseOrPayments = fetchedExpenses.map { it }
-                // Update combined list of expenses and payments
+
                 updateExpenseAndPaymentItems(expenseOrPayments)
                 calculateTotalAmounts()
+                println("Fetched successfully")
 
             } catch (e: Exception) {
                 // Handle the exception
@@ -83,8 +95,9 @@ class ExpenseViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 expenseRepository.deleteExpenseById(expenseId)
-                // After deleting the expense, you might want to refresh the list of expenses
+                clearExpenseAndPaymentItems()
                 fetchExpenses()
+                fetchPayments()
                 println("Expense deleted successfully")
             } catch (e: Exception) {
                 println("Failed to delete expense: ${e.message}")
@@ -139,7 +152,6 @@ class ExpenseViewModel @Inject constructor(
         _netAmountOwed.value = netAmountOwed
     }
 
-    // Function to add an expense with the selected payer's name
     fun addExpense(id: String, payer: String, description: String, expenseAmount: BigDecimal, owingAmounts: Map<String, BigDecimal>) {
         // Convert BigDecimal values to Double, since firestore doesn't accept bigdecimal
         val expenseAmountDouble = expenseAmount.toDouble()
@@ -162,8 +174,6 @@ class ExpenseViewModel @Inject constructor(
         }
     }
 
-
-    // Define a StateFlow or LiveData object to hold the list of payments
     private val _paymentItems = MutableStateFlow<List<Payment>>(emptyList())
     val paymentItems: StateFlow<List<Payment>> = _paymentItems
 
@@ -210,19 +220,17 @@ class ExpenseViewModel @Inject constructor(
         }
     }
 
-    // Define StateFlow objects to hold the combined list of expenses and payments
-    private val _expenseAndPaymentItems = MutableStateFlow<List<ExpenseOrPayment>>(emptyList())
-    val expenseAndPaymentItems: StateFlow<List<ExpenseOrPayment>> = _expenseAndPaymentItems
+    private fun clearExpenseAndPaymentItems() {
+        _expenseAndPaymentItems.value = emptyList()
+    }
 
     // Combine and sort expenses and payments by timestamp, then update StateFlow
     private fun updateExpenseAndPaymentItems(newItems: List<ExpenseOrPayment>) {
         val currentItems = _expenseAndPaymentItems.value.toMutableList()
-
         // Filter out any new items that are already present in the current list
         val filteredNewItems = newItems.filter { newItem ->
             currentItems.none { it == newItem }
         }
-
         // Combine the current list with the filtered new items and sort by timestamp
         val combinedList = (currentItems + filteredNewItems).sortedByDescending { it.timestamp }
 
