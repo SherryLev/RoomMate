@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 
 
 
+
 data class Task(val name: String)
 
 
@@ -72,6 +73,7 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
             .fillMaxSize()
             .padding(0.dp, 15.dp, 0.dp, 0.dp)
     ) {
+
         Column(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -95,7 +97,7 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
             Text(
                 "Start a new household and invite your housemates!",
                 modifier = Modifier
-                    .padding(top = 10.dp)
+                    //.padding(top = 10.dp)
                     .align(Alignment.CenterHorizontally),
                 fontSize = 14.sp
             )
@@ -115,6 +117,8 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
                                 )
                                 userDocRef.update("groupCode", uniqueGroupCode).addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
+                                        // This will be changed through another issue
+                                        //navController.navigate("success/$uniqueGroupCode")
                                         showSuccessMessage = true
                                     } else {
                                         showErrorMessage = "Failed to update user with group code. Please try again"
@@ -171,7 +175,7 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 65.dp)
+                //.padding(bottom = 10.dp)
         ) {
             Text(
                 "Join an Existing Household",
@@ -253,6 +257,8 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
         }
     }
 }
+
+
 
 
 
