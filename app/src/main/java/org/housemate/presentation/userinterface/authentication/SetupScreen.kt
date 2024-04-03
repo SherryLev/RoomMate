@@ -26,14 +26,19 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.domain.repositories.GroupRepository
-import org.housemate.presentation.userinterface.chores.ChoreCreator
-import org.housemate.presentation.userinterface.chores.choresList
 import org.housemate.domain.model.Group
 import org.housemate.domain.repositories.UserRepository
-import org.housemate.data.firestore.UserRepositoryImpl
 import kotlinx.coroutines.launch
 import java.util.UUID
 import androidx.compose.runtime.LaunchedEffect
+import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.TextField
+import androidx.compose.runtime.*
+import androidx.compose.ui.text.input.KeyboardType
+
+
 
 
 data class Task(val name: String)
@@ -68,6 +73,7 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
             .fillMaxSize()
             .padding(0.dp, 15.dp, 0.dp, 0.dp)
     ) {
+
         Column(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -91,7 +97,7 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
             Text(
                 "Start a new household and invite your housemates!",
                 modifier = Modifier
-                    .padding(top = 10.dp)
+                    //.padding(top = 10.dp)
                     .align(Alignment.CenterHorizontally),
                 fontSize = 14.sp
             )
@@ -102,10 +108,23 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
                     coroutineScope.launch {
                         val uniqueGroupCode = UUID.randomUUID().toString().replace("-","").substring(0,4)
                         // group code will be of length 4
-                        val newGroup = Group(uniqueGroupCode, "groupName", userId, listOf())
+                        val newGroup = Group(uniqueGroupCode, "groupName", userId, listOf(userId))
                         try {
                             val success = groupRepository.createGroup(newGroup)
                             if (success) {
+                                val userDocRef = FirebaseFirestore.getInstance().collection("users").document(
+                                    userId.toString()
+                                )
+                                userDocRef.update("groupCode", uniqueGroupCode).addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        // This will be changed through another issue
+                                        //navController.navigate("success/$uniqueGroupCode")
+                                        showSuccessMessage = true
+                                    } else {
+                                        showErrorMessage = "Failed to update user with group code. Please try again"
+                                    }
+                                }
+
                                 showSuccessMessage = true
                                 groupCode = uniqueGroupCode
                                 showGroupCodeDialog = true
@@ -156,7 +175,7 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 65.dp)
+                //.padding(bottom = 10.dp)
         ) {
             Text(
                 "Join an Existing Household",
@@ -172,8 +191,51 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
                     .align(Alignment.CenterHorizontally),
                 fontSize = 14.sp
             )
+            // State to hold the group code entered by the user
+            var enteredGroupCode by remember { mutableStateOf("")}
+
+            TextField(
+                value = enteredGroupCode,
+                onValueChange = { enteredGroupCode = it },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 8.dp, bottom = 8.dp)
+                    .width(200.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+            )
+
             Button(
                 onClick = {
+                    coroutineScope.launch {
+                        try {
+                            // Get group code from Firestore using the enteredGroupCode
+                            val group = groupRepository.getGroupByCode(enteredGroupCode)
+
+                            if (group != null) {
+                                // Add current user to the group members
+                                //val updateResult = groupRepository.addMemberToGroup(enteredGroupCode, userId)
+                                val success = groupRepository.addMemberToGroup(enteredGroupCode, userId!!)
+                                if (success) {
+                                    val userDocRef = FirebaseFirestore.getInstance().collection("users").document(userId!!)
+                                    userDocRef.update("groupCode", enteredGroupCode).addOnSuccessListener {
+                                        showSuccessMessage = true
+                                        // NAVIGATE TO NEXT SCREEN
+                                    }.addOnFailureListener{
+                                        showErrorMessage = "Failed to update user with group code. Please try again"
+                                    }
+                                } else {
+                                    showErrorMessage =
+                                        "Failed to join the group. Please check the code and try again."
+                                }
+                            } else {
+                                showErrorMessage =
+                                    "No group found with that code. Please check the code and try again"
+                            }
+
+                        } catch (e: Exception) {
+                            showErrorMessage = "An error occurred: ${e.message}"
+                        }
+                    }
                 },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -195,6 +257,8 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
         }
     }
 }
+
+
 
 
 
