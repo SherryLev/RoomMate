@@ -26,14 +26,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.domain.repositories.GroupRepository
-import org.housemate.presentation.userinterface.chores.ChoreCreator
-import org.housemate.presentation.userinterface.chores.choresList
 import org.housemate.domain.model.Group
 import org.housemate.domain.repositories.UserRepository
-import org.housemate.data.firestore.UserRepositoryImpl
 import kotlinx.coroutines.launch
 import java.util.UUID
 import androidx.compose.runtime.LaunchedEffect
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 data class Task(val name: String)
@@ -102,10 +100,21 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
                     coroutineScope.launch {
                         val uniqueGroupCode = UUID.randomUUID().toString().replace("-","").substring(0,4)
                         // group code will be of length 4
-                        val newGroup = Group(uniqueGroupCode, "groupName", userId, listOf())
+                        val newGroup = Group(uniqueGroupCode, "groupName", userId, listOf(userId))
                         try {
                             val success = groupRepository.createGroup(newGroup)
                             if (success) {
+                                val userDocRef = FirebaseFirestore.getInstance().collection("users").document(
+                                    userId.toString()
+                                )
+                                userDocRef.update("groupCode", uniqueGroupCode).addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        showSuccessMessage = true
+                                    } else {
+                                        showErrorMessage = "Failed to update user with group code. Please try again"
+                                    }
+                                }
+
                                 showSuccessMessage = true
                                 groupCode = uniqueGroupCode
                                 showGroupCodeDialog = true
