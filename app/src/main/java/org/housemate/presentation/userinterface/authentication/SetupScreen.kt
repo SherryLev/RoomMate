@@ -32,6 +32,12 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import androidx.compose.runtime.LaunchedEffect
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.TextField
+import androidx.compose.runtime.*
+import androidx.compose.ui.text.input.KeyboardType
+
 
 
 data class Task(val name: String)
@@ -181,8 +187,51 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
                     .align(Alignment.CenterHorizontally),
                 fontSize = 14.sp
             )
+            // State to hold the group code entered by the user
+            var enteredGroupCode by remember { mutableStateOf("")}
+
+            TextField(
+                value = enteredGroupCode,
+                onValueChange = { enteredGroupCode = it },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 8.dp, bottom = 8.dp)
+                    .width(200.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+            )
+
             Button(
                 onClick = {
+                    coroutineScope.launch {
+                        try {
+                            // Get group code from Firestore using the enteredGroupCode
+                            val group = groupRepository.getGroupByCode(enteredGroupCode)
+
+                            if (group != null) {
+                                // Add current user to the group members
+                                //val updateResult = groupRepository.addMemberToGroup(enteredGroupCode, userId)
+                                val success = groupRepository.addMemberToGroup(enteredGroupCode, userId!!)
+                                if (success) {
+                                    val userDocRef = FirebaseFirestore.getInstance().collection("users").document(userId!!)
+                                    userDocRef.update("groupCode", enteredGroupCode).addOnSuccessListener {
+                                        showSuccessMessage = true
+                                        // NAVIGATE TO NEXT SCREEN
+                                    }.addOnFailureListener{
+                                        showErrorMessage = "Failed to update user with group code. Please try again"
+                                    }
+                                } else {
+                                    showErrorMessage =
+                                        "Failed to join the group. Please check the code and try again."
+                                }
+                            } else {
+                                showErrorMessage =
+                                    "No group found with that code. Please check the code and try again"
+                            }
+
+                        } catch (e: Exception) {
+                            showErrorMessage = "An error occurred: ${e.message}"
+                        }
+                    }
                 },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
