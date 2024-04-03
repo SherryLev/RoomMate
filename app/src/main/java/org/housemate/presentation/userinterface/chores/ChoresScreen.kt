@@ -42,10 +42,15 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -65,32 +70,42 @@ import java.time.LocalDate
 
 var choresList = mutableListOf<Chore>()
 
+//CITE: https://medium.com/@imitiyaz125/star-rating-bar-in-jetpack-compose-5ae54a2b5b23
+@Composable
+fun StarRatingBar(
+    maxStars: Int = 5,
+    rating: Float,
+    onRatingChanged: (Float) -> Unit
+) {
+    val density = LocalDensity.current.density
+    val starSize = (12f * density).dp
+    val starSpacing = (0.5f * density).dp
 
-@Composable /// CITE this https://stackoverflow.com/questions/73948960/jetpack-compose-how-to-create-a-rating-bar
-private fun RatingBarComposable() {
-    var rating by remember { mutableStateOf(0) }
-    val outlinedStar = painterResource(id = R.drawable.outlined_star)
-    val filledStar = painterResource(id = R.drawable.filled_star)
-    Row (
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+    Row(
+        modifier = Modifier.selectableGroup(),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        repeat(5) { index ->
-            Icon (
-                //imageVector = if (index < rating) Icons.Filled.Star else Icons.Outlined.Star,
-                painter = if (index < rating) filledStar else outlinedStar,
+        for (i in 1..maxStars) {
+            val isSelected = i <= rating
+            val icon = if (isSelected) Icons.Filled.Star else Icons.Outlined.Star
+            val iconTintColor = if (isSelected) Color(0xFFFFC700) else Color.LightGray
+            Icon(
+                imageVector = icon,
                 contentDescription = null,
-                tint = starColor,
+                tint = iconTintColor,
                 modifier = Modifier
-                    .size(30.dp)
-                    .clickable {
-                        rating = index + 1
-                    }
-                    .padding(4.dp)
+                    .selectable(
+                        selected = isSelected,
+                        onClick = {
+                            onRatingChanged(i.toFloat())
+                        }
+                    )
+                    .width(starSize).height(starSize)
             )
+
+            if (i < maxStars) {
+                Spacer(modifier = Modifier.width(starSpacing))
+            }
         }
     }
 }
@@ -172,21 +187,23 @@ fun getCurrentWeekTasks(chores: List<Chore>): List<Chore> {
     val endOfWeek = startOfWeek.plusDays(6)
 
     return chores.filter { chore -> chore.dueDate in startOfWeek..endOfWeek }
-   // return chores.filter { it.dueDate?.let {date -> date in startOfWeek ..endOfWeek} ?: false }
 }
 
 
 @Composable
 fun TaskWeekItem(chore: Chore) {
-    Card(
-       // backgroundColor = Color(lightPurple),
+    var rating by remember { mutableStateOf(1f) }
+    Log.d("Rating", "Rating is: " + rating)
+    Surface(
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .width(300.dp)
-            .height(50.dp)
+            .height(80.dp),
+        elevation = 5.dp
     ) {
         Column(
-            //horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(start = 8.dp, end = 16.dp)
+
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp)
         ) {
             Icon(
                 painter = painterResource(R.drawable.person),
@@ -201,14 +218,15 @@ fun TaskWeekItem(chore: Chore) {
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(start = 30.dp, top = 16.dp)
         ) {
             Text(
                 text = chore.choreName,
                 style = TextStyle(fontSize = 18.sp),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(start = 24.dp)
+                modifier = Modifier.padding(start = 18.dp)
             )
-            RatingBarComposable()
+            StarRatingBar(maxStars = 5, rating = rating, onRatingChanged = { rating = it })
         }
     }
     Spacer(modifier = Modifier.height(8.dp))
@@ -361,12 +379,6 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                     } else{
                         val dayOfWeek: DayOfWeek? = stringToDayOfWeek(selectedDay)
                         Column(modifier = Modifier.weight(1f)) { // Set weight to 1
-                            Text(
-                                text = selectedDay,
-                                color = Color.Black,
-                                fontSize = MaterialTheme.typography.h5.fontSize,
-                                fontWeight = FontWeight.Bold
-                            )
                             Spacer(modifier = Modifier.height(16.dp))
 
                             //Log.d("day conversion ", "Day: "+ dayOfWeek)
