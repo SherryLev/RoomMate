@@ -83,7 +83,7 @@ fun AddExpenseScreen(
 
     var selectedSplit by remember { mutableStateOf("Equally") }
 
-    val housemates = listOf("You", "Sally", "Bob", "Mikeegfdsfdsfds")
+    val housemates = listOf("You", "Sally", "Bob", "Mike")
     val split_options = listOf("Equally", "By exact amount")
 
     var expenseAmountState by remember {
