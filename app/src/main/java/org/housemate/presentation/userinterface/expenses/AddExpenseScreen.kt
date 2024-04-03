@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
@@ -65,13 +63,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.presentation.viewmodel.ExpenseViewModel
-import org.housemate.presentation.viewmodel.LoginViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_gray
 import org.housemate.theme.light_purple
 import org.housemate.theme.md_theme_dark_error
 import org.housemate.theme.md_theme_light_primary
-import org.housemate.utils.AppScreenRoutes
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -86,9 +82,7 @@ fun AddExpenseScreen(
     val owingAmounts by expenseViewModel.owingAmounts.collectAsState()
 
     var selectedSplit by remember { mutableStateOf("Equally") }
-    var selectedCurrency by remember { mutableStateOf("CAD") }
 
-    val currencies = listOf("CAD", "USD", "EUR", "GBP")
     val housemates = listOf("You", "Sally", "Bob", "Mike")
     val split_options = listOf("Equally", "By exact amount")
 
@@ -194,15 +188,7 @@ fun AddExpenseScreen(
                 ) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Text("Paid", fontWeight = FontWeight.Bold, color = Color.Gray)
-                    Spacer(modifier = Modifier.width(22.dp))
-                    CustomDropdown(
-                        items = currencies,
-                        selectedItem = selectedCurrency,
-                        onItemSelected = { selectedCurrency = it },
-                        modifier = Modifier,
-                        dropdownWidth = 78.dp
-                    )
-                    Spacer(modifier = Modifier.width(22.dp))
+                    Spacer(modifier = Modifier.width(26.dp))
                     TextField(
                         value = expenseAmountState,
                         onValueChange = {
@@ -431,8 +417,9 @@ fun AddExpenseScreen(
                         if (expenseDescription.isEmpty() || expenseAmount == BigDecimal.ZERO) {
                             // Show the error dialog
                             showEmptyFieldsErrorDialog.value = true
-                        } else if (remainingAmountState.value != BigDecimal.ZERO.setScale(2)) {
-                                showIncorrectAmountErrorDialog.value = true
+                        } else if (selectedSplit == "By exact amount" && remainingAmountState.value != BigDecimal.ZERO.setScale(2)) {
+                            println("remaining: ${remainingAmountState.value}")
+                            showIncorrectAmountErrorDialog.value = true
                         } else {
 
                             // also need:
@@ -443,7 +430,6 @@ fun AddExpenseScreen(
                             // this can all be calculated using the expense history, in the viewmodel
 
                             // for each expense
-                            // settledup = false
                             // date of expense
 
                             // when you click settle up, you should be able to
@@ -553,6 +539,25 @@ fun EquallySplitUI(
                                 owingAmounts[name] = amountPerPerson.value
                             }
                         }
+
+                        var totalOwingAmounts = BigDecimal.ZERO
+                        for (value in owingAmounts.values) {
+                            totalOwingAmounts = totalOwingAmounts.add(value)
+                        }
+
+                        val totalAmount = expenseAmountState.text.toBigDecimalOrNull() ?: BigDecimal.ZERO
+                        if (totalOwingAmounts > totalAmount) {
+                            // If total owing amounts exceed the total amount, subtract the difference from the last person
+                            val difference = totalOwingAmounts - totalAmount
+                            val lastPerson = owingAmounts.keys.last()
+                            owingAmounts[lastPerson] = owingAmounts[lastPerson]!! - difference
+                        } else if (totalOwingAmounts < totalAmount) {
+                            // If total owing amounts are less than the total amount, add the difference to the last person
+                            val difference = totalAmount - totalOwingAmounts
+                            val lastPerson = owingAmounts.keys.last()
+                            owingAmounts[lastPerson] = owingAmounts[lastPerson]!! + difference
+                        }
+
                         onAmountChanged(owingAmounts)
                     },
                     modifier = Modifier.padding(end = 8.dp),

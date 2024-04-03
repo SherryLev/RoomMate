@@ -1,19 +1,16 @@
 package org.housemate.presentation.viewmodel
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FieldValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.housemate.domain.model.Expense
+import org.housemate.domain.model.ExpenseOrPayment
+import org.housemate.domain.model.Payment
 import org.housemate.domain.repositories.ExpenseRepository
 import java.math.BigDecimal
 import javax.inject.Inject
@@ -42,10 +39,22 @@ class ExpenseViewModel @Inject constructor(
     private val _isExpenseHistoryLoading = MutableStateFlow(false)
     val isExpenseHistoryLoading: StateFlow<Boolean> = _isExpenseHistoryLoading
 
+    private val _totalAmountOwedToYou = MutableStateFlow(BigDecimal.ZERO)
+    val totalAmountOwedToYou: StateFlow<BigDecimal> = _totalAmountOwedToYou
+
+    private val _totalAmountYouOwe = MutableStateFlow(BigDecimal.ZERO)
+    val totalAmountYouOwe: StateFlow<BigDecimal> = _totalAmountYouOwe
+
+    // Total amounts you owe to each housemate
+    private val _netAmountOwed = MutableStateFlow<Map<String, BigDecimal>>(emptyMap())
+    val netAmountOwed: StateFlow<Map<String, BigDecimal>> = _netAmountOwed
+
     init {
         // Fetch expenses from the repository when the ViewModel is initialized
         fetchExpenses()
+        fetchPayments()
     }
+
     private fun fetchExpenses() {
         viewModelScope.launch {
             try {
@@ -54,6 +63,13 @@ class ExpenseViewModel @Inject constructor(
                 val fetchedExpenses = expenseRepository.getExpenses()
                 // Update the _expenses StateFlow object with the fetched expenses
                 _expenseItems.value = fetchedExpenses
+
+                // Convert fetched expenses to ExpenseOrPayment items
+                val expenseOrPayments = fetchedExpenses.map { it }
+                // Update combined list of expenses and payments
+                updateExpenseAndPaymentItems(expenseOrPayments)
+                calculateTotalAmounts()
+
             } catch (e: Exception) {
                 // Handle the exception
                 println("Failed to fetch expenses: ${e.message}")
@@ -61,6 +77,53 @@ class ExpenseViewModel @Inject constructor(
                 _isExpenseHistoryLoading.value = false
             }
         }
+    }
+
+    private fun calculateTotalAmounts() {
+        val totalOwedToYou: BigDecimal?
+        val totalYouOwe: BigDecimal?
+        val netAmountOwed = mutableMapOf<String, BigDecimal>()
+
+        _expenseItems.value.forEach { expense ->
+            // Convert all values in owingAmounts to BigDecimal
+            val payer = expense.payer
+            val owingAmountsBigDecimal = expense.owingAmounts.mapValues { (_, value) -> BigDecimal.valueOf(value) }
+
+            val youOweAmount = owingAmountsBigDecimal["You"] ?: BigDecimal.ZERO
+            // if you didn't pay, then you subtract from the netamountowed
+            if (payer != "You") {
+                netAmountOwed[payer] = (netAmountOwed[payer] ?: BigDecimal.ZERO) + youOweAmount.negate()
+            } else {
+                // if you paid, then you add to the netamountowed
+                owingAmountsBigDecimal.forEach { (housemate, amount) ->
+                    if (housemate != "You") {
+                        netAmountOwed[housemate] = (netAmountOwed[housemate] ?: BigDecimal.ZERO) + amount
+                    }
+                }
+            }
+        }
+
+        // Calculate amounts from payments
+        _paymentItems.value.forEach { payment ->
+            val payer = payment.payerName
+            val amountPaid = BigDecimal.valueOf(payment.amount)
+
+            // If the payer is "You", you received the payment, else you made the payment
+            if (payer == "You") {
+                netAmountOwed[payment.payeeName] = (netAmountOwed[payment.payeeName] ?: BigDecimal.ZERO) + amountPaid
+            } else {
+                netAmountOwed[payer] = (netAmountOwed[payer] ?: BigDecimal.ZERO) - amountPaid
+            }
+        }
+
+        // Calculate total amounts owed to you and by you using netAmountOwed
+        totalOwedToYou = netAmountOwed.filterValues { it > BigDecimal.ZERO }.values.sumOf { it }
+        totalYouOwe = netAmountOwed.filterValues { it < BigDecimal.ZERO }.values.sumOf { it.abs() }
+
+        // Update StateFlow values with the calculated totals
+        _totalAmountOwedToYou.value = totalOwedToYou
+        _totalAmountYouOwe.value = totalYouOwe
+        _netAmountOwed.value = netAmountOwed
     }
 
     // Function to add an expense with the selected payer's name
@@ -86,7 +149,92 @@ class ExpenseViewModel @Inject constructor(
         }
     }
 
-        // Functions to update the state
+
+    // Define a StateFlow or LiveData object to hold the list of payments
+    private val _paymentItems = MutableStateFlow<List<Payment>>(emptyList())
+    val paymentItems: StateFlow<List<Payment>> = _paymentItems
+
+    private val _paymentAmount = MutableStateFlow(BigDecimal.ZERO)
+    val paymentAmount = _paymentAmount.asStateFlow()
+
+    // Fetch payments from the repository
+    private fun fetchPayments() {
+        viewModelScope.launch {
+            try {
+                // Call the getPayments function from the repository to fetch payments
+                val fetchedPayments = expenseRepository.getPayments()
+                // Update the _paymentItems StateFlow object with the fetched payments
+                _paymentItems.value = fetchedPayments
+
+                // Convert fetched payments to ExpenseOrPayment items
+                val expenseOrPayments = fetchedPayments.map { it }
+                // Update combined list of expenses and payments
+                updateExpenseAndPaymentItems(expenseOrPayments)
+                calculateTotalAmounts()
+
+            } catch (e: Exception) {
+                // Handle the exception
+                println("Failed to fetch payments: ${e.message}")
+            }
+        }
+    }
+
+    // Function to add a payment
+    fun addPayment(payerId: String, payerName: String, payeeId: String, payeeName: String, amount: BigDecimal) {
+        viewModelScope.launch {
+            try {
+                val paymentAmountDouble = amount.toDouble()
+                // Create the Payment object
+                val payment = Payment(payerName, payerId, payeeName, payeeId, paymentAmountDouble, Timestamp.now())
+                // Call the addPayment function from the repository to add the payment to Firestore
+                expenseRepository.addPayment(payment)
+                // After adding the payment, fetch the updated list of payments
+                fetchPayments()
+                println("Payment added successfully")
+            } catch (e: Exception) {
+                println("Failed to add payment: ${e.message}")
+            }
+        }
+    }
+
+    // Define StateFlow objects to hold the combined list of expenses and payments
+    private val _expenseAndPaymentItems = MutableStateFlow<List<ExpenseOrPayment>>(emptyList())
+    val expenseAndPaymentItems: StateFlow<List<ExpenseOrPayment>> = _expenseAndPaymentItems
+
+    // Combine and sort expenses and payments by timestamp, then update StateFlow
+    private fun updateExpenseAndPaymentItems(newItems: List<ExpenseOrPayment>) {
+        val currentItems = _expenseAndPaymentItems.value.toMutableList()
+
+        // Filter out any new items that are already present in the current list
+        val filteredNewItems = newItems.filter { newItem ->
+            currentItems.none { it == newItem }
+        }
+
+        // Combine the current list with the filtered new items and sort by timestamp
+        val combinedList = (currentItems + filteredNewItems).sortedByDescending { it.timestamp }
+
+        _expenseAndPaymentItems.value = combinedList
+    }
+
+
+    private val _selectedHousemate = MutableStateFlow("")
+    val selectedHousemate: StateFlow<String> = _selectedHousemate
+
+    private val _selectedOwingAmount = MutableStateFlow("")
+    val selectedOwingAmount: StateFlow<String> = _selectedOwingAmount
+
+    private val _selectedOweStatus = MutableStateFlow(false)
+    val selectedOweStatus: StateFlow<Boolean> = _selectedOweStatus
+
+    fun onSettleUpClicked(name: String, amount: String, youOwe: Boolean) {
+        _selectedHousemate.value = name
+        _selectedOwingAmount.value = amount
+        _selectedOweStatus.value = youOwe
+        setPaymentAmount(amount.toBigDecimalOrNull() ?: BigDecimal.ZERO)
+    }
+
+
+    // Functions to update the state
     fun setSelectedPayer(payer: String) {
         _selectedPayer.value = payer
     }
@@ -101,5 +249,8 @@ class ExpenseViewModel @Inject constructor(
 
     fun setOwingAmounts(owingAmounts: Map<String, BigDecimal>) {
         _owingAmounts.value = owingAmounts
+    }
+    fun setPaymentAmount(amount: BigDecimal) {
+        _paymentAmount.value = amount
     }
 }
