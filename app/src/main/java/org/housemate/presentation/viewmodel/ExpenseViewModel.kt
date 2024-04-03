@@ -68,9 +68,8 @@ class ExpenseViewModel @Inject constructor(
                 val expenseOrPayments = fetchedExpenses.map { it }
                 // Update combined list of expenses and payments
                 updateExpenseAndPaymentItems(expenseOrPayments)
-
-
                 calculateTotalAmounts()
+
             } catch (e: Exception) {
                 // Handle the exception
                 println("Failed to fetch expenses: ${e.message}")
@@ -81,8 +80,8 @@ class ExpenseViewModel @Inject constructor(
     }
 
     private fun calculateTotalAmounts() {
-        var totalOwedToYou = BigDecimal.ZERO
-        var totalYouOwe = BigDecimal.ZERO
+        val totalOwedToYou: BigDecimal?
+        val totalYouOwe: BigDecimal?
         val netAmountOwed = mutableMapOf<String, BigDecimal>()
 
         _expenseItems.value.forEach { expense ->
@@ -101,6 +100,19 @@ class ExpenseViewModel @Inject constructor(
                         netAmountOwed[housemate] = (netAmountOwed[housemate] ?: BigDecimal.ZERO) + amount
                     }
                 }
+            }
+        }
+
+        // Calculate amounts from payments
+        _paymentItems.value.forEach { payment ->
+            val payer = payment.payerName
+            val amountPaid = BigDecimal.valueOf(payment.amount)
+
+            // If the payer is "You", you received the payment, else you made the payment
+            if (payer == "You") {
+                netAmountOwed[payment.payeeName] = (netAmountOwed[payment.payeeName] ?: BigDecimal.ZERO) + amountPaid
+            } else {
+                netAmountOwed[payer] = (netAmountOwed[payer] ?: BigDecimal.ZERO) - amountPaid
             }
         }
 
@@ -158,6 +170,7 @@ class ExpenseViewModel @Inject constructor(
                 val expenseOrPayments = fetchedPayments.map { it }
                 // Update combined list of expenses and payments
                 updateExpenseAndPaymentItems(expenseOrPayments)
+                calculateTotalAmounts()
 
             } catch (e: Exception) {
                 // Handle the exception
@@ -190,8 +203,16 @@ class ExpenseViewModel @Inject constructor(
 
     // Combine and sort expenses and payments by timestamp, then update StateFlow
     private fun updateExpenseAndPaymentItems(newItems: List<ExpenseOrPayment>) {
-        val currentItems = _expenseAndPaymentItems.value
-        val combinedList = (currentItems + newItems).sortedByDescending { it.timestamp }
+        val currentItems = _expenseAndPaymentItems.value.toMutableList()
+
+        // Filter out any new items that are already present in the current list
+        val filteredNewItems = newItems.filter { newItem ->
+            currentItems.none { it == newItem }
+        }
+
+        // Combine the current list with the filtered new items and sort by timestamp
+        val combinedList = (currentItems + filteredNewItems).sortedByDescending { it.timestamp }
+
         _expenseAndPaymentItems.value = combinedList
     }
 

@@ -34,6 +34,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
+import androidx.compose.material.icons.outlined.Paid
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,6 +67,7 @@ fun ExpensesScreen(
     val totalAmountYouOwe by expenseViewModel.totalAmountYouOwe.collectAsState()
     val netAmountOwed by expenseViewModel.netAmountOwed.collectAsState()
 
+    val payments by expenseViewModel.paymentItems.collectAsState()
     val expenseAndPaymentItems by expenseViewModel.expenseAndPaymentItems.collectAsState()
 
     Box(
@@ -196,7 +201,7 @@ fun ExpensesScreen(
                                 )
                             }
                         } else {
-                            if (expenses.isEmpty()) {
+                            if (expenses.isEmpty() && payments.isEmpty()) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -382,12 +387,12 @@ fun ExpensesScreen(
                                                         modifier = Modifier.weight(3f),
                                                         horizontalAlignment = Alignment.End
                                                     ) {
-                                                        Text(
-                                                            text = "payment",
-                                                            fontSize = 14.sp,
-                                                            textAlign = TextAlign.End,
-                                                            color = green,
-                                                            fontWeight = FontWeight.Bold
+                                                        Icon(
+                                                            imageVector = Icons.Outlined.Paid,
+                                                            contentDescription = "Cash",
+                                                            tint = green,
+                                                            modifier = Modifier
+                                                                .size(22.dp)
                                                         )
                                                     }
                                                 }
