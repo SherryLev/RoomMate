@@ -1,7 +1,5 @@
 package org.housemate.presentation.userinterface.expenses
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,8 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -27,13 +23,9 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -44,20 +36,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.material.Divider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_purple
-import org.housemate.theme.md_theme_dark_error
-import org.housemate.theme.md_theme_dark_primary
-import org.housemate.theme.md_theme_dark_secondary
 import org.housemate.theme.md_theme_light_error
 import org.housemate.theme.md_theme_light_primary
-import org.housemate.theme.purple_background
 import org.housemate.utils.AppScreenRoutes
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
@@ -121,7 +106,7 @@ fun ExpensesScreen(
                                     fontWeight = FontWeight.Bold, color = Color.DarkGray
                                 )
                                 // instead of hard coded values, use calculated amounts from viewmodel
-                                Text("$${totalAmountOwedToYou}", fontWeight = FontWeight.Bold, fontSize = 24.sp, color = green)
+                                Text("$${"%.2f".format(totalAmountOwedToYou)}", fontWeight = FontWeight.Bold, fontSize = 24.sp, color = green)
                             }
                             Column(
                                 modifier = Modifier
@@ -147,7 +132,7 @@ fun ExpensesScreen(
                                     textAlign = TextAlign.Center
                                 )
                                 // instead of hard coded values, use calculated amounts from viewmodel
-                                Text("$${totalAmountYouOwe}", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = md_theme_light_error)
+                                Text("$${"%.2f".format(totalAmountYouOwe)}", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = if (totalAmountYouOwe != BigDecimal.ZERO) md_theme_light_error else green)
                             }
                         }
                     }
@@ -167,10 +152,10 @@ fun ExpensesScreen(
                         // instead of hard coded values, use calculated amounts from viewmodel
                         netAmountOwed.forEach { (housemate, amount) ->
                             var youOwe = false
-                            if (amount < BigDecimal.ZERO) {
+                            if (amount.toDouble() < 0.00) {
                                 youOwe = true
                             }
-                            BalancesInfoRow(name = housemate, amount = "$${amount.abs()}", youOwe = youOwe, navController)
+                            BalancesInfoRow(name = housemate, amount = "$${"%.2f".format(amount.abs())}", youOwe = youOwe, navController, expenseViewModel)
                         }
                     }
                 }
@@ -366,10 +351,11 @@ fun ExpensesScreen(
     }
 }
 @Composable
-fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean, navController: NavController) {
+fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean, navController: NavController, expenseViewModel: ExpenseViewModel) {
     Box(
         modifier = Modifier.padding(horizontal = 40.dp, vertical = 10.dp)
     ) {
+        val amountValue = amount.removePrefix("$").toDoubleOrNull() ?: 0.00
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -378,17 +364,28 @@ fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean, navController
             Text(
                 text = name,
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                fontSize = 18.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.width(90.dp)
             )
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (youOwe) {
-                    Text(text = "you owe", color = md_theme_light_error, fontSize = 14.sp)
+                val textColour = if (youOwe) {
+                    md_theme_light_error
                 } else {
-                    Text(text = "owes you", color = green, fontSize = 14.sp)
+                    green
                 }
+
+                val text = if (youOwe || amountValue == 0.00) {
+                    "you owe"
+                } else {
+                    "owes you"
+                }
+                Text(text = text, color = textColour, fontSize = 14.sp)
+
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = amount,
@@ -397,14 +394,19 @@ fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean, navController
                     color = if (youOwe) md_theme_light_error else green
                 )
             }
+
             Button(
-                onClick = { navController.navigate(AppScreenRoutes.SettleUpScreen.route) },
+                onClick = {
+                    expenseViewModel.onSettleUpClicked(name, "%.2f".format(amountValue), youOwe)
+                    navController.navigate(AppScreenRoutes.SettleUpScreen.route)
+                          },
                 shape = RoundedCornerShape(25.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = light_purple,
                     contentColor = md_theme_light_primary
                     ),
-                elevation = ButtonDefaults.elevation(0.dp)
+                elevation = ButtonDefaults.elevation(0.dp),
+                enabled = (amountValue != 0.00)
             ) {
                 Text(text = "Settle up", fontWeight = FontWeight.Bold, fontSize = 14.sp)
             }

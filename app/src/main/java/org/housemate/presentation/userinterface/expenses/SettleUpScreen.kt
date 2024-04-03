@@ -1,6 +1,5 @@
 package org.housemate.presentation.userinterface.expenses
 
-import android.icu.math.BigDecimal
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,18 +11,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowRightAlt
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -43,22 +53,83 @@ import androidx.navigation.compose.rememberNavController
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.light_purple
 import org.housemate.theme.md_theme_light_primary
+import java.math.BigDecimal
 
 @Composable
 fun SettleUpScreen(
     navController: NavHostController = rememberNavController(),
     expenseViewModel: ExpenseViewModel = hiltViewModel()
 ) {
-    var expenseAmountState by remember {
-        mutableStateOf(TextFieldValue(text = ""))
+
+    val paymentAmount by expenseViewModel.paymentAmount.collectAsState()
+    val selectedHousemate by expenseViewModel.selectedHousemate.collectAsState()
+    val selectedOwingAmount by expenseViewModel.selectedOwingAmount.collectAsState()
+    val selectedOweStatus by expenseViewModel.selectedOweStatus.collectAsState()
+
+    val payerName = if (selectedOweStatus) "You" else selectedHousemate
+    val payeeName = if (selectedOweStatus) selectedHousemate else "You"
+
+    var paymentAmountState by remember {
+        mutableStateOf(TextFieldValue(text = selectedOwingAmount))
     }
+
+    val showEmptyFieldsErrorDialog = remember { mutableStateOf(false) }
+    if (showEmptyFieldsErrorDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                // Dismiss the dialog
+                showEmptyFieldsErrorDialog.value = false
+            },
+            title = { Text("Error") },
+            text = {
+                Text(
+                    "Please fill in an amount larger than 0.00",
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // Dismiss the dialog
+                        showEmptyFieldsErrorDialog.value = false
+                    },
+                    modifier = Modifier
+                        .padding(8.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    elevation = ButtonDefaults.elevation(0.dp)
+                ) {
+                    Text("OK")
+                }
+            },
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+
     // Start of content
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Center
+//        verticalArrangement = Arrangement.Center
     ) {
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Record a payment",
+                    style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray),
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp)
+                )
+            }
+        }
+
         item {
             // Raised surface with currency selection and dollar amount text field
             Box(
@@ -66,11 +137,11 @@ fun SettleUpScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Surface(
-                    elevation = 8.dp,
+                    elevation = 6.dp,
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 16.dp)
+                        .padding(vertical = 16.dp, horizontal = 30.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -79,16 +150,16 @@ fun SettleUpScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(24.dp))
                         Text("Paid", fontWeight = FontWeight.Bold, color = Color.Gray)
-                        Spacer(modifier = Modifier.width(26.dp))
+                        Spacer(modifier = Modifier.width(24.dp))
                         TextField(
-                            value = expenseAmountState,
+                            value = paymentAmountState,
                             onValueChange = {
-                                expenseAmountState = formatAmount(it)
-                                expenseViewModel.setExpenseAmount(
-                                    expenseAmountState.text.toBigDecimalOrNull()
-                                        ?: java.math.BigDecimal.ZERO
+                                paymentAmountState = formatAmount(it)
+                                expenseViewModel.setPaymentAmount(
+                                    paymentAmountState.text.toBigDecimalOrNull()
+                                        ?: BigDecimal.ZERO
                                 )
                             },
                             placeholder = {
@@ -119,6 +190,45 @@ fun SettleUpScreen(
                 }
             }
         }
+
+        item {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = 30.dp)
+            ) {
+                Text(
+                    payerName,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowRightAlt,
+                    contentDescription = "To",
+                    tint = md_theme_light_primary,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(top = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Text(
+                    text = payeeName,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+        }
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -137,9 +247,6 @@ fun SettleUpScreen(
                         .padding(2.dp)
                         .weight(1f),
                     onClick = {
-                        // clear the form fields after saving the expense
-//                        expenseViewModel.setSelectedPayer("You")
-
                         navController.popBackStack()
                     },
                     shape = RoundedCornerShape(25.dp),
@@ -164,24 +271,21 @@ fun SettleUpScreen(
                         .padding(2.dp)
                         .weight(1f),
                     onClick = {
+                        println(paymentAmount)
                         // Check if the expense description or amount is empty
-//                        if (expenseDescription.isEmpty() || expenseAmount == java.math.BigDecimal.ZERO) {
-//                            // Show the error dialog
-//                            showEmptyFieldsErrorDialog.value = true
-//                        } else if (selectedSplit == "By exact amount" && remainingAmountState.value != java.math.BigDecimal.ZERO.setScale(2)) {
-//                            println("remaining: ${remainingAmountState.value}")
-//                            showIncorrectAmountErrorDialog.value = true
-//                        } else {
-//
-//                            // also need:
-//                            // totalYouOwe to each housemate
-//                            // totalOwed by each housemate
-//                            // totalYouOwe to everyone
-//                            // totalOwed by everyone
-//                            // this can all be calculated using the expense history, in the viewmodel
-//
-//                            // for each expense
-//                            // date of expense
+                        if (paymentAmount == BigDecimal.ZERO.setScale(2)) {
+                            // Show the error dialog
+                            showEmptyFieldsErrorDialog.value = true
+                        } else {
+                            expenseViewModel.addPayment(
+                                "testPayerId",
+                                payerName,
+                                "testPayeeId",
+                                payeeName,
+                                paymentAmount
+                            )
+                        }
+//                        else {
 //
 //                            // when you click settle up, you should be able to
 //                            // see how much you owe that person or how much they owe you
