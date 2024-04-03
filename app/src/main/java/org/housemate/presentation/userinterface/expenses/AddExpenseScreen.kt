@@ -88,7 +88,7 @@ fun AddExpenseScreen(
     val split_options = listOf("Equally", "By exact amount")
 
     var expenseAmountState by remember {
-        mutableStateOf(TextFieldValue(text = expenseAmount.toString()))
+        mutableStateOf(TextFieldValue(text = expenseAmount.setScale(2).toString()))
     }
 
     var remainingAmountState = remember { mutableStateOf(BigDecimal.ZERO.setScale(2)) }
