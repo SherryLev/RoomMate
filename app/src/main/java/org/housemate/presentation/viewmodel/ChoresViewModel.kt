@@ -20,14 +20,13 @@ class ChoresViewModel @Inject constructor(
     private val _chores = MutableStateFlow<List<Chore>>(emptyList())
     val chores: StateFlow<List<Chore>> = _chores
 
-    private val _isLoading = MutableStateFlow<Boolean>(false)
+    private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
     init {
-        // Initialize the ViewModel and fetch all chores for all users
         getAllChores()
     }
 
@@ -37,22 +36,23 @@ class ChoresViewModel @Inject constructor(
                 _isLoading.value = true
                 val allChores = choreRepository.getAllChores().await()
                 _chores.value = allChores
-                _isLoading.value = false
             } catch (e: Exception) {
-                _isLoading.value = false
                 _error.value = e.message ?: "An error occurred"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
+
     fun createChore(chore: Chore) {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
                 choreRepository.createChore(chore).await()
-                _isLoading.value = false
             } catch (e: Exception) {
-                _isLoading.value = false
                 _error.value = e.message ?: "An error occurred"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
@@ -63,10 +63,10 @@ class ChoresViewModel @Inject constructor(
                 _isLoading.value = true
                 val chores = choreRepository.getChoresByUserId(userId).await()
                 _chores.value = chores
-                _isLoading.value = false
             } catch (e: Exception) {
-                _isLoading.value = false
                 _error.value = e.message ?: "An error occurred"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
@@ -76,10 +76,10 @@ class ChoresViewModel @Inject constructor(
             try {
                 _isLoading.value = true
                 choreRepository.updateChore(chore).await()
-                _isLoading.value = false
             } catch (e: Exception) {
-                _isLoading.value = false
                 _error.value = e.message ?: "An error occurred"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
@@ -89,10 +89,10 @@ class ChoresViewModel @Inject constructor(
             try {
                 _isLoading.value = true
                 choreRepository.deleteChore(choreId, userId).await()
-                _isLoading.value = false
             } catch (e: Exception) {
-                _isLoading.value = false
                 _error.value = e.message ?: "An error occurred"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
