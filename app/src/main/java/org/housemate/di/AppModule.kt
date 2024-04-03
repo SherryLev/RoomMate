@@ -13,7 +13,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.housemate.data.ExpenseRepositoryImpl
+import org.housemate.data.firestore.ChoreRepositoryImpl
 import org.housemate.data.firestore.UserRepositoryImpl
+import org.housemate.domain.repositories.ChoreRepository
 import org.housemate.domain.repositories.ExpenseRepository
 import org.housemate.domain.repositories.UserRepository
 import javax.inject.Singleton
@@ -71,4 +73,12 @@ object AppModule {
         return ExpenseRepositoryImpl(firestore, auth)
     }
 
+    @Provides
+    @Singleton
+    fun provideChoreRepository(
+        firestore : FirebaseFirestore,
+        auth: FirebaseAuth
+    ): ChoreRepository {
+        return ChoreRepositoryImpl()
+    }
 }
