@@ -52,6 +52,7 @@ import org.housemate.domain.model.Payment
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_purple
+import org.housemate.theme.light_red
 import org.housemate.theme.md_theme_light_error
 import org.housemate.theme.md_theme_light_primary
 import org.housemate.utils.AppScreenRoutes
@@ -262,7 +263,10 @@ fun ExpensesScreen(
                                                 if (showDialog.value) {
                                                     ExpensePopupDialog(
                                                         expense = item,
-                                                        onEditExpense = { navController.navigate(AppScreenRoutes.AddExpenseScreen.route) },
+                                                        onEditExpense = {
+                                                            expenseViewModel.onEditExpenseClicked(item)
+                                                            navController.navigate(AppScreenRoutes.AddExpenseScreen.route)
+                                                                        },
                                                         onDeleteExpense = { expenseViewModel.deleteExpenseById(item.id) },
 
                                                         onDismiss = {
@@ -472,45 +476,66 @@ fun ExpensePopupDialog(
     val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     val formattedDate = dateFormatter.format(expense.timestamp.toDate())
 
-    AlertDialog(
-        onDismissRequest = {
-            onDismiss()
-        },
-        title = {
-            Text(text = "Expense Details")
-        },
-        buttons = {
-            Row(
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp)
-            ) {
-                TextButton(onClick = { onEditExpense() }) {
-                    Text(text = "Edit")
+    Box(
+        modifier = Modifier
+            .width(250.dp)
+            .padding(horizontal = 16.dp)
+    ) {
+        AlertDialog(
+            onDismissRequest = {
+                onDismiss()
+            },
+            title = {
+                Text(text = "Expense Details                             ")
+            },
+            buttons = {
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                ) {
+                    Button(
+                        onClick = { onEditExpense() },
+                        shape = RoundedCornerShape(25.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = light_purple,
+                            contentColor = md_theme_light_primary
+                        ),
+                        elevation = ButtonDefaults.elevation(0.dp),
+                    ) {
+                        Text(text = "Edit Expense")
+                    }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Button(
+                        onClick = { onDeleteExpense() },
+                        shape = RoundedCornerShape(25.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = light_red,
+                            contentColor = md_theme_light_error
+                        ),
+                        elevation = ButtonDefaults.elevation(0.dp),
+                    ) {
+                        Text(text = "Delete Expense")
+                    }
                 }
-                TextButton(
-                    onClick = {
-                        onDeleteExpense()
-                    }) {
-                    Text(text = "Delete")
+                Spacer(modifier = Modifier.height(20.dp))
+            },
+            text = {
+                Column(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(text = "Payer: ${expense.payer}")
+                    Text(text = "Description: ${expense.description}")
+                    Text(text = "Amount: $${"%.2f".format(expense.amount)}")
+                    Text(text = "Date: $formattedDate")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(text = "Owing Amounts:")
+                    expense.owingAmounts.forEach { (person, amount) ->
+                        Text(text = "- $person: $${"%.2f".format(amount)}")
+                    }
                 }
             }
-        },
-        text = {
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(text = "Payer: ${expense.payer}")
-                Text(text = "Description: ${expense.description}")
-                Text(text = "Amount: $${"%.2f".format(expense.amount)}")
-                Text(text = "Date: $formattedDate")
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Owing Amounts:")
-                expense.owingAmounts.forEach { (person, amount) ->
-                    Text(text = "- $person: $${"%.2f".format(amount)}")
-                }
-            }
-        }
-    )
+        )
+    }
 }
 
 @Composable

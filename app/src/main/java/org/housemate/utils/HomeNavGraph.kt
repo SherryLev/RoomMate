@@ -103,7 +103,6 @@ sealed class AppScreenRoutes(val route:String){
     object ChoresScreen: AppScreenRoutes("chores_screen")
     object ExpensesScreen: AppScreenRoutes("expenses_screen")
     object AddExpenseScreen: AppScreenRoutes("add_expense_screen")
-
     object SettleUpScreen: AppScreenRoutes("settle_up_screen")
     object StatsScreen: AppScreenRoutes("stats_screen")
 }

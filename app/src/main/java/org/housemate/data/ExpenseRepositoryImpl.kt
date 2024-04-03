@@ -31,7 +31,6 @@ class ExpenseRepositoryImpl(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error adding expense", e)
-            // You can handle the exception here, e.g., throw it to be handled by the caller
             throw e
         }
     }
@@ -64,6 +63,22 @@ class ExpenseRepositoryImpl(
         return expenses
     }
 
+    override suspend fun updateExpenseById(expenseId: String, updatedExpense: Expense) {
+        try {
+            val currentUser = auth.currentUser
+            val userId = currentUser?.uid
+            if (userId != null) {
+                firestore.collection("expenses").document(expenseId).set(updatedExpense).await()
+                Log.d(TAG, "Expense updated successfully")
+            } else {
+                throw IllegalStateException("User is not authenticated.")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating expense", e)
+            throw e
+        }
+    }
+
     override suspend fun deleteExpenseById(expenseId: String) {
         try {
             val currentUser = auth.currentUser
@@ -75,7 +90,6 @@ class ExpenseRepositoryImpl(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error deleting expense", e)
-            // You can handle the exception here, e.g., throw it to be handled by the caller
             throw e
         }
     }
@@ -117,7 +131,6 @@ class ExpenseRepositoryImpl(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error adding payment", e)
-            // You can handle the exception here, e.g., throw it to be handled by the caller
             throw e
         }
     }

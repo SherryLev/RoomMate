@@ -32,6 +32,9 @@ class ExpenseViewModel @Inject constructor(
     private val _owingAmounts = MutableStateFlow<Map<String, BigDecimal>>(emptyMap())
     val owingAmounts = _owingAmounts.asStateFlow()
 
+    private val _expenseId = MutableStateFlow("")
+    val expenseId = _expenseId.asStateFlow()
+
     private val _expenseItems = MutableStateFlow<List<Expense>>(emptyList())
     val expenseItems: StateFlow<List<Expense>> = _expenseItems
 
@@ -68,6 +71,16 @@ class ExpenseViewModel @Inject constructor(
         _dialogDismissed.value = false
     }
 
+    fun onEditExpenseClicked(expense: Expense) {
+        // Set all the values to be edited in the UI
+        _expenseId.value = expense.id
+        _selectedPayer.value = expense.payer
+        _expenseDescription.value = expense.description
+        _expenseAmount.value = expense.amount.toBigDecimal()
+        val convertedOwingAmounts = expense.owingAmounts.mapValues { it.value.toBigDecimal() }
+        _owingAmounts.value = convertedOwingAmounts
+    }
+
     private fun fetchExpenses() {
         viewModelScope.launch {
             try {
@@ -101,6 +114,27 @@ class ExpenseViewModel @Inject constructor(
                 println("Expense deleted successfully")
             } catch (e: Exception) {
                 println("Failed to delete expense: ${e.message}")
+            }
+        }
+    }
+
+    fun updateExpenseById(expenseId: String, updatedPayer: String, updatedDescription: String, updatedExpenseAmount: BigDecimal, updatedOwingAmounts: Map<String, BigDecimal>) {
+        // Convert BigDecimal values to Double, since Firestore doesn't accept BigDecimal
+        val expenseAmountDouble = updatedExpenseAmount.toDouble()
+        val owingAmountsDouble = updatedOwingAmounts.mapValues { it.value.toDouble() } // Convert each BigDecimal value to Double
+
+        // Create the updated Expense object with converted values
+        val updatedExpense = Expense(expenseId, updatedPayer, updatedDescription, expenseAmountDouble, owingAmountsDouble, Timestamp.now())
+
+        viewModelScope.launch {
+            try {
+                expenseRepository.updateExpenseById(expenseId, updatedExpense)
+                println("Expense updated successfully")
+                clearExpenseAndPaymentItems()
+                fetchExpenses()
+                fetchPayments()
+            } catch (e: Exception) {
+                println("Failed to update expense: ${e.message}")
             }
         }
     }

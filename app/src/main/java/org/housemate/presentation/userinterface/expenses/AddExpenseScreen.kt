@@ -80,6 +80,7 @@ fun AddExpenseScreen(
     val expenseDescription by expenseViewModel.expenseDescription.collectAsState()
     val expenseAmount by expenseViewModel.expenseAmount.collectAsState()
     val owingAmounts by expenseViewModel.owingAmounts.collectAsState()
+    val expenseId by expenseViewModel.expenseId.collectAsState()
 
     var selectedSplit by remember { mutableStateOf("Equally") }
 
@@ -87,7 +88,7 @@ fun AddExpenseScreen(
     val split_options = listOf("Equally", "By exact amount")
 
     var expenseAmountState by remember {
-        mutableStateOf(TextFieldValue(text = ""))
+        mutableStateOf(TextFieldValue(text = expenseAmount.toString()))
     }
 
     var remainingAmountState = remember { mutableStateOf(BigDecimal.ZERO.setScale(2)) }
@@ -436,13 +437,25 @@ fun AddExpenseScreen(
                             // see how much you owe that person or how much they owe you
                             // you can write a smaller amount
                             // then this should appear in the expense history as a payment
-                            expenseViewModel.addExpense(
-                                "",
-                                selectedPayer,
-                                expenseDescription,
-                                expenseAmount,
-                                owingAmounts
-                            )
+
+                            if (expenseId == "") {
+                                expenseViewModel.addExpense(
+                                    expenseId,
+                                    selectedPayer,
+                                    expenseDescription,
+                                    expenseAmount,
+                                    owingAmounts
+                                )
+                            } else {
+                                expenseViewModel.updateExpenseById(
+                                    expenseId,
+                                    selectedPayer,
+                                    expenseDescription,
+                                    expenseAmount,
+                                    owingAmounts
+                                )
+                            }
+
                             // clear the form fields after saving the expense
                             expenseViewModel.setSelectedPayer("You")
                             expenseViewModel.setExpenseDescription("")
