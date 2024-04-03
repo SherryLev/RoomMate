@@ -10,11 +10,13 @@ import kotlinx.coroutines.tasks.await
 import org.housemate.domain.model.Chore
 import org.housemate.domain.repositories.ChoreRepository
 import org.housemate.domain.repositories.ExpenseRepository
+import org.housemate.domain.repositories.UserRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class ChoresViewModel @Inject constructor(
-    private val choreRepository: ChoreRepository
+    private val choreRepository: ChoreRepository,
+    private val userRepository: UserRepository
 ): ViewModel() {
 
     private val _chores = MutableStateFlow<List<Chore>>(emptyList())
@@ -26,11 +28,27 @@ class ChoresViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    private val _userId = MutableStateFlow<String?>(null)
+    val userId: StateFlow<String?> = _userId
+
     init {
         getAllChores()
     }
 
-    private fun getAllChores() {
+    private val _dialogDismissed = MutableStateFlow(false)
+    val dialogDismissed: StateFlow<Boolean> = _dialogDismissed
+
+    fun setDialogDismissed(dismissed: Boolean) {
+        _dialogDismissed.value = dismissed
+    }
+
+    fun fetchCurrentUserId() {
+        viewModelScope.launch {
+            _userId.value = userRepository.getCurrentUserId()
+        }
+    }
+
+    fun getAllChores() {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
@@ -44,13 +62,15 @@ class ChoresViewModel @Inject constructor(
         }
     }
 
-    fun createChore(chore: Chore) {
+    fun addChore(chore: Chore) {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
                 choreRepository.createChore(chore).await()
+                println("Chore added successfully")
             } catch (e: Exception) {
                 _error.value = e.message ?: "An error occurred"
+                println("Failed to add expense: ${e.message}")
             } finally {
                 _isLoading.value = false
             }

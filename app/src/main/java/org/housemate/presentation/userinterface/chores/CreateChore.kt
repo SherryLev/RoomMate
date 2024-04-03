@@ -28,15 +28,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.firebase.Timestamp
 import org.housemate.R
 import org.housemate.domain.model.Chore
 import org.housemate.domain.model.User
-import java.time.LocalDateTime
 import java.util.*
 import org.housemate.domain.repositories.ChoreRepository
 import org.housemate.domain.repositories.UserRepository
 import org.housemate.presentation.userinterface.expenses.CustomDropdown
-import java.time.LocalDate
+import org.housemate.presentation.viewmodel.ChoresViewModel
+import org.housemate.presentation.viewmodel.ExpenseViewModel
 import java.time.temporal.ChronoUnit
 
 var choreIdCount = 1
@@ -66,11 +68,11 @@ fun ReadonlyOutlinedTextField(
 }
 
 @Composable
-fun TasksDatePicker(onDateSelected: (LocalDate) -> Unit): LocalDate? {
+fun TasksDatePicker(onDateSelected: (Timestamp) -> Unit): Timestamp? {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
-    // getting today's date fields
+    // Getting today's date fields
     val year = calendar[Calendar.YEAR]
     val month = calendar[Calendar.MONTH]
     val day = calendar[Calendar.DAY_OF_MONTH]
@@ -82,13 +84,14 @@ fun TasksDatePicker(onDateSelected: (LocalDate) -> Unit): LocalDate? {
             context,
             { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
                 selectedDateText = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-                onDateSelected(LocalDate.of(selectedYear, selectedMonth + 1, selectedDay))
+                val selectedTimestamp = Timestamp(Date(selectedYear - 1900, selectedMonth, selectedDay))
+                onDateSelected(selectedTimestamp)
             },
             year,
             month,
             day,
         )
-    // can't pick dates in the past
+    // Can't pick dates in the past
     datePicker.datePicker.minDate = calendar.timeInMillis
 
     Column(
@@ -171,7 +174,9 @@ fun alignButton(options: List<String>,label: String,onCategorySelected: (String)
 }
 
 @Composable
-fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, choreRepository: ChoreRepository, userRepository: UserRepository){
+fun ChoreCreator(onDialogDismiss: () -> Unit,
+                 choresViewModel: ChoresViewModel = hiltViewModel()
+){
     val categories = listOf( "Kitchen", "Living Room", "Dining Room", "Staircase", "Backyard")
     val choreList = listOf( "Clean dishes", "Sweep Floors", "Clean Toilet", "Vaccum Floor")
     val assignees = listOf( "Bob", "Marlee", "Shawn", "Ben", "Laura")
@@ -180,16 +185,16 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
     var choreChoice by remember { mutableStateOf("") }
     var assigneeChoice by remember { mutableStateOf("") }
 
-    val selectedDate = remember { mutableStateOf<LocalDate?>(null) }
+    val selectedDate = remember { mutableStateOf<Timestamp?>(null) }
     val repetitionOptions = listOf("None", "Every Day", "Week", "2 Weeks", "3 Weeks", "4 Weeks")
     var repetitionChoice by remember { mutableStateOf("None") }
     var choreCounter by remember { mutableStateOf(0) }
     val choreId = "chore${choreIdCount++}" // Generate unique chore ID
 
-    var userId by remember { mutableStateOf<String?>(null) }
+    val userId by choresViewModel.userId.collectAsState()
 
-    LaunchedEffect(key1 = "userId") {
-        userId = userRepository.getCurrentUserId()
+    LaunchedEffect(key1 = "fetchUserId") {
+        choresViewModel.fetchCurrentUserId()
     }
 
     Column(
@@ -222,10 +227,14 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
                 if (allFieldsSelected) {
                     val dueDate = selectedDate.value ?: return@Button // Ensure due date is not null
 
+                    val calendar = Calendar.getInstance()
+                    calendar.time = dueDate.toDate() // Convert to Date type
+
                     val repetitions = when (repetitionChoice) {
                         "Every Day" -> {
-                            val endDate = dueDate.plusMonths(4) // Get the end date 4 months from the due date
-                            val daysBetween = ChronoUnit.DAYS.between(dueDate, endDate)
+                            calendar.add(Calendar.MONTH, 4) // Add 4 months to the due date
+                            val endDate = calendar.time // Get the end date
+                            val daysBetween = (endDate.time - dueDate.toDate().time) / (1000 * 60 * 60 * 24)
                             (daysBetween / 7) * 7
                         }
                         "Week" -> 16
@@ -234,36 +243,25 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
                         "4 Weeks" -> 4
                         else -> 1
                     }
-
-                    repeat(repetitions.toInt()) {
+                    repeat(repetitions.toInt()) { index ->
                         val choreDueDate = when (repetitionChoice) {
-                            "Every Day" -> dueDate.plusDays(it.toLong()) // Add days for "Every Day"
-                            else -> dueDate.plusWeeks(it.toLong()) // Add weeks for other repetitions
+                            "Every Day" -> Timestamp(dueDate.seconds + index * 86400, dueDate.nanoseconds) // Add seconds for "Every Day"
+                            else -> Timestamp(dueDate.seconds + index * 604800, dueDate.nanoseconds) // Add seconds for other repetitions
                         }
                         val chore = Chore(
                             userId = userId ?: "",
-                            choreId = "$choreId-$it", // Ensure unique ID for each chore
+                            choreId = "$choreId-$index", // Ensure unique ID for each chore
                             choreName = choreChoice,
                             category = categoryChoice,
                             assignee = assigneeChoice,
-                            dueDate = choreDueDate, // Assign due date for the chore
+                            dueDate = choreDueDate,
                             userRating = emptyList(),
                             votedUser = emptyList()
                         )
-                        createChore(chore)
-                        choreRepository.createChore(chore)
-                            .addOnSuccessListener {
-                                Log.d("ChoreCreation", "Chore successfully added to Firestore")
-                                choreCounter++
-                                if (choreCounter == repetitions.toInt()) {
-                                    onDialogDismiss()
-                                }
-                            }
-                            .addOnFailureListener { e ->
-                                Log.w("ChoreCreation", "Error adding chore to Firestore", e)
-                            }
+                        choresViewModel.addChore(chore)
+                        choreCounter++
                     }
-
+                    onDialogDismiss()
 
                 }else {
                     isErrorVisible = true
