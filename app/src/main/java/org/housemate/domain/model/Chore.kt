@@ -1,5 +1,6 @@
 package org.housemate.domain.model
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class Chore(
@@ -8,7 +9,7 @@ data class Chore(
     val choreName: String,
     val assignee: String,
     val category: String,
-    val dueDate: LocalDateTime? = null,
+    val dueDate: LocalDate? = null,
     val userRating :  List<Int> = emptyList(),  // nullable
     val votedUser: List<String>? // nullable
 ) {

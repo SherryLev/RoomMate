@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+//import com.google.android.libraries.places.api.model.LocalDate
 import org.housemate.R
 import org.housemate.data.firestore.ChoreRepositoryImpl
 import org.housemate.presentation.sharedcomponents.TextEntryModule
@@ -60,6 +61,7 @@ import kotlin.math.sqrt
 import org.housemate.data.firestore.UserRepositoryImpl
 import com.google.firebase.firestore.FirebaseFirestore
 import org.housemate.presentation.userinterface.expenses.CustomDropdown
+import java.time.LocalDate
 
 var choresList = mutableListOf<Chore>()
 
@@ -95,8 +97,6 @@ private fun RatingBarComposable() {
 
 @Composable
 fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-    val formattedDateTime = chore.dueDate?.format(formatter)
     Surface(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
@@ -159,6 +159,23 @@ fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
     }
     Spacer(modifier = Modifier.height(8.dp))
 }
+fun getCurrentWeekTasks(chores: List<Chore>): List<Chore> {
+    val today = LocalDate.now()
+    val dayOfWeek = today.dayOfWeek
+
+    val offsetDays = when (dayOfWeek) {
+        DayOfWeek.MONDAY -> 0
+        else -> dayOfWeek.value - 1
+    }
+
+    val startOfWeek = today.minusDays(offsetDays.toLong())
+    val endOfWeek = startOfWeek.plusDays(6)
+
+    return chores.filter { chore -> chore.dueDate in startOfWeek..endOfWeek }
+   // return chores.filter { it.dueDate?.let {date -> date in startOfWeek ..endOfWeek} ?: false }
+}
+
+
 @Composable
 fun TaskWeekItem(chore: Chore) {
     Card(
@@ -330,16 +347,19 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                 if(isHouse){
                     TaskDisplayHouse(chores, deleteTask)
                 } else {
+                    val currentWeekTasks = getCurrentWeekTasks(chores)
                     if(selectedDay == "Week") {
                         for (day in daysOfWeekList) {
                             Column(modifier = Modifier.weight(1f)) { // Set weight to 1
                                 Text(text = day.toString())
                                 Spacer(modifier = Modifier.height(4.dp))
-                                TaskDisplayWeek(chores, deleteTask = { chore -> chores.remove(chore) }, day)
+                                TaskDisplayWeek(currentWeekTasks, deleteTask = { chore -> chores.remove(chore) }, day)
+                                //TaskDisplayWeek(chores, deleteTask = { chore -> chores.remove(chore) }, day)
                                 Spacer(modifier = Modifier.height(4.dp))
                             }
                         }
                     } else{
+                        val dayOfWeek: DayOfWeek? = stringToDayOfWeek(selectedDay)
                         Column(modifier = Modifier.weight(1f)) { // Set weight to 1
                             Text(
                                 text = selectedDay,
@@ -347,11 +367,12 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                                 fontSize = MaterialTheme.typography.h5.fontSize,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            val dayOfWeek: DayOfWeek? = stringToDayOfWeek(selectedDay)
+                            Spacer(modifier = Modifier.height(16.dp))
+
                             //Log.d("day conversion ", "Day: "+ dayOfWeek)
                             if (dayOfWeek != null) {
-                                TaskDisplayWeek(chores, deleteTask = { chore -> chores.remove(chore) },dayOfWeek)
+                                TaskDisplayWeek(currentWeekTasks, deleteTask = { chore -> chores.remove(chore) },
+                                    dayOfWeek)
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                         }
