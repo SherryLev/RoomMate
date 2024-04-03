@@ -32,6 +32,7 @@ import java.time.LocalDateTime
 import java.util.*
 import org.housemate.domain.repositories.ChoreRepository
 import org.housemate.domain.repositories.UserRepository
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 var choreIdCount = 1
@@ -61,7 +62,7 @@ fun ReadonlyOutlinedTextField(
 }
 
 @Composable
-fun TasksDatePicker(onDateSelected: (LocalDateTime) -> Unit): LocalDateTime? {
+fun TasksDatePicker(onDateSelected: (LocalDate) -> Unit): LocalDate? {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
@@ -77,7 +78,7 @@ fun TasksDatePicker(onDateSelected: (LocalDateTime) -> Unit): LocalDateTime? {
             context,
             { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
                 selectedDateText = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-                onDateSelected(LocalDateTime.of(selectedYear, selectedMonth + 1, selectedDay, 0, 0))
+                onDateSelected(LocalDate.of(selectedYear, selectedMonth + 1, selectedDay))
             },
             year,
             month,
@@ -159,7 +160,7 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
     var choreChoice by remember { mutableStateOf("") }
     var assigneeChoice by remember { mutableStateOf("") }
 
-    val selectedDate = remember { mutableStateOf<LocalDateTime?>(null) }
+    val selectedDate = remember { mutableStateOf<LocalDate?>(null) }
     val repetitionOptions = listOf("None", "Every Day", "Week", "2 Weeks", "3 Weeks", "4 Weeks")
     var repetitionChoice by remember { mutableStateOf("None") }
     var choreCounter by remember { mutableStateOf(0) }
