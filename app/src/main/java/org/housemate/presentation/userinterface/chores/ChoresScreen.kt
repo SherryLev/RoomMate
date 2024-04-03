@@ -42,7 +42,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.ui.graphics.Canvas
@@ -241,9 +243,9 @@ fun TaskDisplayHouse(chores: List<Chore>, deleteTask: (Chore) -> Unit) {
 
 @Composable
 fun TaskDisplayWeek(chores: List<Chore>, deleteTask: (Chore) -> Unit, day: DayOfWeek) {
-    LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
-        items(chores){chore ->
-            if(chore.dueDate?.dayOfWeek == day){
+    Column(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
+        chores.forEach { chore ->
+            if (chore.dueDate?.dayOfWeek == day) {
                 TaskWeekItem(chore)
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -349,13 +351,36 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                 } else {
                     val currentWeekTasks = getCurrentWeekTasks(chores)
                     if(selectedDay == "Week") {
-                        for (day in daysOfWeekList) {
-                            Column(modifier = Modifier.weight(1f)) { // Set weight to 1
-                                Text(text = day.toString())
-                                Spacer(modifier = Modifier.height(4.dp))
-                                TaskDisplayWeek(currentWeekTasks, deleteTask = { chore -> chores.remove(chore) }, day)
-                                //TaskDisplayWeek(chores, deleteTask = { chore -> chores.remove(chore) }, day)
-                                Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier.width(300.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)
+                            ) {
+                                // Iterate over each day of the week
+                                daysOfWeekList.forEach { day ->
+                                    // Add a spacer between days
+                                    item {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = day.toString(),
+                                            style = TextStyle(
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 18.sp
+                                            )
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                    item {
+                                        TaskDisplayWeek(
+                                            currentWeekTasks,
+                                            deleteTask = { chore -> chores.remove(chore) },
+                                            day
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                }
                             }
                         }
                     } else{
@@ -371,6 +396,7 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
 
                             //Log.d("day conversion ", "Day: "+ dayOfWeek)
                             if (dayOfWeek != null) {
+
                                 TaskDisplayWeek(currentWeekTasks, deleteTask = { chore -> chores.remove(chore) },
                                     dayOfWeek)
                             }

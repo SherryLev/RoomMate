@@ -44,6 +44,29 @@ class ChoreRepositoryImpl : ChoreRepository{
         return taskCompletionSource.task
     }
 
+    override fun getAllChores(): Task<List<Chore>> {
+        val choreList = mutableListOf<Chore>()
+        val taskCompletionSource = TaskCompletionSource<List<Chore>>()
+
+        db.collectionGroup("userChores")
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    for (document in task.result) {
+                        val chore = document.toObject(Chore::class.java).copy(choreId = document.id)
+                        choreList.add(chore)
+                    }
+                    taskCompletionSource.setResult(choreList)
+                } else {
+                    task.exception?.let {
+                        taskCompletionSource.setException(it)
+                    }
+                }
+            }
+
+        return taskCompletionSource.task
+    }
+
     override fun updateChore(chore: Chore): Task<Void> {
         val choreMap = chore.toMap()
 
