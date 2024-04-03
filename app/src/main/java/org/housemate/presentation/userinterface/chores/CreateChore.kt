@@ -5,6 +5,7 @@ import android.text.Selection
 import android.util.Log
 import android.widget.DatePicker
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -21,17 +22,20 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import org.housemate.R
 import org.housemate.domain.model.Chore
 import org.housemate.domain.model.User
 import java.time.LocalDateTime
 import java.util.*
 import org.housemate.domain.repositories.ChoreRepository
 import org.housemate.domain.repositories.UserRepository
+import org.housemate.presentation.userinterface.expenses.CustomDropdown
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -119,7 +123,7 @@ fun SelectionDropdown(options: List<String>, label: String, onCategorySelected: 
         OutlinedTextField(
             value = selectedOption,
             onValueChange = { },
-            readOnly = false,
+            readOnly = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { coordinates ->
@@ -149,6 +153,22 @@ fun SelectionDropdown(options: List<String>, label: String, onCategorySelected: 
         }
     }
 }
+@Composable
+fun alignButton(options: List<String>,label: String,onCategorySelected: (String) -> Unit){
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(
+            onClick = {},
+            modifier = Modifier
+                .size(40.dp)
+                .background(Color.LightGray)
+                .padding(4.dp)
+        ) {
+            Icon(painterResource(R.drawable.add), "Add")
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        SelectionDropdown(options,label, onCategorySelected)
+    }
+}
 
 @Composable
 fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, choreRepository: ChoreRepository, userRepository: UserRepository){
@@ -174,11 +194,11 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
 
     Column(
         modifier = Modifier.padding(16.dp)) {
-        SelectionDropdown(choreList,labels[0], onCategorySelected = { category -> choreChoice = category })
+        alignButton(choreList, labels[0],onCategorySelected = { category -> choreChoice = category })
         Spacer(modifier = Modifier.height(16.dp))
-        SelectionDropdown(categories,labels[1], onCategorySelected = { category -> categoryChoice = category })
+        alignButton(categories,labels[1], onCategorySelected = { category -> categoryChoice = category })
         Spacer(modifier = Modifier.height(16.dp))
-        SelectionDropdown(assignees,labels[2],onCategorySelected = { category -> assigneeChoice = category })
+        alignButton(assignees,labels[2],onCategorySelected = { category -> assigneeChoice = category })
         Spacer(modifier = Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             TasksDatePicker { date ->selectedDate.value = date}
@@ -206,14 +226,13 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
                         "Every Day" -> {
                             val endDate = dueDate.plusMonths(4) // Get the end date 4 months from the due date
                             val daysBetween = ChronoUnit.DAYS.between(dueDate, endDate)
-                            (daysBetween / 7) * 7 // 7 times per week for 4 months
+                            (daysBetween / 7) * 7
                         }
-
-                        "Week" -> 16 // Once per week for 4 months (4 weeks * 4 months)
-                        "2 Weeks" -> 8 // Once per two weeks for 4 months (2 weeks * 4 months)
-                        "3 Weeks" -> 4 // Once per three weeks for 4 months (1 week * 4 months)
-                        "4 Weeks" -> 4 // Once per four weeks for 4 months (1 week * 4 months)
-                        else -> 1 // Default to one-time chore
+                        "Week" -> 16
+                        "2 Weeks" -> 8
+                        "3 Weeks" -> 4
+                        "4 Weeks" -> 4
+                        else -> 1
                     }
 
                     repeat(repetitions.toInt()) {
@@ -221,7 +240,6 @@ fun ChoreCreator(createChore: (Chore) -> Unit,  onDialogDismiss: () -> Unit, cho
                             "Every Day" -> dueDate.plusDays(it.toLong()) // Add days for "Every Day"
                             else -> dueDate.plusWeeks(it.toLong()) // Add weeks for other repetitions
                         }
-
                         val chore = Chore(
                             userId = userId ?: "",
                             choreId = "$choreId-$it", // Ensure unique ID for each chore
