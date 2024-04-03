@@ -1,6 +1,7 @@
 package org.housemate.presentation.userinterface.chores
 
 
+import android.util.Log
 import android.widget.GridLayout
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
@@ -58,6 +59,8 @@ import java.time.DayOfWeek
 import kotlin.math.sqrt
 import org.housemate.data.firestore.UserRepositoryImpl
 import com.google.firebase.firestore.FirebaseFirestore
+import org.housemate.presentation.userinterface.expenses.CustomDropdown
+
 var choresList = mutableListOf<Chore>()
 
 
@@ -193,6 +196,18 @@ fun TaskWeekItem(chore: Chore) {
     }
     Spacer(modifier = Modifier.height(8.dp))
 }
+fun stringToDayOfWeek(dayString: String): DayOfWeek? {
+    return when (dayString.lowercase()) { // Convert to lowercase for case-insensitive matching
+        "monday" -> DayOfWeek.MONDAY
+        "tuesday" -> DayOfWeek.TUESDAY
+        "wednesday" -> DayOfWeek.WEDNESDAY
+        "thursday" -> DayOfWeek.THURSDAY
+        "friday" -> DayOfWeek.FRIDAY
+        "saturday" -> DayOfWeek.SATURDAY
+        "sunday" -> DayOfWeek.SUNDAY
+        else -> null // Return null for invalid day or "Week"
+    }
+}
 
 @Composable
 fun TaskDisplayHouse(chores: List<Chore>, deleteTask: (Chore) -> Unit) {
@@ -236,7 +251,9 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
         DayOfWeek.SATURDAY,
         DayOfWeek.SUNDAY
     )
+    val stringDays = listOf("Week", "Monday", "Tuesday", "Wednesday","Thursday","Friday","Saturday","Sunday")
     var chores by remember { mutableStateOf(choresList) }
+    var selectedDay by remember { mutableStateOf("Week") }
 
     val deleteTask: (Chore) -> Unit = { choreToDelete ->
         chores = chores.toMutableList().apply { remove(choreToDelete) }
@@ -293,23 +310,56 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
                     Text("All Chores")
                 }
             }
-            Column(
-                //modifier = Modifier.align(Alignment.Start)
+           Row(
+               modifier = Modifier
+                   .width(300.dp), // Set desired fixed width
+               horizontalArrangement = Arrangement.End
             ) {
+               if(!isHouse) {
+                   CustomDropdown(
+                       stringDays,
+                       selectedDay,
+                       onItemSelected = { selectedDay = it },
+                       modifier = Modifier ,
+                       dropdownWidth = 128.dp
+                   )
+               }
+           }
+            Column(
+                ) {
                 if(isHouse){
                     TaskDisplayHouse(chores, deleteTask)
                 } else {
-                    for (day in daysOfWeekList) {
+                    if(selectedDay == "Week") {
+                        for (day in daysOfWeekList) {
+                            Column(modifier = Modifier.weight(1f)) { // Set weight to 1
+                                Text(text = day.toString())
+                                Spacer(modifier = Modifier.height(4.dp))
+                                TaskDisplayWeek(chores, deleteTask = { chore -> chores.remove(chore) }, day)
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+                        }
+                    } else{
                         Column(modifier = Modifier.weight(1f)) { // Set weight to 1
-                            Text(text = day.toString())
-                            Spacer(modifier = Modifier.height(4.dp))
-                            TaskDisplayWeek(chores, deleteTask = { chore -> chores.remove(chore) }, day)
+                            Text(
+                                text = selectedDay,
+                                color = Color.Black,
+                                fontSize = MaterialTheme.typography.h5.fontSize,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            val dayOfWeek: DayOfWeek? = stringToDayOfWeek(selectedDay)
+                            //Log.d("day conversion ", "Day: "+ dayOfWeek)
+                            if (dayOfWeek != null) {
+                                TaskDisplayWeek(chores, deleteTask = { chore -> chores.remove(chore) },dayOfWeek)
+                            }
                             Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
-
                 }
             }
+
+
         }
         if(isHouse) {
             Column(
