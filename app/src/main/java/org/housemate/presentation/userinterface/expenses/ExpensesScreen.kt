@@ -1,5 +1,6 @@
 package org.housemate.presentation.userinterface.expenses
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
@@ -35,10 +37,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material.icons.outlined.Paid
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -246,11 +251,23 @@ fun ExpensesScreen(
                                                         -(item.owingAmounts["You"] ?: 0.00)
                                                     }
 
+                                                val showDialog = remember { mutableStateOf(false) }
+                                                if (showDialog.value) {
+                                                    ExpensePopupDialog(
+                                                        expense = item,
+                                                        onEditExpense = { navController.navigate(AppScreenRoutes.AddExpenseScreen.route) },
+                                                        onDeleteExpense = { expenseViewModel.deleteExpenseById(item.id) },
+                                                        onDismiss = { showDialog.value = false } // Dismiss the dialog when needed
+                                                    )
+                                                }
                                                 Row(
                                                     verticalAlignment = Alignment.CenterVertically,
-                                                    modifier = Modifier.padding(
-                                                        vertical = 8.dp
-                                                    )
+                                                    modifier = Modifier
+                                                        .padding(vertical = 8.dp)
+                                                        .clickable {
+                                                            // Show the popup dialog when an expense item is clicked
+                                                            showDialog.value = true
+                                                        }
                                                 ) {
                                                     Column(
                                                         horizontalAlignment = Alignment.Start,
@@ -433,6 +450,56 @@ fun ExpensesScreen(
         }
     }
 }
+
+@Composable
+fun ExpensePopupDialog(
+    expense: Expense,
+    onEditExpense: () -> Unit,
+    onDeleteExpense: () -> Unit,
+    onDismiss: () -> Unit
+)  {
+
+    val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    val formattedDate = dateFormatter.format(expense.timestamp.toDate())
+
+    AlertDialog(
+        onDismissRequest = {
+            onDismiss()
+        },
+        title = {
+            Text(text = "Expense Details")
+        },
+        buttons = {
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp)
+            ) {
+                TextButton(onClick = { onEditExpense() }) {
+                    Text(text = "Edit")
+                }
+                TextButton(onClick = { onDeleteExpense() }) {
+                    Text(text = "Delete")
+                }
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(text = "Payer: ${expense.payer}")
+                Text(text = "Description: ${expense.description}")
+                Text(text = "Amount: $${"%.2f".format(expense.amount)}")
+                Text(text = "Date: $formattedDate")
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Owing Amounts:")
+                expense.owingAmounts.forEach { (person, amount) ->
+                    Text(text = "- $person: $${"%.2f".format(amount)}")
+                }
+            }
+        }
+    )
+}
+
 @Composable
 fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean, navController: NavController, expenseViewModel: ExpenseViewModel) {
     Box(

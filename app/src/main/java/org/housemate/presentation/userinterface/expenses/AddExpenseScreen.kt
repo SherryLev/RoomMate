@@ -437,6 +437,7 @@ fun AddExpenseScreen(
                             // you can write a smaller amount
                             // then this should appear in the expense history as a payment
                             expenseViewModel.addExpense(
+                                "",
                                 selectedPayer,
                                 expenseDescription,
                                 expenseAmount,

@@ -79,6 +79,19 @@ class ExpenseViewModel @Inject constructor(
         }
     }
 
+    fun deleteExpenseById(expenseId: String) {
+        viewModelScope.launch {
+            try {
+                expenseRepository.deleteExpenseById(expenseId)
+                // After deleting the expense, you might want to refresh the list of expenses
+                fetchExpenses()
+                println("Expense deleted successfully")
+            } catch (e: Exception) {
+                println("Failed to delete expense: ${e.message}")
+            }
+        }
+    }
+
     private fun calculateTotalAmounts() {
         val totalOwedToYou: BigDecimal?
         val totalYouOwe: BigDecimal?
@@ -127,13 +140,13 @@ class ExpenseViewModel @Inject constructor(
     }
 
     // Function to add an expense with the selected payer's name
-    fun addExpense(payer: String, description: String, expenseAmount: BigDecimal, owingAmounts: Map<String, BigDecimal>) {
+    fun addExpense(id: String, payer: String, description: String, expenseAmount: BigDecimal, owingAmounts: Map<String, BigDecimal>) {
         // Convert BigDecimal values to Double, since firestore doesn't accept bigdecimal
         val expenseAmountDouble = expenseAmount.toDouble()
         val owingAmountsDouble = owingAmounts.mapValues { it.value.toDouble() } // Convert each BigDecimal value to Double
 
         // Create the Expense object with converted values
-        val expense = Expense(payer, description, expenseAmountDouble, owingAmountsDouble, Timestamp.now())
+        val expense = Expense(id, payer, description, expenseAmountDouble, owingAmountsDouble, Timestamp.now())
 
         // Call the addExpense function from the repository to add the expense to Firestore
         viewModelScope.launch {
@@ -232,8 +245,6 @@ class ExpenseViewModel @Inject constructor(
         _selectedOweStatus.value = youOwe
         setPaymentAmount(amount.toBigDecimalOrNull() ?: BigDecimal.ZERO)
     }
-
-
     // Functions to update the state
     fun setSelectedPayer(payer: String) {
         _selectedPayer.value = payer

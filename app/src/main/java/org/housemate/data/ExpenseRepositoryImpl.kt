@@ -23,7 +23,9 @@ class ExpenseRepositoryImpl(
             val currentUser = auth.currentUser
             val userId = currentUser?.uid
             if (userId != null) {
-                firestore.collection("expenses").add(expense).await()
+                val documentReference = firestore.collection("expenses").add(expense).await()
+                val expenseWithId = expense.copy(id = documentReference.id)
+                firestore.collection("expenses").document(documentReference.id).set(expenseWithId).await()
             } else {
                 throw IllegalStateException("User is not authenticated.")
             }
@@ -61,6 +63,21 @@ class ExpenseRepositoryImpl(
         return expenses
     }
 
+    override suspend fun deleteExpenseById(expenseId: String) {
+        try {
+            val currentUser = auth.currentUser
+            val userId = currentUser?.uid
+            if (userId != null) {
+                firestore.collection("expenses").document(expenseId).delete().await()
+            } else {
+                throw IllegalStateException("User is not authenticated.")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error deleting expense", e)
+            // You can handle the exception here, e.g., throw it to be handled by the caller
+            throw e
+        }
+    }
 
     override suspend fun getPayments(): List<Payment> {
         val payments = mutableListOf<Payment>()
