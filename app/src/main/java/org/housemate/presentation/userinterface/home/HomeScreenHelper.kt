@@ -141,18 +141,18 @@ fun HomeScreenHelper(
             }
 //                Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Your Current Expense Status",
+                text = "Expense Status",
                 style = MaterialTheme.typography.h6.copy(
                     fontWeight = FontWeight.Bold
                 ),
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp)
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Card(
                shape = RoundedCornerShape(8.dp),
                elevation = 4.dp,
                modifier = Modifier
-                   .padding(8.dp)
+                   .padding(start = 20.dp)
                    .width((LocalConfiguration.current.screenWidthDp * 0.80).dp)
                    .height(100.dp),
 
