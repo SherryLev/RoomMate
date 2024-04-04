@@ -87,7 +87,7 @@ fun NavGraphBuilder.settingsNavGraph(navController: NavHostController) {
                 }
             },
                 userRepository = UserRepositoryImpl(FirebaseFirestore.getInstance()),
-                groupRepository = GroupRepositoryImpl()
+                groupRepository = GroupRepositoryImpl(userRepository = UserRepositoryImpl(FirebaseFirestore.getInstance()))
             )
         }
         composable(route = SettingsScreenRoutes.EditUserInfoScreen.route) {
