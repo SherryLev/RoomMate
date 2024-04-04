@@ -1,10 +1,13 @@
 package org.housemate.presentation.userinterface.home
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import com.google.firebase.Timestamp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -22,22 +25,27 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import org.housemate.domain.model.Chore
+import org.housemate.presentation.viewmodel.ChoresViewModel
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_purple
 import org.housemate.theme.md_theme_light_error
 import org.housemate.theme.pretty_purple
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.ZoneId
+import kotlin.time.ExperimentalTime
 
 @Composable
-fun textShow() {
+fun textShow(chore: Chore) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .width(300.dp)
             .height(60.dp),
         elevation = 5.dp,
-        color = light_purple // Added background color for better visualization
+        color = light_purple
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
@@ -45,28 +53,44 @@ fun textShow() {
             modifier = Modifier.fillMaxSize().padding(vertical = 8.dp)
         ) {
             Text(
-                text = "Some Text",
+                text = chore.choreName,
                 textAlign = TextAlign.Center
             )
         }
     }
 }
 @Composable
-fun TodaysChores() {
+fun TodaysChores(chores: List<Chore>) {
     LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 10.dp)) {
-        item {
-            textShow()
+        items(chores) { chore ->
+            textShow(chore)
         }
     }
+}
+fun filterChoresForCurrentUserAndToday(chores: List<Chore>, currentUser: String): List<Chore> {
+    val currentDate = LocalDate.now()
+    println("Current User: " + currentUser)
+    println("Current Date: " + currentDate)
+    println("Chore Assignee: " + chores[0].assignee)
+    println("Chore due date: " + chores[0].dueDate)
+    return chores.filter { chore ->
+        chore.assignee == currentUser &&
+                chore.dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate() == currentDate
+    }
+
 }
 @Composable
 fun HomeScreenHelper(
     navController: NavHostController = rememberNavController(),
-    onNavigateToSettingsScreen: () -> Unit,expenseViewModel: ExpenseViewModel = hiltViewModel()
-    ) {
+    onNavigateToSettingsScreen: () -> Unit,expenseViewModel: ExpenseViewModel = hiltViewModel(),
+    choresViewModel: ChoresViewModel = hiltViewModel()) {
+
+    val chores by choresViewModel.chores.collectAsState()
+    val currentUserID = choresViewModel.fetchCurrentUserId().toString()
+    val fileredChores = filterChoresForCurrentUserAndToday(chores, currentUserID)
+
     val name = "Alice"
-    val totalTasks = 0
-    val choreSize = 0
+    val totalTasks = fileredChores.size
     val totalAmountOwedToYou by expenseViewModel.totalAmountOwedToYou.collectAsState()
     val totalAmountYouOwe by expenseViewModel.totalAmountYouOwe.collectAsState()
 
@@ -125,8 +149,8 @@ fun HomeScreenHelper(
                     .height(200.dp)
                     .fillMaxWidth()
             ){
-                if(choreSize >0) {
-                    TodaysChores()
+                if(totalTasks > 0) {
+                    TodaysChores(fileredChores)
                 }else{
                     Text(
                         text = "You have no chores on this day!",
@@ -230,3 +254,4 @@ fun HomeScreenHelper(
         }
     }
 }
+
