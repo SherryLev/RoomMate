@@ -10,6 +10,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.google.firebase.firestore.FirebaseFirestore
+import org.housemate.data.firestore.GroupRepositoryImpl
+import org.housemate.data.firestore.UserRepositoryImpl
 import org.housemate.presentation.userinterface.chores.ChoresScreen
 import org.housemate.presentation.userinterface.expenses.AddExpenseScreen
 import org.housemate.presentation.userinterface.expenses.ExpensesScreen
@@ -82,7 +85,10 @@ fun NavGraphBuilder.settingsNavGraph(navController: NavHostController) {
                         inclusive = true
                     }
                 }
-            })
+            },
+                userRepository = UserRepositoryImpl(FirebaseFirestore.getInstance()),
+                groupRepository = GroupRepositoryImpl()
+            )
         }
         composable(route = SettingsScreenRoutes.EditUserInfoScreen.route) {
             EditUserInfoScreen()

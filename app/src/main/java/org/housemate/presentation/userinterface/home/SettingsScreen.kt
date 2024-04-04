@@ -31,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,6 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.coroutineScope
 import org.housemate.presentation.sharedcomponents.TextEntryModule
 import org.housemate.presentation.viewmodel.DeleteAccountResult
 import org.housemate.presentation.viewmodel.ExpenseViewModel
@@ -53,18 +55,39 @@ import org.housemate.theme.md_theme_light_error
 import org.housemate.theme.md_theme_light_primary
 import org.housemate.utils.AuthScreen
 import org.housemate.utils.Graph
+import kotlinx.coroutines.launch
+
+import org.housemate.domain.repositories.GroupRepository
+import org.housemate.domain.model.Group
+import org.housemate.domain.repositories.UserRepository
+import kotlin.coroutines.coroutineContext
 
 @Composable
 fun SettingsScreen(
     navController: NavHostController = rememberNavController(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
-    onNavigateToAuthScreen: () -> Unit
+    onNavigateToAuthScreen: () -> Unit,
+    userRepository: UserRepository,
+    groupRepository: GroupRepository
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
+    val enteredGroupCode = remember { mutableStateOf("")}
+
     val deleteAccountState by settingsViewModel.deleteAccountState.collectAsState()
 
     val logoutState by settingsViewModel.logoutState.collectAsState()
 
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
+
+    // State to hold group code
+    var groupCode by remember { mutableStateOf<String?>(null)}
+
+    LaunchedEffect(Unit) {
+        val userId = userRepository.getCurrentUserId()
+        groupCode = userRepository.getGroupCodeForUser(userId!!)
+    }
+
 
     // Observe logout state
     if (logoutState == true) {
@@ -138,7 +161,13 @@ fun SettingsScreen(
                 item {
                     // View Group Code
                     Section("Your Group Code") {
-                        Text("ABC123", modifier = Modifier.padding(vertical = 8.dp))
+                        val code = groupCode
+                        if (code != null) {
+                            Text(code, modifier = Modifier.padding(vertical = 16.dp))
+                        } else {
+                            Text("Loading...", modifier = Modifier.padding(vertical = 8.dp))
+                        }
+                        //Text("ABC123", modifier = Modifier.padding(vertical = 8.dp))
                     }
                     Divider(modifier = Modifier.padding(vertical = 16.dp))
                 }
@@ -154,10 +183,10 @@ fun SettingsScreen(
                                 .fillMaxWidth(),
                             description = "Enter valid group code",
                             hint = "Group code",
-                            textValue = "",
+                            textValue = enteredGroupCode.value,
                             textColor = Color.Gray,
                             cursorColor = md_theme_light_primary,
-                            onValueChanged = { /* TODO */ },
+                            onValueChanged = { newCode -> enteredGroupCode.value = newCode },
                             trailingIcon = null,
                             onTrailingIconClick = null,
                             leadingIcon = Icons.Default.Groups
@@ -168,7 +197,40 @@ fun SettingsScreen(
                                 .padding(8.dp)
                         )
                         Button(
-                            onClick = { /* Handle join group */ },
+                            onClick = {
+                                coroutineScope.launch {
+                                    val newGroupCode = enteredGroupCode.value
+                                    if (newGroupCode.isNotBlank()) {
+                                        val currentUserId = userRepository.getCurrentUserId()
+                                        currentUserId?.let { userId ->
+                                            val newGroup = groupRepository.getGroupByCode(newGroupCode)
+                                            if (newGroup != null) {
+                                                val currentGroupCode = userRepository.getGroupCodeForUser(userId)
+                                                if (currentGroupCode != null) {
+                                                    groupRepository.removeMemberFromGroup(currentGroupCode, userId)
+                                                }
+
+                                                val addMemberResult = groupRepository.addMemberToGroup(newGroupCode, userId)
+                                                if (addMemberResult) {
+                                                    userRepository.updateUserGroupCode(userId, newGroupCode)
+
+                                                    // SUCCESS MESSAGE OR NAVIGATION
+                                                } else {
+                                                    // HANDLE FAILURE
+                                                }
+                                            } else {
+                                                // HANDLE FAILURE FOR NON EXISTENT GROUP CODE
+                                            }
+                                        } ?: run {
+                                            // HANDLE WHERE NO CURRENT USER ID
+                                        }
+
+                                    } else {
+                                        // HANDLE VALIDATION ERROR
+                                    }
+
+                                }
+                            },
                             shape = RoundedCornerShape(25.dp),
                             modifier = Modifier
                                 .fillMaxWidth()

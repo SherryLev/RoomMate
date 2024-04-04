@@ -56,4 +56,22 @@ class GroupRepositoryImpl : GroupRepository {
         }
     }
 
+    override suspend fun removeMemberFromGroup(groupCode: String, userId: String): Boolean {
+        return try {
+            val groupRef = db.collection("groups").document(groupCode)
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(groupRef)
+                val currentMembers = snapshot.get("members") as? List<String> ?: listOf()
+                if (userId in currentMembers) {
+                    val updatedMembers = currentMembers - userId
+                    transaction.update(groupRef, "members", updatedMembers)
+                }
+            }.await()
+            true
+        } catch (e: Exception) {
+            Log.e("RemoveMember", "Failed to remove member from group", e)
+            false
+        }
+    }
+
 }

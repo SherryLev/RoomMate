@@ -44,4 +44,27 @@ class UserRepositoryImpl (
             false
         }
     }
+
+    override suspend fun getGroupCodeForUser(userId: String): String? {
+        return try {
+            val document = firestore.collection("users").document(userId).get().await()
+            document.getString("groupCode")
+        } catch (e: Exception) {
+            Log.e("UserRepository", "Error fetching group code for user", e)
+            null
+        }
+    }
+
+    override suspend fun updateUserGroupCode(userId: String, newGroupCode: String): Boolean {
+        return try {
+            val userDocRef = firestore.collection("users").document(userId)
+            firestore.runTransaction { transaction ->
+                transaction.update(userDocRef, "groupCode", newGroupCode)
+            }.await()
+            true
+        } catch (e: Exception) {
+            Log.e("UserRepository", "Error updatin user's group code", e)
+            false
+        }
+    }
 }
