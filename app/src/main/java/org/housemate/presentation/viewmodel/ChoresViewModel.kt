@@ -8,15 +8,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import org.housemate.domain.model.Chore
+import org.housemate.domain.model.User
 import org.housemate.domain.repositories.ChoreRepository
 import org.housemate.domain.repositories.ExpenseRepository
+import org.housemate.domain.repositories.GroupRepository
 import org.housemate.domain.repositories.UserRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class ChoresViewModel @Inject constructor(
     private val choreRepository: ChoreRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val groupRepository: GroupRepository
 ): ViewModel() {
 
     private val _chores = MutableStateFlow<List<Chore>>(emptyList())
@@ -30,6 +33,9 @@ class ChoresViewModel @Inject constructor(
 
     private val _userId = MutableStateFlow<String?>(null)
     val userId: StateFlow<String?> = _userId
+
+    private val _housemates = MutableStateFlow<List<User>>(emptyList())
+    val housemates: StateFlow<List<User>> = _housemates
 
     init {
         getAllChores()
@@ -46,6 +52,24 @@ class ChoresViewModel @Inject constructor(
     fun fetchCurrentUserId() {
         viewModelScope.launch {
             _userId.value = userRepository.getCurrentUserId()
+        }
+    }
+    fun fetchAllHousemates() {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                val userId = _userId.value ?: return@launch
+                val housemates = groupRepository.fetchAllGroupMembers(userId)
+                if (housemates != null) {
+                    _housemates.value = housemates
+                } else {
+                    _error.value = "Failed to fetch housemates"
+                }
+            } catch (e: Exception) {
+                _error.value = e.message ?: "An error occurred"
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 

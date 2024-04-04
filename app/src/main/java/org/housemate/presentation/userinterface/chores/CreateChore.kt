@@ -173,16 +173,46 @@ fun alignButton(options: List<String>,label: String,onCategorySelected: (String)
 }
 
 @Composable
+fun alignButtonforUser(
+    housemates: List<User>,
+    label: String,
+    onHousemateSelected: (User) -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(
+            onClick = {},
+            modifier = Modifier
+                .size(40.dp)
+                .background(Color.LightGray)
+                .padding(4.dp)
+        ) {
+            Icon(painterResource(R.drawable.add), "Add")
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        SelectionDropdown(
+            options = housemates.map { it.username }, // Map User objects to their usernames
+            label = label,
+            onCategorySelected = { username ->
+                val selectedHousemate = housemates.find { it.username == username }
+                selectedHousemate?.let { onHousemateSelected(it) }
+            }
+        )
+    }
+}
+
+@Composable
 fun ChoreCreator(onDialogDismiss: () -> Unit,
                  choresViewModel: ChoresViewModel = hiltViewModel()
 ){
+    val housemates by choresViewModel.housemates.collectAsState()
+
     val categories = listOf( "Kitchen", "Living Room", "Dining Room", "Staircase", "Backyard")
     val choreList = listOf( "Clean dishes", "Sweep Floors", "Clean Toilet", "Vaccum Floor")
-    val assignees = listOf( "Bob", "Marlee", "Shawn", "Ben", "Laura")
     val labels =  listOf("Chore","Category", "Assignee" )
     var categoryChoice by remember { mutableStateOf("") }
     var choreChoice by remember { mutableStateOf("") }
     var assigneeChoice by remember { mutableStateOf("") }
+    var assigneeId by remember { mutableStateOf("") }
 
     val selectedDate = remember { mutableStateOf<Timestamp?>(null) }
     val repetitionOptions = listOf("None", "Every day", "Every 2 days", "Every 3 days", "Every week", "Every 2 wks", "Every 3 wks", "Every 4 wks")
@@ -200,7 +230,7 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
         }
     }
 
-    LaunchedEffect(key1 = "fetchUserId") {
+    LaunchedEffect("fetchUserId") {
         choresViewModel.fetchCurrentUserId()
     }
 
@@ -210,7 +240,10 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
         Spacer(modifier = Modifier.height(16.dp))
         alignButton(categories,labels[1], onCategorySelected = { category -> categoryChoice = category })
         Spacer(modifier = Modifier.height(16.dp))
-        alignButton(assignees,labels[2],onCategorySelected = { category -> assigneeChoice = category })
+        alignButtonforUser(housemates, labels[2]) { housemate ->
+            assigneeChoice = housemate.username
+            assigneeId = housemate.uid
+        }
         Spacer(modifier = Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             TasksDatePicker { date ->selectedDate.value = date }
@@ -282,6 +315,7 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                             choreName = choreChoice,
                             category = categoryChoice,
                             assignee = assigneeChoice,
+                            assigneeId = assigneeId,
                             dueDate = choreDueDate,
                             userRating = emptyList(),
                             votedUser = emptyList(),

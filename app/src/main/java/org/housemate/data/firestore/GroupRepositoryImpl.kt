@@ -4,8 +4,13 @@ import kotlinx.coroutines.tasks.await
 import org.housemate.domain.model.Group
 import org.housemate.domain.repositories.GroupRepository
 import android.util.Log
+import org.housemate.domain.model.User
+import org.housemate.domain.repositories.UserRepository
+import javax.inject.Inject
 
-class GroupRepositoryImpl : GroupRepository {
+class GroupRepositoryImpl @Inject constructor(
+    private val userRepository: UserRepository
+) : GroupRepository {
     private val db = FirebaseFirestore.getInstance()
 
     override suspend fun createGroup(group: Group): Boolean {
@@ -74,4 +79,22 @@ class GroupRepositoryImpl : GroupRepository {
         }
     }
 
+    override suspend fun fetchAllGroupMembers(userId: String): List<User>? {
+        return try {
+            // Find the group where the user is a member
+            val groupQuery = db.collection("groups").whereArrayContains("members", userId).get().await()
+            val groupDoc = groupQuery.documents.firstOrNull() // Retrieve the first group document
+
+            // Extract member IDs from the group document
+            val memberIds = groupDoc?.get("members") as? List<String>
+
+            // use the userrepository function to get the user for each memberid
+            memberIds?.mapNotNull { memberId ->
+                userRepository.getUserById(memberId)
+            }
+        } catch (e: Exception) {
+            Log.e("FetchAllGroupMembers", "Failed to fetch group members", e)
+            null
+        }
+    }
 }
