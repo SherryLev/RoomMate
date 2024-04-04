@@ -274,15 +274,34 @@ fun TaskDisplayHouse(chores: List<Chore>) {
 fun TaskDisplayWeek(chores: List<Chore>, day: DayOfWeek) {
     Column(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
         val calendar = Calendar.getInstance()
-        chores.forEach { chore ->
-            val choreDueDate = chore.dueDate?.toDate() // Convert Timestamp to Date
+        val choresForDay = chores.filter { chore ->
+            val choreDueDate = chore.dueDate?.toDate()
             if (choreDueDate != null) {
                 calendar.time = choreDueDate
+                calendar.get(Calendar.DAY_OF_WEEK) == day.value
+            } else {
+                false
             }
-            if (calendar.get(Calendar.DAY_OF_WEEK) == day.value) {
+        }
+        if (choresForDay.isNotEmpty()) {
+            // Display chores for the specified day
+            choresForDay.forEach { chore ->
                 TaskWeekItem(chore)
                 Spacer(modifier = Modifier.height(8.dp))
             }
+        } else {
+            // Display message when there are no chores for the specified day
+            Text(
+                text = "You have no chores on this day!",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                ),
+                color = Color.LightGray,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+            )
         }
     }
 }
@@ -396,19 +415,23 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
                     val currentWeekTasks = getCurrentWeekTasks(chores)
                     if(selectedDay == "Week") {
                         Box(
-                            modifier = Modifier.width(300.dp),
+                            modifier = Modifier
+                                .padding(bottom = 16.dp)
+                                .width(300.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             LazyColumn(
-                                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)
+                                modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)
                             ) {
                                 // Iterate over each day of the week
                                 daysOfWeekList.forEach { day ->
                                     // Add a spacer between days
+                                    val camelCaseDay = day.toString().lowercase().replaceFirstChar { it.uppercase() }
+
                                     item {
                                         Spacer(modifier = Modifier.height(16.dp))
                                         Text(
-                                            text = day.toString(),
+                                            text = camelCaseDay,
                                             style = TextStyle(
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 18.sp
@@ -429,16 +452,20 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
                         }
                     } else{
                         val dayOfWeek: DayOfWeek? = stringToDayOfWeek(selectedDay)
-                        Column(modifier = Modifier.weight(1f)) { // Set weight to 1
-                            Spacer(modifier = Modifier.height(16.dp))
+                        Box(
+                            modifier = Modifier.width(300.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column() {
+                                Spacer(modifier = Modifier.height(16.dp))
 
-                            //Log.d("day conversion ", "Day: "+ dayOfWeek)
-                            if (dayOfWeek != null) {
+                                //Log.d("day conversion ", "Day: "+ dayOfWeek)
+                                if (dayOfWeek != null) {
+                                    TaskDisplayWeek(currentWeekTasks, dayOfWeek)
+                                }
 
-                                TaskDisplayWeek(currentWeekTasks,
-                                    dayOfWeek)
+                                Spacer(modifier = Modifier.height(4.dp))
                             }
-                            Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
                 }
