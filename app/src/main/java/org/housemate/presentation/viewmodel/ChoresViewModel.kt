@@ -39,6 +39,7 @@ class ChoresViewModel @Inject constructor(
 
     init {
         getAllChores()
+        fetchAllHousemates()
     }
 
     private val _dialogDismissed = MutableStateFlow(false)

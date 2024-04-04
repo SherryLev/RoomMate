@@ -61,7 +61,7 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
                         }
                     }
                 },
-                groupRepository = GroupRepositoryImpl(),
+                groupRepository = GroupRepositoryImpl(userRepository = UserRepositoryImpl(FirebaseFirestore.getInstance())),
                 userRepository = UserRepositoryImpl(FirebaseFirestore.getInstance())
             )
         }
@@ -71,7 +71,7 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
                     navController.popBackStack()
                     navController.navigate(Graph.HOME)
                 },
-                groupRepository = GroupRepositoryImpl(),
+                groupRepository = GroupRepositoryImpl(userRepository = UserRepositoryImpl(FirebaseFirestore.getInstance())),
                 userRepository = UserRepositoryImpl(FirebaseFirestore.getInstance())
             )
         }

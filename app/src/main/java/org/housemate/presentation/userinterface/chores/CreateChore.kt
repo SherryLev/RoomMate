@@ -232,7 +232,10 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
 
     LaunchedEffect("fetchUserId") {
         choresViewModel.fetchCurrentUserId()
+        choresViewModel.fetchAllHousemates()
     }
+
+    println(housemates)
 
     Column(
         modifier = Modifier.padding(16.dp)) {

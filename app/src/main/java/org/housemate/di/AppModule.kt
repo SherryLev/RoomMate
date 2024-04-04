@@ -14,9 +14,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.housemate.data.ExpenseRepositoryImpl
 import org.housemate.data.firestore.ChoreRepositoryImpl
+import org.housemate.data.firestore.GroupRepositoryImpl
 import org.housemate.data.firestore.UserRepositoryImpl
 import org.housemate.domain.repositories.ChoreRepository
 import org.housemate.domain.repositories.ExpenseRepository
+import org.housemate.domain.repositories.GroupRepository
 import org.housemate.domain.repositories.UserRepository
 import javax.inject.Singleton
 
@@ -80,5 +82,13 @@ object AppModule {
         auth: FirebaseAuth
     ): ChoreRepository {
         return ChoreRepositoryImpl()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGroupRepository(
+        userRepository: UserRepository
+    ): GroupRepository {
+        return GroupRepositoryImpl(userRepository)
     }
 }
