@@ -139,28 +139,44 @@ fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
                 Icon(
                     painter = painterResource(R.drawable.person),
                     contentDescription = "local",
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(30.dp)
                 )
                 Text(
                     text = chore.assignee,
-                    style = TextStyle(fontSize = 16.sp),
+                    style = TextStyle(fontSize = 15.sp),
                     textAlign = TextAlign.Center
                 )
             }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 40.dp) // Adjust the padding here
+                    .padding(start = 30.dp) // Adjust the padding here
             )  {
                 Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    horizontalAlignment = Alignment.Start,
                 ) {
                     Text(
                         text = chore.choreName,
-                        style = TextStyle(fontSize = 20.sp),
-                        textAlign = TextAlign.Center,
-
+                        style = TextStyle(fontSize = 15.sp),
+                        textAlign = TextAlign.Center
                     )
+                    Text(
+                        text = chore.category,
+                        style = TextStyle(fontSize = 13.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    )
+
+                    Text(
+                        text = "Repeats: ${chore.repeat}",
+                        style = TextStyle(fontSize = 13.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Left
+                    )
+
                 }
             }
             Box(modifier = Modifier.padding(end = 5.dp)) {
@@ -273,12 +289,13 @@ fun TaskDisplayHouse(chores: List<Chore>) {
 @Composable
 fun TaskDisplayWeek(chores: List<Chore>, day: DayOfWeek) {
     Column(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
-        val calendar = Calendar.getInstance()
         val choresForDay = chores.filter { chore ->
             val choreDueDate = chore.dueDate?.toDate()
             if (choreDueDate != null) {
+                val calendar = Calendar.getInstance()
                 calendar.time = choreDueDate
-                calendar.get(Calendar.DAY_OF_WEEK) == day.value
+                val calendarDayOfWeek = (calendar.get(Calendar.DAY_OF_WEEK) + 5) % 7 + 1
+                calendarDayOfWeek == day.value
             } else {
                 false
             }

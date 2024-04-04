@@ -186,7 +186,7 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
     var assigneeChoice by remember { mutableStateOf("") }
 
     val selectedDate = remember { mutableStateOf<Timestamp?>(null) }
-    val repetitionOptions = listOf("None", "Every Day", "Week", "2 Weeks", "3 Weeks", "4 Weeks")
+    val repetitionOptions = listOf("None", "Every day", "Every week", "Every 2 weeks", "Every 3 weeks", "Every 4 weeks")
     var repetitionChoice by remember { mutableStateOf("None") }
     var choreCounter by remember { mutableStateOf(0) }
     val choreId = "chore${choreIdCount++}" // Generate unique chore ID
@@ -255,7 +255,8 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                             assignee = assigneeChoice,
                             dueDate = choreDueDate,
                             userRating = emptyList(),
-                            votedUser = emptyList()
+                            votedUser = emptyList(),
+                            repeat = repetitionChoice
                         )
                         choresViewModel.addChore(chore)
                         choreCounter++
