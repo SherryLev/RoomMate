@@ -43,7 +43,7 @@ fun textShow(chore: Chore) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
-            .width(300.dp)
+            .width(330.dp)
             .height(60.dp),
         elevation = 5.dp,
         color = light_purple
@@ -55,7 +55,12 @@ fun textShow(chore: Chore) {
         ) {
             Text(
                 text = chore.choreName,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = Color.DarkGray
+                )
             )
         }
     }
@@ -65,18 +70,18 @@ fun TodaysChores(chores: List<Chore>) {
     LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 10.dp)) {
         items(chores) { chore ->
             textShow(chore)
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
 fun filterChoresForCurrentUserAndToday(chores: List<Chore>, currentUser: String): List<Chore> {
     val currentDate = LocalDate.now()
-    println("Current User: " + currentUser)
-    println("Current Date: " + currentDate)
+    //println("Current User: " + currentUser)
+   // println("Current Date: " + currentDate)
 //    println("Chore Assignee: " + chores[0].assignee)
     //println("Chore due date: " + chores[0].dueDate)
     return chores.filter { chore ->
-        chore.assignee == currentUser &&
+        chore.assigneeId == currentUser &&
                 chore.dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate() == currentDate
     }
 
@@ -89,15 +94,17 @@ fun HomeScreenHelper(
     LaunchedEffect(key1 = "fetchUserIdandchores") {
         choresViewModel.fetchCurrentUserId()
         choresViewModel.getAllChores()
+        choresViewModel.fetchCurrentUser()
     }
     val chores by choresViewModel.chores.collectAsState()
     val currentUserID by choresViewModel.userId.collectAsState()
+    val currentUser by choresViewModel.currentUser.collectAsState()
    // println("Num" + chores[0].dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate())
 
     println("Current User Id: " + currentUserID)
     val fileredChores = currentUserID?.let { filterChoresForCurrentUserAndToday(chores, it) }
 
-    val name = "Alice"
+    val name = currentUser?.username
     val totalTasks = fileredChores?.size
     //val totalTasks =  chores.size
     val totalAmountOwedToYou by expenseViewModel.totalAmountOwedToYou.collectAsState()

@@ -34,6 +34,9 @@ class ChoresViewModel @Inject constructor(
     private val _userId = MutableStateFlow<String?>(null)
     val userId: StateFlow<String?> = _userId
 
+    private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser: StateFlow<User?> = _currentUser
+
     private val _housemates = MutableStateFlow<List<User>>(emptyList())
     val housemates: StateFlow<List<User>> = _housemates
 
@@ -53,6 +56,11 @@ class ChoresViewModel @Inject constructor(
     fun fetchCurrentUserId() {
         viewModelScope.launch {
             _userId.value = userRepository.getCurrentUserId()
+        }
+    }
+    fun fetchCurrentUser() {
+        viewModelScope.launch {
+            _currentUser.value = _userId.value?.let { userRepository.getUserById(it) }
         }
     }
     fun fetchAllHousemates() {
