@@ -219,6 +219,7 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
                                     userDocRef.update("groupCode", enteredGroupCode).addOnSuccessListener {
                                         showSuccessMessage = true
                                         // NAVIGATE TO NEXT SCREEN
+                                        onNavigateToGroupSuccessScreen()
                                     }.addOnFailureListener{
                                         showErrorMessage = "Failed to update user with group code. Please try again"
                                     }
