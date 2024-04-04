@@ -1,7 +1,6 @@
 package org.housemate.domain.model
 
-import java.time.LocalDate
-import java.time.LocalDateTime
+import com.google.firebase.Timestamp
 
 data class Chore(
     val userId: String,
@@ -9,19 +8,22 @@ data class Chore(
     val choreName: String,
     val assignee: String,
     val category: String,
-    val dueDate: LocalDate? = null,
+    val dueDate: Timestamp? = null,
     val userRating :  List<Int> = emptyList(),  // nullable
-    val votedUser: List<String>? // nullable
+    val votedUser: List<String>?, // nullable
+    val repeat: String
 ) {
+    constructor() : this("", "", "", "", "", null, emptyList(), null, "")
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "choreId" to choreId,
             "choreName" to choreName,
             "assignee" to assignee,
             "category" to category,
-            "dueDate" to dueDate?.toString(),
+            "dueDate" to dueDate,
             "userRating" to userRating,
-            "votedUser" to votedUser
+            "votedUser" to votedUser,
+            "repeat" to repeat
         )
     }
 }

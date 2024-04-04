@@ -124,33 +124,6 @@ fun SettingsScreen(
                     Section("Username") {
                         // Display current username
                         Text("Your current username is: [currentUsername]", modifier = Modifier.padding(vertical = 8.dp))
-
-                        Divider(modifier = Modifier.padding(vertical = 16.dp))
-
-                        TextEntryModule(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            description = "Edit username",
-                            hint = "Enter new username",
-                            textValue = "",
-                            textColor = Color.Gray,
-                            cursorColor = md_theme_light_primary,
-                            onValueChanged = { /* TODO */ },
-                            trailingIcon = null,
-                            onTrailingIconClick = null,
-                            leadingIcon = Icons.Default.AccountCircle
-                        )
-
-                        Button(
-                            onClick = { /* Handle username change */ },
-                            shape = RoundedCornerShape(25.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp)
-                        ) {
-                            Text("Change Username", fontSize = 16.sp)
-                        }
                     }
                 }
 

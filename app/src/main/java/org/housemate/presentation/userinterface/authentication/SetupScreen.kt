@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.domain.repositories.GroupRepository
+import org.housemate.presentation.userinterface.chores.ChoreCreator
 import org.housemate.domain.model.Group
 import org.housemate.domain.repositories.UserRepository
 import kotlinx.coroutines.launch
@@ -42,9 +43,6 @@ import androidx.compose.ui.text.input.KeyboardType
 
 
 data class Task(val name: String)
-
-
-
 
 @Composable
 fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController, groupRepository: GroupRepository, userRepository: UserRepository) {

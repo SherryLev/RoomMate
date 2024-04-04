@@ -44,7 +44,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Star
@@ -54,6 +56,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.firebase.Timestamp
 //import com.google.android.libraries.places.api.model.LocalDate
 import org.housemate.R
 import org.housemate.data.firestore.ChoreRepositoryImpl
@@ -66,9 +70,11 @@ import kotlin.math.sqrt
 import org.housemate.data.firestore.UserRepositoryImpl
 import com.google.firebase.firestore.FirebaseFirestore
 import org.housemate.presentation.userinterface.expenses.CustomDropdown
+import org.housemate.presentation.viewmodel.ChoresViewModel
 import java.time.LocalDate
+import java.util.Calendar
 
-var choresList = mutableListOf<Chore>()
+//var choresList = mutableListOf<Chore>()
 
 //CITE: https://medium.com/@imitiyaz125/star-rating-bar-in-jetpack-compose-5ae54a2b5b23
 @Composable
@@ -133,28 +139,44 @@ fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
                 Icon(
                     painter = painterResource(R.drawable.person),
                     contentDescription = "local",
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(30.dp)
                 )
                 Text(
                     text = chore.assignee,
-                    style = TextStyle(fontSize = 16.sp),
+                    style = TextStyle(fontSize = 15.sp),
                     textAlign = TextAlign.Center
                 )
             }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 40.dp) // Adjust the padding here
+                    .padding(start = 30.dp) // Adjust the padding here
             )  {
                 Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    horizontalAlignment = Alignment.Start,
                 ) {
                     Text(
                         text = chore.choreName,
-                        style = TextStyle(fontSize = 20.sp),
-                        textAlign = TextAlign.Center,
-
+                        style = TextStyle(fontSize = 15.sp),
+                        textAlign = TextAlign.Center
                     )
+                    Text(
+                        text = chore.category,
+                        style = TextStyle(fontSize = 13.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    )
+
+                    Text(
+                        text = "Repeats: ${chore.repeat}",
+                        style = TextStyle(fontSize = 13.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Left
+                    )
+
                 }
             }
             Box(modifier = Modifier.padding(end = 5.dp)) {
@@ -164,10 +186,10 @@ fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
                         //deleteChore(chore.choreId, userId: String)
                     },
                     modifier = Modifier
-                        .width(30.dp)
-                        .height(30.dp)
+                        .width(22.dp)
+                        .height(22.dp)
                 ) {
-                    Icon(painterResource(R.drawable.edit), "Edit")
+                    Icon(painterResource(R.drawable.delete), "Delete", tint = Color.DarkGray)
                 }
             }
         }
@@ -175,18 +197,25 @@ fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
     Spacer(modifier = Modifier.height(8.dp))
 }
 fun getCurrentWeekTasks(chores: List<Chore>): List<Chore> {
-    val today = LocalDate.now()
-    val dayOfWeek = today.dayOfWeek
+    val today = Timestamp.now().toDate()
+    val calendar = Calendar.getInstance()
+    calendar.time = today
+    val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
 
     val offsetDays = when (dayOfWeek) {
-        DayOfWeek.MONDAY -> 0
-        else -> dayOfWeek.value - 1
+        Calendar.MONDAY -> 0
+        else -> dayOfWeek - Calendar.MONDAY
     }
 
-    val startOfWeek = today.minusDays(offsetDays.toLong())
-    val endOfWeek = startOfWeek.plusDays(6)
+    calendar.add(Calendar.DAY_OF_YEAR, -offsetDays)
+    val startOfWeek = calendar.time
+    calendar.add(Calendar.DAY_OF_YEAR, 6)
+    val endOfWeek = calendar.time
 
-    return chores.filter { chore -> chore.dueDate in startOfWeek..endOfWeek }
+    return chores.filter { chore ->
+        val choreDueDate = chore.dueDate?.toDate()
+        choreDueDate in startOfWeek..endOfWeek
+    }
 }
 
 
@@ -245,35 +274,67 @@ fun stringToDayOfWeek(dayString: String): DayOfWeek? {
 }
 
 @Composable
-fun TaskDisplayHouse(chores: List<Chore>, deleteTask: (Chore) -> Unit) {
+fun TaskDisplayHouse(chores: List<Chore>) {
+    val uniqueChoreTypes = mutableSetOf<String>()
     LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
         items(chores) { chore ->
-            TaskItem(chore) {
-                deleteTask(chore)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-    }
-}
-
-@Composable
-fun TaskDisplayWeek(chores: List<Chore>, deleteTask: (Chore) -> Unit, day: DayOfWeek) {
-    LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
-        items(chores){chore ->
-            if(chore.dueDate?.dayOfWeek == day){
-                TaskWeekItem(chore)
+            val choreType = extractChoreType(chore.choreId)
+            print(choreType)
+            if (uniqueChoreTypes.add(choreType)) { // Check if the chore type is already added
+                TaskItem(chore) {
+                    // deleteTask(chore)
+                }
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
 }
 
+@Composable
+fun TaskDisplayWeek(chores: List<Chore>, day: DayOfWeek) {
+    Column(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
+        val choresForDay = chores.filter { chore ->
+            val choreDueDate = chore.dueDate?.toDate()
+            if (choreDueDate != null) {
+                val calendar = Calendar.getInstance()
+                calendar.time = choreDueDate
+                val calendarDayOfWeek = (calendar.get(Calendar.DAY_OF_WEEK) + 5) % 7 + 1
+                calendarDayOfWeek == day.value
+            } else {
+                false
+            }
+        }
+        if (choresForDay.isNotEmpty()) {
+            // Display chores for the specified day
+            choresForDay.forEach { chore ->
+                TaskWeekItem(chore)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        } else {
+            // Display message when there are no chores for the specified day
+            Text(
+                text = "You have no chores on this day!",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                ),
+                color = Color.LightGray,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+            )
+        }
+    }
+}
 
 @Composable
-fun MainLayout(navController: NavHostController = rememberNavController()) {
+fun MainLayout(navController: NavHostController = rememberNavController(),
+               choresViewModel: ChoresViewModel = hiltViewModel()) {
     //val chores = remember { choresList }
     //val (chores, setChores) = remember { mutableStateOf(choresList) }
+    val dialogDismissed by choresViewModel.dialogDismissed.collectAsState()
+    val chores by choresViewModel.chores.collectAsState()
+
     var showDialog by remember { mutableStateOf(false) }
     var isPersonal by remember { mutableStateOf(false) }
     var isHouse by remember { mutableStateOf(true) }
@@ -287,11 +348,18 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
         DayOfWeek.SUNDAY
     )
     val stringDays = listOf("Week", "Monday", "Tuesday", "Wednesday","Thursday","Friday","Saturday","Sunday")
-    var chores by remember { mutableStateOf(choresList) }
+//    var chores by remember { mutableStateOf(choresList) }
     var selectedDay by remember { mutableStateOf("Week") }
 
-    val deleteTask: (Chore) -> Unit = { choreToDelete ->
-        chores = chores.toMutableList().apply { remove(choreToDelete) }
+//    val deleteTask: (Chore) -> Unit = { choreToDelete ->
+//        chores = chores.toMutableList().apply { remove(choreToDelete) }
+//    }
+
+    LaunchedEffect(dialogDismissed) {
+        if (dialogDismissed) {
+            choresViewModel.getAllChores()
+            choresViewModel.setDialogDismissed(false) // Reset the state after refreshing
+        }
     }
 
     Box(
@@ -363,30 +431,62 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
             Column(
                 ) {
                 if(isHouse){
-                    TaskDisplayHouse(chores, deleteTask)
+                    TaskDisplayHouse(chores)
                 } else {
                     val currentWeekTasks = getCurrentWeekTasks(chores)
                     if(selectedDay == "Week") {
-                        for (day in daysOfWeekList) {
-                            Column(modifier = Modifier.weight(1f)) { // Set weight to 1
-                                Text(text = day.toString())
-                                Spacer(modifier = Modifier.height(4.dp))
-                                TaskDisplayWeek(currentWeekTasks, deleteTask = { chore -> chores.remove(chore) }, day)
-                                //TaskDisplayWeek(chores, deleteTask = { chore -> chores.remove(chore) }, day)
-                                Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .padding(bottom = 16.dp)
+                                .width(300.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)
+                            ) {
+                                // Iterate over each day of the week
+                                daysOfWeekList.forEach { day ->
+                                    // Add a spacer between days
+                                    val camelCaseDay = day.toString().lowercase().replaceFirstChar { it.uppercase() }
+
+                                    item {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = camelCaseDay,
+                                            style = TextStyle(
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 18.sp
+                                            )
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                    item {
+                                        TaskDisplayWeek(
+                                            currentWeekTasks,
+//                                            deleteTask = { chore -> chores.remove(chore) },
+                                            day
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                }
                             }
                         }
                     } else{
                         val dayOfWeek: DayOfWeek? = stringToDayOfWeek(selectedDay)
-                        Column(modifier = Modifier.weight(1f)) { // Set weight to 1
-                            Spacer(modifier = Modifier.height(16.dp))
+                        Box(
+                            modifier = Modifier.width(300.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column() {
+                                Spacer(modifier = Modifier.height(16.dp))
 
-                            //Log.d("day conversion ", "Day: "+ dayOfWeek)
-                            if (dayOfWeek != null) {
-                                TaskDisplayWeek(currentWeekTasks, deleteTask = { chore -> chores.remove(chore) },
-                                    dayOfWeek)
+                                //Log.d("day conversion ", "Day: "+ dayOfWeek)
+                                if (dayOfWeek != null) {
+                                    TaskDisplayWeek(currentWeekTasks, dayOfWeek)
+                                }
+
+                                Spacer(modifier = Modifier.height(4.dp))
                             }
-                            Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
                 }
@@ -419,19 +519,20 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
             }
         }
         if (showDialog) {
-            Dialog( onDismissRequest = { showDialog = false }) {
+            Dialog( onDismissRequest = {
+                showDialog = false
+                choresViewModel.setDialogDismissed(true)
+            }) {
                 // Content of the modal dialog
                 Box(
                     modifier = Modifier
                         .background(Color.White)
                     //.padding(16.dp)
                 ) {
-                    ChoreCreator(createChore = { chore ->
-                        chores = chores.toMutableList().apply { add(chore) }
-                    }, onDialogDismiss = { showDialog = false },
-                        choreRepository = ChoreRepositoryImpl(),
-                        userRepository = UserRepositoryImpl(FirebaseFirestore.getInstance())
-                    )
+                    ChoreCreator(
+                        onDialogDismiss = {
+                            showDialog = false
+                        } )
                     Button(
                         onClick = { showDialog = false },
                         modifier = Modifier
@@ -449,13 +550,21 @@ fun MainLayout(navController: NavHostController = rememberNavController()) {
 
 
 @Composable
-fun ChoresScreen(navController: NavHostController = rememberNavController()) {
+fun ChoresScreen(
+    navController: NavHostController = rememberNavController()
+) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         MainLayout(navController = navController)
     }
+}
+
+// Function to extract chore type from choreId
+private fun extractChoreType(choreId: String): String {
+    // Split the choreId by "-" and get the first part
+    return choreId.split("-").firstOrNull() ?: ""
 }
 
 
