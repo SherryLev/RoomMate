@@ -14,8 +14,7 @@ import org.housemate.presentation.userinterface.authentication.RegisterScreen
 import org.housemate.presentation.userinterface.authentication.SetupScreen
 import org.housemate.data.firestore.GroupRepositoryImpl
 import org.housemate.data.firestore.UserRepositoryImpl
-import org.housemate.presentation.userinterface.authentication.SuccessScreen
-
+import org.housemate.presentation.userinterface.authentication.GroupSuccessScreen
 
 fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
     navigation(
@@ -54,7 +53,22 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
         }
         composable(AuthScreen.SetupScreen.route){
             SetupScreen(
+                onNavigateToGroupSuccessScreen = {
+                    navController.popBackStack()
+                    navController.navigate(AuthScreen.GroupSuccessScreen.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                    }
+                },
+                groupRepository = GroupRepositoryImpl(),
+                userRepository = UserRepositoryImpl(FirebaseFirestore.getInstance())
+            )
+        }
+        composable(AuthScreen.GroupSuccessScreen.route) {
+            GroupSuccessScreen(
                 onNavigateToHomeScreen = {
+                    navController.popBackStack()
                     navController.navigate(Graph.HOME)
                 },
                 groupRepository = GroupRepositoryImpl(),
@@ -62,12 +76,7 @@ fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             )
         }
 
-        composable(
-            route = "success/{groupcode}",
-            arguments = listOf(navArgument("groupCode") { type = NavType.StringType})
-        ) { backStackEntry ->
-            SuccessScreen(groupCode = backStackEntry.arguments?.getString("groupCode") ?: "")
-        }
+
     }
 }
 
@@ -75,4 +84,5 @@ sealed class AuthScreen(val route:String){
     object Login:AuthScreen("login_screen")
     object Register:AuthScreen("register_screen")
     object SetupScreen:AuthScreen("setup_screen")
+    object GroupSuccessScreen:AuthScreen("group_success_screen")
 }
