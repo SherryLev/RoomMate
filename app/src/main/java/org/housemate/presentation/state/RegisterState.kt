@@ -2,6 +2,7 @@ package org.housemate.presentation.state
 
 data class RegisterState(
     val emailInput:String = "",
+    val usernameInput: String = "",
     val passwordInput:String = "",
     val passwordRepeatedInput:String = "",
     val isInputValid:Boolean = false,

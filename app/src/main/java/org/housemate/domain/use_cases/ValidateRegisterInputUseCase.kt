@@ -8,6 +8,7 @@ import org.housemate.utils.containsUpperCase
 class ValidateRegisterInputUseCase {
     operator fun invoke(
         email: String,
+        username: String,
         password: String,
         passwordRepeated: String
     ): RegisterInputValidationType {
@@ -16,6 +17,12 @@ class ValidateRegisterInputUseCase {
         }
         if("@" !in email){
             return RegisterInputValidationType.NoEmail
+        }
+        if(username.count() > 15){
+            return RegisterInputValidationType.UsernameTooLong
+        }
+        if(username.count() < 3){
+            return RegisterInputValidationType.UsernameTooShort
         }
         if(password!= passwordRepeated){
             return RegisterInputValidationType.PasswordsDoNotMatch

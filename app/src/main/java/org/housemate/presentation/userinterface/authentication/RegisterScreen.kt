@@ -13,6 +13,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.VpnKey
@@ -89,6 +90,9 @@ fun RegisterScreen(
             emailValue = {
                 registerViewModel.registerState.emailInput
             },
+            usernameValue = {
+                registerViewModel.registerState.usernameInput
+            },
             passwordValue = {
                 registerViewModel.registerState.passwordInput
             },
@@ -99,6 +103,7 @@ fun RegisterScreen(
                 registerViewModel.registerState.isInputValid
             },
             onEmailChanged = registerViewModel::onEmailInputChange,
+            onUsernameChanged = registerViewModel::onUsernameInputChange,
             onPasswordChanged = registerViewModel::onPasswordInputChange,
             onPasswordRepeatedChanged = registerViewModel::onPasswordRepeatedInputChange,
             onButtonClick = registerViewModel::onRegisterClick,
@@ -156,10 +161,12 @@ fun RegisterScreen(
 @Composable
 fun RegisterContainer(
     emailValue:() -> String,
+    usernameValue:() -> String,
     passwordValue:() -> String,
     passwordRepeatedValue:() -> String,
     buttonEnabled:() -> Boolean,
     onEmailChanged:(String)->Unit,
+    onUsernameChanged: (String) -> Unit,
     onPasswordChanged:(String)->Unit,
     onPasswordRepeatedChanged:(String)->Unit,
     onButtonClick:()->Unit,
@@ -186,6 +193,20 @@ fun RegisterContainer(
             textColor = Color.Gray,
             cursorColor = md_theme_light_primary,
             onValueChanged = onEmailChanged,
+            trailingIcon = null,
+            onTrailingIconClick = null
+        )
+
+        TextEntryModule(
+            modifier = Modifier
+                .fillMaxWidth(),
+            description = "Username",
+            hint = "Choose a username",
+            leadingIcon = Icons.Default.AccountCircle,
+            textValue = usernameValue(),
+            textColor = Color.Gray,
+            cursorColor = md_theme_light_primary,
+            onValueChanged = onUsernameChanged,
             trailingIcon = null,
             onTrailingIconClick = null
         )

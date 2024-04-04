@@ -21,7 +21,7 @@ class AuthRepositoryImpl (
     private val auth: FirebaseAuth
 )  : AuthRepository {
 
-    override suspend fun register(email: String, password: String): Boolean {
+    override suspend fun register(email: String, username: String, password: String): Boolean {
         try {
             auth.createUserWithEmailAndPassword(email, password).await()
 
@@ -33,6 +33,7 @@ class AuthRepositoryImpl (
                     // User doesn't exist in Firestore, so add them
                     val newUser = User(
                         uid = currentUser.uid,
+                        username = username,
                         email = email,
                         loggedIn = true
                     )

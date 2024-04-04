@@ -28,6 +28,11 @@ class RegisterViewModel @Inject constructor(
         checkInputValidation()
     }
 
+    fun onUsernameInputChange(newValue: String){
+        registerState = registerState.copy(usernameInput = newValue)
+        checkInputValidation()
+    }
+
     fun onPasswordInputChange(newValue: String){
         registerState = registerState.copy(passwordInput = newValue)
         checkInputValidation()
@@ -53,6 +58,7 @@ class RegisterViewModel @Inject constructor(
             registerState = try{
                 val registerResult = authRepository.register(
                     email = registerState.emailInput,
+                    username = registerState.usernameInput,
                     password = registerState.passwordInput
                 )
                 if (!registerResult) {
@@ -76,6 +82,7 @@ class RegisterViewModel @Inject constructor(
     private fun checkInputValidation(){
         val validationResult = validateRegisterInputUseCase(
             registerState.emailInput,
+            registerState.usernameInput,
             registerState.passwordInput,
             registerState.passwordRepeatedInput
         )
@@ -91,6 +98,12 @@ class RegisterViewModel @Inject constructor(
             }
             RegisterInputValidationType.NoEmail -> {
                 registerState.copy(errorMessageInput = "Please enter a valid email", isInputValid = false)
+            }
+            RegisterInputValidationType.UsernameTooLong -> {
+                registerState.copy(errorMessageInput = "Username too long, must be less than 15 characters")
+            }
+            RegisterInputValidationType.UsernameTooShort -> {
+                registerState.copy(errorMessageInput = "Username too short, must be more than 2 characters")
             }
             RegisterInputValidationType.PasswordTooShort -> {
                 registerState.copy(errorMessageInput = "Password must be at least 8 characters", isInputValid = false)
