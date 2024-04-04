@@ -13,12 +13,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.housemate.domain.repositories.AuthRepository
+import org.housemate.domain.repositories.UserRepository
 import javax.inject.Inject
 
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
 ): ViewModel() {
 
     private val _logoutState = MutableStateFlow<Boolean?>(null)
@@ -27,10 +29,20 @@ class SettingsViewModel @Inject constructor(
     private val _deleteAccountState = MutableStateFlow<DeleteAccountResult?>(null)
     val deleteAccountState: StateFlow<DeleteAccountResult?> = _deleteAccountState
 
+    private val _username = MutableStateFlow<String?>("")
+    val username: StateFlow<String?> = _username
+
     fun logout() {
         viewModelScope.launch {
             val success = authRepository.logout()
             _logoutState.value = success
+        }
+    }
+
+    fun getUsername(userId: String) {
+        viewModelScope.launch {
+            val user = userRepository.getUserById(userId)
+            _username.value = user?.username
         }
     }
 

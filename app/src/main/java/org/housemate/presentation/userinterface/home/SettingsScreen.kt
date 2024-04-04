@@ -83,11 +83,13 @@ fun SettingsScreen(
     // State to hold group code
     var groupCode by remember { mutableStateOf<String?>(null)}
 
+    val username by settingsViewModel.username.collectAsState()
+
     LaunchedEffect(Unit) {
         val userId = userRepository.getCurrentUserId()
         groupCode = userRepository.getGroupCodeForUser(userId!!)
+        settingsViewModel.getUsername(userId = userRepository.getCurrentUserId()!!)
     }
-
 
     // Observe logout state
     if (logoutState == true) {
@@ -123,7 +125,7 @@ fun SettingsScreen(
                 item {
                     Section("Username") {
                         // Display current username
-                        Text("Your current username is: [currentUsername]", modifier = Modifier.padding(vertical = 8.dp))
+                        Text("Your username is: $username", modifier = Modifier.padding(vertical = 8.dp))
                     }
                 }
 
