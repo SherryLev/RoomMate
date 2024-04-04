@@ -101,7 +101,7 @@ fun TasksDatePicker(onDateSelected: (Timestamp) -> Unit): Timestamp? {
             onValueChange = { selectedDateText = it },
             onClick = {
                 datePicker.show()
-            },
+            }
         ) {
             Text(text = "Start Date")
         }
@@ -213,7 +213,7 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
         alignButton(assignees,labels[2],onCategorySelected = { category -> assigneeChoice = category })
         Spacer(modifier = Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TasksDatePicker { date ->selectedDate.value = date}
+            TasksDatePicker { date ->selectedDate.value = date }
             Spacer(modifier = Modifier.width(16.dp))
             SelectionDropdown(
                 options = repetitionOptions,

@@ -7,18 +7,20 @@ data class Chore(
     val choreId: String,
     val choreName: String,
     val assignee: String,
+    val assigneeId: String,
     val category: String,
     val dueDate: Timestamp? = null,
     val userRating :  List<Int> = emptyList(),  // nullable
     val votedUser: List<String>?, // nullable
     val repeat: String
 ) {
-    constructor() : this("", "", "", "", "", null, emptyList(), null, "")
+    constructor() : this("", "", "", "", "", "", null, emptyList(), null, "")
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "choreId" to choreId,
             "choreName" to choreName,
             "assignee" to assignee,
+            "assigneeId" to assigneeId,
             "category" to category,
             "dueDate" to dueDate,
             "userRating" to userRating,
