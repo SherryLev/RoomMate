@@ -207,7 +207,7 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
     val housemates by choresViewModel.housemates.collectAsState()
 
     val categories = listOf( "Kitchen", "Living Room", "Dining Room", "Staircase", "Backyard")
-    val choreList = listOf( "Clean dishes", "Sweep Floors", "Clean Toilet", "Vaccum Floor")
+    val choreList = listOf( "Clean dishes", "Sweep Floors", "Clean Toilet", "Vacuum Floor")
     val labels =  listOf("Chore","Category", "Assignee" )
     var categoryChoice by remember { mutableStateOf("") }
     var choreChoice by remember { mutableStateOf("") }
