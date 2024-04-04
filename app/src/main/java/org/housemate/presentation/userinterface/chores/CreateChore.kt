@@ -186,7 +186,7 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
     var assigneeChoice by remember { mutableStateOf("") }
 
     val selectedDate = remember { mutableStateOf<Timestamp?>(null) }
-    val repetitionOptions = listOf("None", "Every day", "Every week", "Every 2 weeks", "Every 3 weeks", "Every 4 weeks")
+    val repetitionOptions = listOf("None", "Every day", "Every week", "Every 2 wks", "Every 3 wks", "Every 4 wks")
     var repetitionChoice by remember { mutableStateOf("None") }
     var choreCounter by remember { mutableStateOf(0) }
     val choreId = "chore${choreIdCount++}" // Generate unique chore ID
@@ -236,17 +236,25 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                             val daysBetween = (endDate.time - dueDate.toDate().time) / (1000 * 60 * 60 * 24)
                             (daysBetween / 7) * 7
                         }
-                        "Week" -> 16
-                        "2 Weeks" -> 8
-                        "3 Weeks" -> 4
-                        "4 Weeks" -> 4
+                        "Every week" -> 16
+                        "Every 2 wks" -> 8
+                        "Every 3 wks" -> 4
+                        "Every 4 wks" -> 4
                         else -> 1
                     }
                     repeat(repetitions.toInt()) { index ->
-                        val choreDueDate = when (repetitionChoice) {
-                            "Every Day" -> Timestamp(dueDate.seconds + index * 86400, dueDate.nanoseconds) // Add seconds for "Every Day"
-                            else -> Timestamp(dueDate.seconds + index * 604800, dueDate.nanoseconds) // Add seconds for other repetitions
+                        val repetitionSeconds = when (repetitionChoice) {
+                            "Every Day" -> 86400 * index
+                            "Every 2 wks" -> 604800 * 2 * index
+                            "Every 3 wks" -> 604800 * 3 * index
+                            "Every 4 wks" -> 604800 * 4 * index
+                            else -> 604800 * index
                         }
+
+                        val choreDueDate = Timestamp(dueDate.seconds + repetitionSeconds, dueDate.nanoseconds)
+                        // Create the chore with the calculated due date
+                        println(choreDueDate.toDate())
+
                         val chore = Chore(
                             userId = userId ?: "",
                             choreId = "$choreId-$index", // Ensure unique ID for each chore

@@ -39,6 +39,7 @@ class ChoresViewModel @Inject constructor(
     val dialogDismissed: StateFlow<Boolean> = _dialogDismissed
 
     fun setDialogDismissed(dismissed: Boolean) {
+        getAllChores()
         _dialogDismissed.value = dismissed
     }
 
