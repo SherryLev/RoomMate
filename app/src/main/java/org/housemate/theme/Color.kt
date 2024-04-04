@@ -69,4 +69,5 @@ val purple_background = Color(0x999419FF)
 val light_purple = Color(0xFFF4E7FF)
 val light_gray = Color(0xFFF3F3F3)
 val light_red = Color(0xFFFFDAD6)
+val pretty_purple = Color(0XFFCA8DFD)
 
