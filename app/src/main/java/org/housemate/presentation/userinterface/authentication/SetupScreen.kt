@@ -65,6 +65,7 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
         userId = userRepository.getCurrentUserId()
     }
 
+    var newGroupname by remember { mutableStateOf("")}
 
     Box(
         Modifier
@@ -76,19 +77,23 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
             modifier = Modifier
                 .align(Alignment.TopCenter)
         ) {
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 "Welcome to HouseMate",
                 modifier = Modifier
                     .padding(top = 20.dp, start = 35.dp)
                     .align(Alignment.CenterHorizontally),
-                fontSize = 60.sp
+                fontSize = 50.sp
             )
 
+
+            // INCREASE IF NEEDED
+            //Spacer(modifier = Modifier.height(30.dp))
 
             Text(
                 "Create a New Household",
                 modifier = Modifier
-                    .padding(top = 80.dp)
+                    .padding(top = 20.dp)
                     .align(Alignment.CenterHorizontally),
                 fontSize = 20.sp
             )
@@ -99,6 +104,16 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
                     .align(Alignment.CenterHorizontally),
                 fontSize = 14.sp
             )
+
+            // CREATE GROUP NAME
+            TextField(
+                value = newGroupname,
+                onValueChange = { newGroupname = it },
+                label = { Text("Household Name") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            )
+
             Button(
                 onClick = {
 
@@ -106,7 +121,7 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
                     coroutineScope.launch {
                         val uniqueGroupCode = UUID.randomUUID().toString().replace("-","").substring(0,4)
                         // group code will be of length 4
-                        val newGroup = Group(uniqueGroupCode, "groupName", userId, listOf(userId))
+                        val newGroup = Group(uniqueGroupCode, newGroupname, userId, listOf(userId))
                         try {
                             val success = groupRepository.createGroup(newGroup)
                             if (success) {
@@ -117,6 +132,7 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
                                     if (task.isSuccessful) {
                                         // This will be changed through another issue
                                         //navController.navigate("success/$uniqueGroupCode")
+
                                         onNavigateToGroupSuccessScreen()
                                         showSuccessMessage = true
                                     } else {
@@ -139,7 +155,7 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
                 },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(vertical = 25.dp)
+                    //.padding(vertical = 15.dp)
             ) {
                 Text("Create Household")
             }
@@ -149,7 +165,7 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
                 Box(
                     modifier = Modifier
                         .width(300.dp)
-                        .height(70.dp)
+                        .height(20.dp) //70
                         .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
@@ -158,6 +174,10 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
                         modifier = Modifier.align(Alignment.TopCenter),
                         fontSize = 14.sp
                     )
+
+                    // INCREASE IF NEEDED
+                    //Spacer(modifier = Modifier.height(100.dp))
+
                     Button(
                         onClick = { showDialog = false },
                         modifier = Modifier
