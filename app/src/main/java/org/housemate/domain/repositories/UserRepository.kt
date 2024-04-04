@@ -11,4 +11,5 @@ interface UserRepository {
     suspend fun getGroupCodeForUser(userId: String): String?
 
     suspend fun updateUserGroupCode(userId: String, newGroupCode: String): Boolean
+
     }

@@ -74,4 +74,15 @@ class GroupRepositoryImpl : GroupRepository {
         }
     }
 
+    override suspend fun isCreator(userId: String, groupCode: String): Boolean {
+        return try {
+            val documentSnapshot = db.collection("groups").document(groupCode).get().await()
+            val creatorId = documentSnapshot.getString("creatorId")
+            userId == creatorId
+        } catch (e: Exception) {
+            Log.e("GroupRepository", "Error checking creator status")
+            false
+        }
+    }
+
 }

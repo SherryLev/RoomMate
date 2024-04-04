@@ -45,7 +45,7 @@ import androidx.compose.ui.text.input.KeyboardType
 data class Task(val name: String)
 
 @Composable
-fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController, groupRepository: GroupRepository, userRepository: UserRepository) {
+fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavController, groupRepository: GroupRepository, userRepository: UserRepository) {
     var tasks by remember { mutableStateOf(emptyList<Task>()) }
     var showDialog by remember { mutableStateOf(false) }
     var coroutineScope = rememberCoroutineScope()
@@ -117,6 +117,7 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
                                     if (task.isSuccessful) {
                                         // This will be changed through another issue
                                         //navController.navigate("success/$uniqueGroupCode")
+                                        onNavigateToGroupSuccessScreen()
                                         showSuccessMessage = true
                                     } else {
                                         showErrorMessage = "Failed to update user with group code. Please try again"
@@ -244,7 +245,7 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
 
             Button(
                 onClick = {
-                    onNavigateToHomeScreen()
+                    onNavigateToGroupSuccessScreen()
                 },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -262,7 +263,7 @@ fun MainLayout( onNavigateToHomeScreen: () -> Unit, navController: NavController
 
 
 @Composable
-fun SetupScreen( onNavigateToHomeScreen: () -> Unit,
+fun SetupScreen( onNavigateToGroupSuccessScreen: () -> Unit,
                  navController: NavHostController = rememberNavController(),
                  groupRepository: GroupRepository,
                  userRepository: UserRepository) {
@@ -270,7 +271,7 @@ fun SetupScreen( onNavigateToHomeScreen: () -> Unit,
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        MainLayout(onNavigateToHomeScreen,
+        MainLayout(onNavigateToGroupSuccessScreen,
             navController = navController,
             groupRepository = groupRepository,
             userRepository = userRepository)
