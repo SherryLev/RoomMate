@@ -11,6 +11,7 @@ import com.google.firebase.Timestamp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -64,6 +65,7 @@ fun TodaysChores(chores: List<Chore>) {
     LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 10.dp)) {
         items(chores) { chore ->
             textShow(chore)
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -71,8 +73,8 @@ fun filterChoresForCurrentUserAndToday(chores: List<Chore>, currentUser: String)
     val currentDate = LocalDate.now()
     println("Current User: " + currentUser)
     println("Current Date: " + currentDate)
-    println("Chore Assignee: " + chores[0].assignee)
-    println("Chore due date: " + chores[0].dueDate)
+//    println("Chore Assignee: " + chores[0].assignee)
+    //println("Chore due date: " + chores[0].dueDate)
     return chores.filter { chore ->
         chore.assignee == currentUser &&
                 chore.dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate() == currentDate
@@ -84,13 +86,20 @@ fun HomeScreenHelper(
     navController: NavHostController = rememberNavController(),
     onNavigateToSettingsScreen: () -> Unit,expenseViewModel: ExpenseViewModel = hiltViewModel(),
     choresViewModel: ChoresViewModel = hiltViewModel()) {
-
+    LaunchedEffect(key1 = "fetchUserIdandchores") {
+        choresViewModel.fetchCurrentUserId()
+        choresViewModel.getAllChores()
+    }
     val chores by choresViewModel.chores.collectAsState()
-    val currentUserID = choresViewModel.fetchCurrentUserId().toString()
-    val fileredChores = filterChoresForCurrentUserAndToday(chores, currentUserID)
+    val currentUserID by choresViewModel.userId.collectAsState()
+   // println("Num" + chores[0].dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate())
+
+    println("Current User Id: " + currentUserID)
+    val fileredChores = currentUserID?.let { filterChoresForCurrentUserAndToday(chores, it) }
 
     val name = "Alice"
-    val totalTasks = fileredChores.size
+    val totalTasks = fileredChores?.size
+    //val totalTasks =  chores.size
     val totalAmountOwedToYou by expenseViewModel.totalAmountOwedToYou.collectAsState()
     val totalAmountYouOwe by expenseViewModel.totalAmountYouOwe.collectAsState()
 
@@ -149,9 +158,15 @@ fun HomeScreenHelper(
                     .height(200.dp)
                     .fillMaxWidth()
             ){
-                if(totalTasks > 0) {
-                    TodaysChores(fileredChores)
-                }else{
+                /*if(chores.isNotEmpty()){
+                    TodaysChores(chores)
+                }*/
+                if(totalTasks != null && totalTasks > 0) {
+                    if (fileredChores != null) {
+                        TodaysChores(fileredChores)
+                    }
+                }
+                else{
                     Text(
                         text = "You have no chores on this day!",
                         style = TextStyle(
