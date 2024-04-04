@@ -125,7 +125,12 @@ fun SettingsScreen(
                 item {
                     Section("Username") {
                         // Display current username
-                        Text("Your username is: $username", modifier = Modifier.padding(vertical = 8.dp))
+                        if (username != null) {
+                            Text("Your current username is: $username", modifier = Modifier.padding(vertical = 8.dp))
+                        } else {
+                            // Display a loading indicator or placeholder text while username is being fetched
+                            Text("Loading username...", modifier = Modifier.padding(vertical = 8.dp))
+                        }
                     }
                 }
 

@@ -122,13 +122,24 @@ fun HomeScreenHelper(
         ) {
             Row(modifier = Modifier
                 .fillMaxWidth()) {
-                Text(
-                    text = "Hey $name!",
-                    style = MaterialTheme.typography.h5.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp)
-                )
+                // Check if name is not null before displaying the greeting message
+                if (name != null) {
+                    Text(
+                        text = "Hey $name!",
+                        style = MaterialTheme.typography.h5.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp)
+                    )
+                } else {
+                    Text(
+                        text = "",
+                        style = MaterialTheme.typography.h5.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp)
+                    )
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
                     onClick = {
