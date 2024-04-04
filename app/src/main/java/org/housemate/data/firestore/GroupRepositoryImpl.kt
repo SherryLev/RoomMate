@@ -74,4 +74,42 @@ class GroupRepositoryImpl : GroupRepository {
         }
     }
 
+    override suspend fun isCreator(userId: String, groupCode: String): Boolean {
+        return try {
+            val documentSnapshot = db.collection("groups").document(groupCode).get().await()
+            val creatorId = documentSnapshot.getString("creatorId")
+            userId == creatorId
+        } catch (e: Exception) {
+            Log.e("GroupRepository", "Error checking creator status")
+            false
+        }
+    }
+
+    override suspend fun createGroupName(groupCode: String, groupName: String): Boolean {
+        return try {
+            val groupRed = db.collection("groups").document(groupCode)
+            db.runTransaction{ transaction ->
+                transaction.update(groupRed, "groupName", groupName)
+            }.await()
+            true
+        } catch (e: Exception) {
+            Log.e("GroupRepository", "Error creating group name")
+            false
+        }
+    }
+
+    override suspend fun getGroupName(groupCode: String): String? {
+        return try {
+            val snapshot = db.collection("groups").document(groupCode).get().await()
+            if (snapshot.exists()) {
+                snapshot.getString("groupName")
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("GroupRepository", "Error fetching group name", e)
+            null
+        }
+    }
+
 }
