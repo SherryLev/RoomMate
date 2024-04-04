@@ -186,10 +186,10 @@ fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
                         //deleteChore(chore.choreId, userId: String)
                     },
                     modifier = Modifier
-                        .width(30.dp)
-                        .height(30.dp)
+                        .width(22.dp)
+                        .height(22.dp)
                 ) {
-                    Icon(painterResource(R.drawable.edit), "Edit")
+                    Icon(painterResource(R.drawable.delete), "Delete", tint = Color.DarkGray)
                 }
             }
         }
