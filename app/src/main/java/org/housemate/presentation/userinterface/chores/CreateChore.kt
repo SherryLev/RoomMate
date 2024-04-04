@@ -41,7 +41,6 @@ import org.housemate.presentation.viewmodel.ChoresViewModel
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import java.time.temporal.ChronoUnit
 
-var choreIdCount = 1
 @Composable
 fun ReadonlyOutlinedTextField(
     value: String,
@@ -186,12 +185,20 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
     var assigneeChoice by remember { mutableStateOf("") }
 
     val selectedDate = remember { mutableStateOf<Timestamp?>(null) }
-    val repetitionOptions = listOf("None", "Every day", "Every week", "Every 2 wks", "Every 3 wks", "Every 4 wks")
+    val repetitionOptions = listOf("None", "Every day", "Every 2 days", "Every 3 days", "Every week", "Every 2 wks", "Every 3 wks", "Every 4 wks")
     var repetitionChoice by remember { mutableStateOf("None") }
     var choreCounter by remember { mutableStateOf(0) }
-    val choreId = "chore${choreIdCount++}" // Generate unique chore ID
+    val choreId = UUID.randomUUID().toString() // Generate unique chore ID
 
+    val dialogDismissed by choresViewModel.dialogDismissed.collectAsState()
     val userId by choresViewModel.userId.collectAsState()
+
+    LaunchedEffect(dialogDismissed) {
+        if (dialogDismissed) {
+            choresViewModel.getAllChores()
+            choresViewModel.setDialogDismissed(false) // Reset the state after refreshing
+        }
+    }
 
     LaunchedEffect(key1 = "fetchUserId") {
         choresViewModel.fetchCurrentUserId()
@@ -230,11 +237,23 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                     calendar.time = dueDate.toDate() // Convert to Date type
 
                     val repetitions = when (repetitionChoice) {
-                        "Every Day" -> {
+                        "Every day" -> {
                             calendar.add(Calendar.MONTH, 4) // Add 4 months to the due date
                             val endDate = calendar.time // Get the end date
                             val daysBetween = (endDate.time - dueDate.toDate().time) / (1000 * 60 * 60 * 24)
                             (daysBetween / 7) * 7
+                        }
+                        "Every 2 days", "Every 3 days" -> {
+                            // Calculate the end date based on the chosen repetition duration
+                            val interval = when (repetitionChoice) {
+                                "Every 2 days" -> 2
+                                "Every 3 days" -> 3
+                                else -> 1 // Default to 1 day if not specified
+                            }
+                            calendar.add(Calendar.MONTH, 4) // Add 4 months to the due date
+                            val endDate = calendar.time // Get the end date
+                            val daysBetween = (endDate.time - dueDate.toDate().time) / (1000 * 60 * 60 * 24)
+                            daysBetween / interval // Calculate the number of repetitions based on the interval
                         }
                         "Every week" -> 16
                         "Every 2 wks" -> 8
@@ -244,7 +263,9 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                     }
                     repeat(repetitions.toInt()) { index ->
                         val repetitionSeconds = when (repetitionChoice) {
-                            "Every Day" -> 86400 * index
+                            "Every 2 days" ->  86400 * 2 * index
+                            "Every 3 days" -> 86400 * 3 * index
+                            "Every day" -> 86400 * index
                             "Every 2 wks" -> 604800 * 2 * index
                             "Every 3 wks" -> 604800 * 3 * index
                             "Every 4 wks" -> 604800 * 4 * index
@@ -269,6 +290,7 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                         choresViewModel.addChore(chore)
                         choreCounter++
                     }
+                    choresViewModel.setDialogDismissed(true)
                     onDialogDismiss()
 
                 }else {

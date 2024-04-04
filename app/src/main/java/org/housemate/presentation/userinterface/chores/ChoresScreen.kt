@@ -275,14 +275,18 @@ fun stringToDayOfWeek(dayString: String): DayOfWeek? {
 
 @Composable
 fun TaskDisplayHouse(chores: List<Chore>) {
+    val uniqueChoreTypes = mutableSetOf<String>()
     LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
         items(chores) { chore ->
-            TaskItem(chore) {
-//                deleteTask(chore)
+            val choreType = extractChoreType(chore.choreId)
+            print(choreType)
+            if (uniqueChoreTypes.add(choreType)) { // Check if the chore type is already added
+                TaskItem(chore) {
+                    // deleteTask(chore)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
             }
-            Spacer(modifier = Modifier.height(8.dp))
         }
-
     }
 }
 
@@ -555,6 +559,12 @@ fun ChoresScreen(
     ) {
         MainLayout(navController = navController)
     }
+}
+
+// Function to extract chore type from choreId
+private fun extractChoreType(choreId: String): String {
+    // Split the choreId by "-" and get the first part
+    return choreId.split("-").firstOrNull() ?: ""
 }
 
 
