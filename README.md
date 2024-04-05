@@ -6,7 +6,7 @@ HouseMate is designed for university students and young working individuals that
 ## Wiki
 Access our wiki [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Project-Proposal:-HouseMate)
 
-## Release Notes Version 1.2.0
+## Release Notes Version 1.3.0
 **_What's New_**
 - **Stats Screen UI:** We designed our statistics screen, enhancing our user experience https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/42
 - **Expenses UI:** We designed our expenses screen and an add expenses function to enhance our user experience https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/20
