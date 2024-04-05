@@ -299,6 +299,9 @@ fun TaskDisplayHouse(chores: List<Chore>, choresViewModel: ChoresViewModel = hil
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
+        item{
+            Spacer(modifier = Modifier.height(38.dp))
+        }
     }
 }
 
@@ -474,8 +477,12 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
 //                                            deleteTask = { chore -> chores.remove(chore) },
                                             day
                                         )
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Spacer(modifier = Modifier.height(4.dp))
                                     }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.height(20.dp))
                                 }
                             }
                         }
@@ -495,6 +502,7 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
 
                                 Spacer(modifier = Modifier.height(4.dp))
                             }
+
                         }
                     }
                 }
