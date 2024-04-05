@@ -78,20 +78,6 @@ class ExpenseViewModel @Inject constructor(
         fetchPayments()
     }
 
-    private val _usernamesMap = MutableStateFlow<Map<String, String>>(emptyMap())
-    val usernamesMap: StateFlow<Map<String, String>> = _usernamesMap
-
-    fun fetchUsernamesForIds(userIds: List<String>) {
-        viewModelScope.launch {
-            val usernames = mutableMapOf<String, String>()
-            for (userId in userIds) {
-                val user = userRepository.getUserById(userId)
-                usernames[userId] = user?.username ?: "Unknown User"
-            }
-            _usernamesMap.value = usernames
-        }
-    }
-
     fun fetchCurrentUser() {
         viewModelScope.launch {
             val userId = userRepository.getCurrentUserId()
