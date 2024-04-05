@@ -106,20 +106,27 @@ class ExpenseViewModel @Inject constructor(
         _dialogDismissed.value = false
     }
 
+    private val _paymentPayer = MutableStateFlow("")
+    val paymentPayer: StateFlow<String> = _paymentPayer
+
+    private val _paymentPayerId = MutableStateFlow("")
+    val paymentPayerId: StateFlow<String> = _paymentPayerId
+
+    private val _paymentPayee = MutableStateFlow("")
+    val paymentPayee: StateFlow<String> = _paymentPayee
+
+    private val _paymentPayeeId = MutableStateFlow("")
+    val paymentPayeeId: StateFlow<String> = _paymentPayeeId
+
     fun onEditPaymentClicked(payment: Payment) {
-        val currentUserValue = _currentUser.value
-        val currentUserUid = currentUserValue?.uid
-
-        // Determine if the current user is the payer
-        val isCurrentUserPayer = payment.payerId == currentUserUid
-
         // Assign values to the corresponding state flow variables
         _paymentId.value = payment.id
         _paymentAmount.value = payment.amount.toBigDecimal().setScale(2)
-        _selectedHousemate.value = if (!isCurrentUserPayer) payment.payeeName else payment.payerName
-        _selectedHousemateId.value = if (!isCurrentUserPayer) payment.payeeId else payment.payerId
-        _selectedOweStatus.value = !isCurrentUserPayer // Set selected owe status based on current user's role
-        _selectedOwingAmount.value = payment.amount.toBigDecimal().toString()
+        _paymentPayer.value = payment.payerName
+        _paymentPayerId.value = payment.payerId
+        _paymentPayee.value = payment.payeeName
+        _paymentPayeeId.value = payment.payeeId
+        _selectedOwingAmount.value = payment.amount.toBigDecimal().setScale(2).toString()
     }
 
     fun onEditExpenseClicked(expense: Expense) {
@@ -128,7 +135,7 @@ class ExpenseViewModel @Inject constructor(
         _selectedPayer.value = expense.payerName
         _selectedPayerId.value = expense.payerId
         _expenseDescription.value = expense.description
-        _expenseAmount.value = expense.amount.toBigDecimal()
+        _expenseAmount.value = expense.amount.toBigDecimal().setScale(2)
         val convertedOwingAmounts = expense.owingAmounts.mapValues { it.value.toBigDecimal() }
         _owingAmounts.value = convertedOwingAmounts
     }
@@ -377,7 +384,7 @@ class ExpenseViewModel @Inject constructor(
         _selectedHousemateId.value = id
         _selectedOwingAmount.value = amount
         _selectedOweStatus.value = youOwe
-        setPaymentAmount(amount.toBigDecimalOrNull() ?: BigDecimal.ZERO)
+        setPaymentAmount(amount.toBigDecimalOrNull()?.setScale(2) ?: BigDecimal.ZERO)
     }
 
     fun fetchAllHousemates() {
@@ -422,6 +429,6 @@ class ExpenseViewModel @Inject constructor(
         _owingAmounts.value = owingAmounts
     }
     fun setPaymentAmount(amount: BigDecimal) {
-        _paymentAmount.value = amount
+        _paymentAmount.value = amount.setScale(2)
     }
 }

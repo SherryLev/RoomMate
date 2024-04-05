@@ -68,6 +68,11 @@ fun SettleUpScreen(
     val selectedOweStatus by expenseViewModel.selectedOweStatus.collectAsState()
     val selectedHousemateId by expenseViewModel.selectedHousemateId.collectAsState()
 
+    val paymentPayer by expenseViewModel.paymentPayer.collectAsState()
+    val paymentPayerId by expenseViewModel.paymentPayerId.collectAsState()
+    val paymentPayee by expenseViewModel.paymentPayee.collectAsState()
+    val paymentPayeeId by expenseViewModel.paymentPayeeId.collectAsState()
+
     var paymentAmountState by remember {
         mutableStateOf(TextFieldValue(text = selectedOwingAmount))
     }
@@ -167,7 +172,7 @@ fun SettleUpScreen(
                             onValueChange = {
                                 paymentAmountState = formatAmount(it)
                                 expenseViewModel.setPaymentAmount(
-                                    paymentAmountState.text.toBigDecimalOrNull()
+                                    paymentAmountState.text.toBigDecimalOrNull()?.setScale(2)
                                         ?: BigDecimal.ZERO
                                 )
                             },
@@ -208,16 +213,25 @@ fun SettleUpScreen(
                     .fillMaxWidth()
                     .padding(vertical = 12.dp, horizontal = 30.dp)
             ) {
-                if (payerName != null) {
+                if (paymentPayer != "") {
                     Text(
-                        payerName,
+                        paymentPayer,
                         fontWeight = FontWeight.Bold,
                         color = Color.DarkGray,
                         fontSize = 18.sp,
                         modifier = Modifier.padding(top = 8.dp)
                     )
+                } else {
+                    if (payerName != null) {
+                        Text(
+                            payerName,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.DarkGray,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
                 }
-
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Icon(
@@ -231,14 +245,24 @@ fun SettleUpScreen(
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                if (payeeName != null) {
+                if (paymentPayee != "") {
                     Text(
-                        text = payeeName,
+                        paymentPayee,
                         fontWeight = FontWeight.Bold,
                         color = Color.DarkGray,
                         fontSize = 18.sp,
                         modifier = Modifier.padding(top = 8.dp)
                     )
+                } else {
+                    if (payeeName != null) {
+                        Text(
+                            text = payeeName,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.DarkGray,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
                 }
             }
         }
@@ -306,10 +330,10 @@ fun SettleUpScreen(
                                             } else {
                                                 expenseViewModel.updatePaymentById(
                                                     paymentId,
-                                                    payerName,
-                                                    payerId,
-                                                    payeeName,
-                                                    payeeId,
+                                                    paymentPayer,
+                                                    paymentPayerId,
+                                                    paymentPayee,
+                                                    paymentPayeeId,
                                                     paymentAmount
                                                 )
                                             }
