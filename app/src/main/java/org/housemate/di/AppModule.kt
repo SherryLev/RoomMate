@@ -81,7 +81,7 @@ object AppModule {
         firestore : FirebaseFirestore,
         auth: FirebaseAuth
     ): ChoreRepository {
-        return ChoreRepositoryImpl()
+        return ChoreRepositoryImpl(auth)
     }
 
     @Provides

@@ -41,7 +41,9 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material.icons.outlined.Paid
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
@@ -49,6 +51,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.housemate.domain.model.Expense
 import org.housemate.domain.model.Payment
+import org.housemate.domain.model.User
+import org.housemate.domain.repositories.UserRepository
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_purple
@@ -77,6 +81,9 @@ fun ExpensesScreen(
     val expenseAndPaymentItems by expenseViewModel.expenseAndPaymentItems.collectAsState()
 
     val dialogDismissed by expenseViewModel.dialogDismissed.collectAsState()
+
+    val currentUser by expenseViewModel.currentUser.collectAsState()
+    val housemates by expenseViewModel.housemates.collectAsState()
 
     // Observe dialogDismissed and trigger recomposition
     if (dialogDismissed) {
@@ -171,13 +178,23 @@ fun ExpensesScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        // instead of hard coded values, use calculated amounts from viewmodel
-                        netAmountOwed.forEach { (housemate, amount) ->
-                            var youOwe = false
-                            if (amount.toDouble() < 0.00) {
-                                youOwe = true
-                            }
-                            BalancesInfoRow(name = housemate, amount = "$${"%.2f".format(amount.abs())}", youOwe = youOwe, navController, expenseViewModel)
+
+                        netAmountOwed.forEach { (userId, amount) ->
+                            // Find the user object with the corresponding userId
+                            val housemate = housemates.find { it.uid == userId }
+                            // Get the username from the user object, or use a default value if not found
+                            val username = housemate?.username ?: ""
+                            // Determine if the user owes or is owed money
+                            val youOwe = amount < BigDecimal.ZERO
+
+                            // Call BalancesInfoRow with the username and other parameters
+                            BalancesInfoRow(
+                                name = username,
+                                amount = "$${"%.2f".format(amount.abs())}",
+                                youOwe = youOwe,
+                                navController,
+                                expenseViewModel
+                            )
                         }
                     }
                 }
@@ -250,13 +267,14 @@ fun ExpensesScreen(
                                                 ).format(timestamp)
 
                                                 val amountLentOrBorrowed: Double =
-                                                    if (item.payer == "You") {
+                                                    if (item.payerId == (currentUser?.uid ?: ""))
+                                                     {
                                                         // Calculate sum of what others owe you
-                                                        item.owingAmounts.values.sum() - (item.owingAmounts["You"]
+                                                        item.owingAmounts.values.sum() - (item.owingAmounts[currentUser!!.uid]
                                                             ?: 0.00)
                                                     } else {
                                                         // Get the amount that you owe
-                                                        -(item.owingAmounts["You"] ?: 0.00)
+                                                        -(item.owingAmounts[currentUser!!.uid] ?: 0.00)
                                                     }
 
                                                 val showDialog = remember { mutableStateOf(false) }
@@ -272,7 +290,8 @@ fun ExpensesScreen(
                                                         onDismiss = {
                                                             showDialog.value = false
                                                             expenseViewModel.dismissDialog()
-                                                        } // Dismiss the dialog when needed
+                                                        },
+                                                        housemates = housemates// Dismiss the dialog when needed
                                                     )
                                                 }
                                                 Row(
@@ -309,7 +328,7 @@ fun ExpensesScreen(
                                                             text = item.description
                                                         )
                                                         Text(
-                                                            text = "${item.payer} paid $${
+                                                            text = "${item.payerName} paid $${
                                                                 "%.2f".format(
                                                                     item.amount
                                                                 )
@@ -471,7 +490,8 @@ fun ExpensePopupDialog(
     expense: Expense,
     onEditExpense: () -> Unit,
     onDeleteExpense: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    housemates: List<User>
 )  {
     val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     val formattedDate = dateFormatter.format(expense.timestamp.toDate())
@@ -523,14 +543,15 @@ fun ExpensePopupDialog(
                 Column(
                     modifier = Modifier.padding(8.dp)
                 ) {
-                    Text(text = "Payer: ${expense.payer}")
+                    Text(text = "Payer: ${expense.payerName}")
                     Text(text = "Description: ${expense.description}")
                     Text(text = "Amount: $${"%.2f".format(expense.amount)}")
                     Text(text = "Date: $formattedDate")
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(text = "Owing Amounts:")
-                    expense.owingAmounts.forEach { (person, amount) ->
-                        Text(text = "- $person: $${"%.2f".format(amount)}")
+                    expense.owingAmounts.forEach { (personId, amount) ->
+                        val username = housemates.find { it.uid == personId }?.username ?: ""
+                        Text(text = "- $username: $${"%.2f".format(amount)}")
                     }
                 }
             }
