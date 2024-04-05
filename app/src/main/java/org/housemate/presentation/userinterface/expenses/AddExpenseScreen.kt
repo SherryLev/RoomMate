@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,6 +63,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import org.housemate.domain.model.User
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_gray
@@ -77,14 +79,17 @@ fun AddExpenseScreen(
     expenseViewModel: ExpenseViewModel = hiltViewModel()
 ) {
     val selectedPayer by expenseViewModel.selectedPayer.collectAsState()
+    val selectedPayerId by expenseViewModel.selectedPayerId.collectAsState()
     val expenseDescription by expenseViewModel.expenseDescription.collectAsState()
     val expenseAmount by expenseViewModel.expenseAmount.collectAsState()
     val owingAmounts by expenseViewModel.owingAmounts.collectAsState()
     val expenseId by expenseViewModel.expenseId.collectAsState()
 
+    val currentUser by expenseViewModel.currentUser.collectAsState()
+
     var selectedSplit by remember { mutableStateOf("Equally") }
 
-    val housemates = listOf("You", "Sally", "Bob", "Mike")
+    val housemates by expenseViewModel.housemates.collectAsState()
     val split_options = listOf("Equally", "By exact amount")
 
     var expenseAmountState by remember {
@@ -93,6 +98,9 @@ fun AddExpenseScreen(
 
     var remainingAmountState = remember { mutableStateOf(BigDecimal.ZERO.setScale(2)) }
 
+    LaunchedEffect(key1 = "fetchUser") {
+        expenseViewModel.fetchCurrentUser()
+    }
 
     var splitUi by remember {
         mutableStateOf<@Composable () -> Unit>(
@@ -268,13 +276,17 @@ fun AddExpenseScreen(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                CustomDropdown(
-                    items = housemates,
-                    selectedItem = selectedPayer,
-                    onItemSelected = { expenseViewModel.setSelectedPayer(it) },
-                    modifier = Modifier,
-                    dropdownWidth = 220.dp
-                )
+                currentUser?.username?.let {
+                    UserDropdown(
+                        users = housemates,
+                        selectedUser = selectedPayer,
+                        onUserSelected = { selectedUser ->
+                            expenseViewModel.setSelectedPayer(selectedUser.username)
+                            expenseViewModel.setSelectedPayerId(selectedUser.uid)
+                        },
+                        dropdownWidth = 220.dp
+                    )
+                }
             }
 
             Row(
@@ -385,7 +397,8 @@ fun AddExpenseScreen(
                         .weight(1f),
                     onClick = {
                         // clear the form fields after saving the expense
-                        expenseViewModel.setSelectedPayer("You")
+                        expenseViewModel.setSelectedPayer("Select payer")
+                        expenseViewModel.setSelectedPayerId("")
                         expenseViewModel.setExpenseDescription("")
                         expenseViewModel.setExpenseAmount(BigDecimal.ZERO)
                         expenseViewModel.setOwingAmounts(emptyMap())
@@ -415,7 +428,7 @@ fun AddExpenseScreen(
                         .weight(1f),
                     onClick = {
                         // Check if the expense description or amount is empty
-                        if (expenseDescription.isEmpty() || expenseAmount == BigDecimal.ZERO) {
+                        if (expenseDescription.isEmpty() || expenseAmount == BigDecimal.ZERO || selectedPayer == "Select payer") {
                             // Show the error dialog
                             showEmptyFieldsErrorDialog.value = true
                         } else if (selectedSplit == "By exact amount" && remainingAmountState.value != BigDecimal.ZERO.setScale(2)) {
@@ -442,6 +455,7 @@ fun AddExpenseScreen(
                                 expenseViewModel.addExpense(
                                     expenseId,
                                     selectedPayer,
+                                    selectedPayerId,
                                     expenseDescription,
                                     expenseAmount,
                                     owingAmounts
@@ -450,6 +464,7 @@ fun AddExpenseScreen(
                                 expenseViewModel.updateExpenseById(
                                     expenseId,
                                     selectedPayer,
+                                    selectedPayerId,
                                     expenseDescription,
                                     expenseAmount,
                                     owingAmounts
@@ -457,7 +472,8 @@ fun AddExpenseScreen(
                             }
 
                             // clear the form fields after saving the expense
-                            expenseViewModel.setSelectedPayer("You")
+                            expenseViewModel.setSelectedPayer("Select payer")
+                            expenseViewModel.setSelectedPayerId("")
                             expenseViewModel.setExpenseDescription("")
                             expenseViewModel.setExpenseAmount(BigDecimal.ZERO)
                             expenseViewModel.setOwingAmounts(emptyMap())
@@ -485,7 +501,7 @@ fun AddExpenseScreen(
 
 @Composable
 fun EquallySplitUI(
-    housemates: List<String>,
+    housemates: List<User>,
     expenseAmountState: TextFieldValue, // Add textFieldValueState parameter
     onAmountChanged: (Map<String, BigDecimal>) -> Unit
 ) {
@@ -507,9 +523,9 @@ fun EquallySplitUI(
         }
         // Calculate and return owing amounts
         val owingAmounts = mutableMapOf<String, BigDecimal>()
-        housemates.forEachIndexed { i, name ->
+        housemates.forEachIndexed { i, user ->
             if (checkedStates.getOrNull(i) == true) {
-                owingAmounts[name] = amountPerPerson.value
+                owingAmounts[user.uid] = amountPerPerson.value
             }
         }
         onAmountChanged(owingAmounts)
@@ -527,7 +543,7 @@ fun EquallySplitUI(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Spacer(modifier = Modifier.width(6.dp))
-                Text(text = housemate)
+                Text(text = housemate.username)
                 Spacer(modifier = Modifier.weight(1f))
                 Checkbox(
                     checked = checkedStates.getOrNull(index) ?: false,
@@ -548,9 +564,9 @@ fun EquallySplitUI(
                         }
                         // Calculate and return owing amounts
                         val owingAmounts = mutableMapOf<String, BigDecimal>()
-                        housemates.forEachIndexed { i, name ->
+                        housemates.forEachIndexed { i, user ->
                             if (checkedStates.getOrNull(i) == true) {
-                                owingAmounts[name] = amountPerPerson.value
+                                owingAmounts[user.uid] = amountPerPerson.value
                             }
                         }
 
@@ -623,7 +639,7 @@ fun EquallySplitUI(
 
 @Composable
 fun ExactAmountSplitUI(
-    housemates: List<String>,
+    housemates: List<User>,
     expenseAmountState: TextFieldValue,
     remainingAmountState: MutableState<BigDecimal>,
     onAmountChanged: (Map<String, BigDecimal>) -> Unit
@@ -635,7 +651,7 @@ fun ExactAmountSplitUI(
     val textFieldValueStates = remember {
         mutableStateMapOf<String, TextFieldValue>().apply {
             housemates.forEach { housemate ->
-                this[housemate] = TextFieldValue(text = "")
+                this[housemate.username] = TextFieldValue(text = "")
             }
         }
     }
@@ -662,20 +678,20 @@ fun ExactAmountSplitUI(
                 modifier = Modifier.height(50.dp)
             ) {
                 Spacer(modifier = Modifier.width(6.dp))
-                Text(text = housemate)
+                Text(text = housemate.username)
                 Spacer(modifier = Modifier.weight(1f))
                 Row(
                     horizontalArrangement = Arrangement.End,
                     modifier = Modifier.padding(vertical = 0.dp) // Adjust the vertical spacing here
                 ) {
                     TextField(
-                        value = textFieldValueStates[housemate] ?: TextFieldValue(""),
+                        value = textFieldValueStates[housemate.username] ?: TextFieldValue(""),
                         onValueChange = { newValue ->
                             val formattedValue = formatAmount(newValue)
-                            textFieldValueStates[housemate] = formatAmount(newValue)
+                            textFieldValueStates[housemate.username] = formatAmount(newValue)
                             val newAmount =
                                 formattedValue.text.toBigDecimalOrNull() ?: BigDecimal.ZERO
-                            enteredAmounts[housemate] = newAmount
+                            enteredAmounts[housemate.username] = newAmount
                             onAmountChanged(enteredAmounts.toMap())
                         },
                         placeholder = {
@@ -840,6 +856,84 @@ fun CustomDropdown(
         }
     }
 }
+
+@Composable
+fun UserDropdown(
+    users: List<User>,
+    selectedUser: String,
+    onUserSelected: (User) -> Unit,
+    dropdownWidth: Dp? = null // Optional width parameter
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = if (dropdownWidth != null) {
+            Modifier
+                .clip(RoundedCornerShape(25.dp))
+                .background(color = light_gray)
+                .clickable { expanded = !expanded }
+                .padding(8.dp)
+                .width(dropdownWidth)
+        } else {
+            Modifier
+                .clip(RoundedCornerShape(25.dp))
+                .background(color = light_gray)
+                .clickable { expanded = !expanded }
+                .padding(8.dp)
+        }
+
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = selectedUser,
+                color = md_theme_light_primary,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                contentDescription = "Dropdown Arrow",
+                tint = md_theme_light_primary,
+                modifier = Modifier
+                    .size(24.dp)
+                    .padding(0.dp)
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = if (dropdownWidth != null) {
+                Modifier
+                    .width(dropdownWidth + 10.dp)
+            } else {
+                Modifier
+            }
+        ) {
+            users.forEach { user ->
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onUserSelected(user) // Pass the selected user back to the caller
+                    },
+                    modifier = Modifier
+                ) {
+                    Text(
+                        text = user.username,
+                        color = Color.Black,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 
 

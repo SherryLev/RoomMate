@@ -1,5 +1,6 @@
 package org.housemate.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
@@ -12,16 +13,28 @@ import kotlinx.coroutines.launch
 import org.housemate.domain.model.Expense
 import org.housemate.domain.model.ExpenseOrPayment
 import org.housemate.domain.model.Payment
+import org.housemate.domain.model.User
 import org.housemate.domain.repositories.ExpenseRepository
+import org.housemate.domain.repositories.GroupRepository
+import org.housemate.domain.repositories.UserRepository
 import java.math.BigDecimal
 import javax.inject.Inject
 
 @HiltViewModel
 class ExpenseViewModel @Inject constructor(
-    private val expenseRepository: ExpenseRepository
+    private val expenseRepository: ExpenseRepository,
+    private val groupRepository: GroupRepository,
+    private val userRepository: UserRepository
 ): ViewModel() {
-    private val _selectedPayer = MutableStateFlow("You")
+
+    private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser: StateFlow<User?> = _currentUser
+
+    private val _selectedPayer = MutableStateFlow("Select payer")
     val selectedPayer = _selectedPayer.asStateFlow()
+
+    private val _selectedPayerId = MutableStateFlow("")
+    val selectedPayerId = _selectedPayerId.asStateFlow()
 
     private val _expenseDescription = MutableStateFlow("")
     val expenseDescription = _expenseDescription.asStateFlow()
@@ -54,10 +67,27 @@ class ExpenseViewModel @Inject constructor(
     private val _expenseAndPaymentItems = MutableStateFlow<List<ExpenseOrPayment>>(emptyList())
     val expenseAndPaymentItems: StateFlow<List<ExpenseOrPayment>> = _expenseAndPaymentItems
 
+    private val _housemates = MutableStateFlow<List<User>>(emptyList())
+    val housemates: StateFlow<List<User>> = _housemates
+
     init {
         // Fetch expenses from the repository when the ViewModel is initialized
+        fetchCurrentUser()
         fetchExpenses()
         fetchPayments()
+        fetchAllHousemates()
+    }
+
+    fun fetchCurrentUser() {
+        viewModelScope.launch {
+            val userId = userRepository.getCurrentUserId()
+            if (!userId.isNullOrEmpty()) {
+                val user = userRepository.getUserById(userId)
+                _currentUser.value = user
+            } else {
+                Log.e("ExpenseViewModel", "Failed to fetch current user: User ID is null or empty")
+            }
+        }
     }
 
     private val _dialogDismissed = MutableStateFlow(false)
@@ -74,7 +104,7 @@ class ExpenseViewModel @Inject constructor(
     fun onEditExpenseClicked(expense: Expense) {
         // Set all the values to be edited in the UI
         _expenseId.value = expense.id
-        _selectedPayer.value = expense.payer
+        _selectedPayer.value = expense.payerName
         _expenseDescription.value = expense.description
         _expenseAmount.value = expense.amount.toBigDecimal()
         val convertedOwingAmounts = expense.owingAmounts.mapValues { it.value.toBigDecimal() }
@@ -118,13 +148,13 @@ class ExpenseViewModel @Inject constructor(
         }
     }
 
-    fun updateExpenseById(expenseId: String, updatedPayer: String, updatedDescription: String, updatedExpenseAmount: BigDecimal, updatedOwingAmounts: Map<String, BigDecimal>) {
+    fun updateExpenseById(expenseId: String, updatedPayer: String, updatedPayerId: String, updatedDescription: String, updatedExpenseAmount: BigDecimal, updatedOwingAmounts: Map<String, BigDecimal>) {
         // Convert BigDecimal values to Double, since Firestore doesn't accept BigDecimal
         val expenseAmountDouble = updatedExpenseAmount.toDouble()
         val owingAmountsDouble = updatedOwingAmounts.mapValues { it.value.toDouble() } // Convert each BigDecimal value to Double
 
         // Create the updated Expense object with converted values
-        val updatedExpense = Expense(expenseId, updatedPayer, updatedDescription, expenseAmountDouble, owingAmountsDouble, Timestamp.now())
+        val updatedExpense = Expense(expenseId, updatedPayer, updatedPayerId, updatedDescription, expenseAmountDouble, owingAmountsDouble, Timestamp.now())
 
         viewModelScope.launch {
             try {
@@ -144,33 +174,36 @@ class ExpenseViewModel @Inject constructor(
         val totalYouOwe: BigDecimal?
         val netAmountOwed = mutableMapOf<String, BigDecimal>()
 
+        val currentUserValue = _currentUser.value
+        val currentUserUid = currentUserValue?.uid
+
         _expenseItems.value.forEach { expense ->
             // Convert all values in owingAmounts to BigDecimal
-            val payer = expense.payer
+            val payer = expense.payerId
             val owingAmountsBigDecimal = expense.owingAmounts.mapValues { (_, value) -> BigDecimal.valueOf(value) }
 
-            val youOweAmount = owingAmountsBigDecimal["You"] ?: BigDecimal.ZERO
+            val youOweAmount = owingAmountsBigDecimal[currentUserUid] ?: BigDecimal.ZERO
             // if you didn't pay, then you subtract from the netamountowed
-            if (payer != "You") {
+            if (payer != currentUserUid) {
                 netAmountOwed[payer] = (netAmountOwed[payer] ?: BigDecimal.ZERO) + youOweAmount.negate()
             } else {
                 // if you paid, then you add to the netamountowed
                 owingAmountsBigDecimal.forEach { (housemate, amount) ->
-                    if (housemate != "You") {
+                    if (housemate != currentUserUid) {
                         netAmountOwed[housemate] = (netAmountOwed[housemate] ?: BigDecimal.ZERO) + amount
                     }
                 }
             }
         }
 
-        // Calculate amounts from payments
+    // Calculate amounts from payments
         _paymentItems.value.forEach { payment ->
-            val payer = payment.payerName
+            val payer = payment.payerId
             val amountPaid = BigDecimal.valueOf(payment.amount)
 
             // If the payer is "You", you received the payment, else you made the payment
-            if (payer == "You") {
-                netAmountOwed[payment.payeeName] = (netAmountOwed[payment.payeeName] ?: BigDecimal.ZERO) + amountPaid
+            if (payer == currentUserUid) {
+                netAmountOwed[payment.payeeId] = (netAmountOwed[payment.payeeId] ?: BigDecimal.ZERO) + amountPaid
             } else {
                 netAmountOwed[payer] = (netAmountOwed[payer] ?: BigDecimal.ZERO) - amountPaid
             }
@@ -186,13 +219,13 @@ class ExpenseViewModel @Inject constructor(
         _netAmountOwed.value = netAmountOwed
     }
 
-    fun addExpense(id: String, payer: String, description: String, expenseAmount: BigDecimal, owingAmounts: Map<String, BigDecimal>) {
+    fun addExpense(id: String, payer: String, payerId: String, description: String, expenseAmount: BigDecimal, owingAmounts: Map<String, BigDecimal>) {
         // Convert BigDecimal values to Double, since firestore doesn't accept bigdecimal
         val expenseAmountDouble = expenseAmount.toDouble()
         val owingAmountsDouble = owingAmounts.mapValues { it.value.toDouble() } // Convert each BigDecimal value to Double
 
         // Create the Expense object with converted values
-        val expense = Expense(id, payer, description, expenseAmountDouble, owingAmountsDouble, Timestamp.now())
+        val expense = Expense(id, payer, payerId, description, expenseAmountDouble, owingAmountsDouble, Timestamp.now())
 
         // Call the addExpense function from the repository to add the expense to Firestore
         viewModelScope.launch {
@@ -287,9 +320,35 @@ class ExpenseViewModel @Inject constructor(
         _selectedOweStatus.value = youOwe
         setPaymentAmount(amount.toBigDecimalOrNull() ?: BigDecimal.ZERO)
     }
+
+    fun fetchAllHousemates() {
+        viewModelScope.launch {
+            try {
+                _currentUser.collect { user ->
+                    val currentUserUid = user?.uid ?: return@collect
+                    val housemates = groupRepository.fetchAllGroupMembers(currentUserUid)
+                    if (housemates != null) {
+                        _housemates.value = housemates
+                    } else {
+                        println("Failed to fetch housemates")
+                    }
+                }
+            } catch (e: Exception) {
+                println("Failed to fetch housemates: ${e.message}")
+            }
+        }
+    }
+
+
     // Functions to update the state
     fun setSelectedPayer(payer: String) {
         _selectedPayer.value = payer
+    }
+
+    // Functions to update the state
+    fun setSelectedPayerId(payerId: String) {
+        println(payerId)
+        _selectedPayerId.value = payerId
     }
 
     fun setExpenseDescription(description: String) {

@@ -78,6 +78,8 @@ fun ExpensesScreen(
 
     val dialogDismissed by expenseViewModel.dialogDismissed.collectAsState()
 
+    val currentUser by expenseViewModel.currentUser.collectAsState()
+
     // Observe dialogDismissed and trigger recomposition
     if (dialogDismissed) {
         expenseViewModel.resetDialogDismissed()
@@ -250,13 +252,14 @@ fun ExpensesScreen(
                                                 ).format(timestamp)
 
                                                 val amountLentOrBorrowed: Double =
-                                                    if (item.payer == "You") {
+                                                    if (item.payerId == (currentUser?.uid ?: ""))
+                                                     {
                                                         // Calculate sum of what others owe you
-                                                        item.owingAmounts.values.sum() - (item.owingAmounts["You"]
+                                                        item.owingAmounts.values.sum() - (item.owingAmounts[currentUser!!.uid]
                                                             ?: 0.00)
                                                     } else {
                                                         // Get the amount that you owe
-                                                        -(item.owingAmounts["You"] ?: 0.00)
+                                                        -(item.owingAmounts[currentUser!!.uid] ?: 0.00)
                                                     }
 
                                                 val showDialog = remember { mutableStateOf(false) }
@@ -309,7 +312,7 @@ fun ExpensesScreen(
                                                             text = item.description
                                                         )
                                                         Text(
-                                                            text = "${item.payer} paid $${
+                                                            text = "${item.payerName} paid $${
                                                                 "%.2f".format(
                                                                     item.amount
                                                                 )
@@ -523,7 +526,7 @@ fun ExpensePopupDialog(
                 Column(
                     modifier = Modifier.padding(8.dp)
                 ) {
-                    Text(text = "Payer: ${expense.payer}")
+                    Text(text = "Payer: ${expense.payerName}")
                     Text(text = "Description: ${expense.description}")
                     Text(text = "Amount: $${"%.2f".format(expense.amount)}")
                     Text(text = "Date: $formattedDate")

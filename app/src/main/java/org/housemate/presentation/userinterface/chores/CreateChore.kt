@@ -156,7 +156,7 @@ fun SelectionDropdown(options: List<String>, label: String, onCategorySelected: 
     }
 }
 @Composable
-fun alignButton(options: List<String>,label: String,onCategorySelected: (String) -> Unit){
+fun alignButton(options: List<String>,label: String, onCategorySelected: (String) -> Unit){
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(
             onClick = {},
@@ -320,7 +320,7 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                             assignee = assigneeChoice,
                             assigneeId = assigneeId,
                             dueDate = choreDueDate,
-                            userRating = emptyList(),
+                            userRating = emptyMap(),
                             votedUser = emptyList(),
                             repeat = repetitionChoice
                         )

@@ -10,11 +10,11 @@ data class Chore(
     val assigneeId: String,
     val category: String,
     val dueDate: Timestamp? = null,
-    val userRating :  List<Int> = emptyList(),  // nullable
-    val votedUser: List<String>?, // nullable
+    val userRating : Map<String, Float> = emptyMap(),  // nullable
+    val votedUser: List<String>? = null, // nullable
     val repeat: String
 ) {
-    constructor() : this("", "", "", "", "", "", null, emptyList(), null, "")
+    constructor() : this("", "", "", "", "", "", null, emptyMap(), null, "")
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "choreId" to choreId,
