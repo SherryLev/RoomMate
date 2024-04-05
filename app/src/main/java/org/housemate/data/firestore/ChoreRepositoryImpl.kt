@@ -8,6 +8,7 @@ import org.housemate.domain.model.Chore
 import org.housemate.domain.repositories.ChoreRepository
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
+import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FieldPath
 
 class ChoreRepositoryImpl : ChoreRepository{
@@ -96,7 +97,7 @@ class ChoreRepositoryImpl : ChoreRepository{
             .document(userId)
             .collection("userChores")
             .whereGreaterThan(FieldPath.documentId(), chorePrefix)
-            .whereLessThan(FieldPath.documentId(), "$chorePrefix\uf8ff")
+            .whereLessThan(FieldPath.documentId(), "$chorePrefix\uffff")
             .get()
             .addOnSuccessListener { querySnapshot ->
                 for (document in querySnapshot.documents) {
@@ -116,4 +117,54 @@ class ChoreRepositoryImpl : ChoreRepository{
 
         return completionSource.task
     }
+
+    override fun updateChoreRating(chore: Chore, newRating: Float, userId: String): Task<Void> {
+        val taskCompletionSource = TaskCompletionSource<Void>()
+
+        db.collection("chores")
+            .document(chore.assigneeId) // Assuming userId refers to the user's document ID
+            .collection("userChores")
+            .document(chore.choreId)
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    val chore = documentSnapshot.toObject(Chore::class.java)
+
+                    // Update the userRating for the current chore
+                    val updatedUserRating = chore?.userRating?.toMutableMap() ?: mutableMapOf()
+                    updatedUserRating[userId] = newRating
+                    val updatedChore = chore?.copy(userRating = updatedUserRating)
+
+                    if (updatedChore != null) {
+                        db.collection("chores")
+                            .document(chore.assigneeId)
+                            .collection("userChores")
+                            .document(chore.choreId)
+                            .update(updatedChore.toMap())
+                            .addOnSuccessListener {
+                                taskCompletionSource.setResult(null)
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("updateChoreRating", "Update failed: $exception")
+                                taskCompletionSource.setException(exception)
+                            }
+                    } else {
+                        val exception = Exception("Chore object is null")
+                        Log.e("updateChoreRating", "Chore object is null")
+                        taskCompletionSource.setException(exception)
+                    }
+                } else {
+                    val exception = Exception("Chore document not found")
+                    Log.e("updateChoreRating", "Chore document not found")
+                    taskCompletionSource.setException(exception)
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("updateChoreRating", "Query failed: $exception")
+                taskCompletionSource.setException(exception)
+            }
+
+        return taskCompletionSource.task
+    }
+
 }

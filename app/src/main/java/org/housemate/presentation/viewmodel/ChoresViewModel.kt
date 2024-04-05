@@ -44,6 +44,7 @@ class ChoresViewModel @Inject constructor(
     init {
         getAllChores()
         fetchAllHousemates()
+        fetchCurrentUserId()
     }
 
     private val _dialogDismissed = MutableStateFlow(false)
@@ -163,5 +164,17 @@ class ChoresViewModel @Inject constructor(
                 getAllChores()
             }
         }
+    }
+    fun updateChoreRating(chore: Chore, newRating: Float, userId: String) {
+        viewModelScope.launch {
+            try {
+                choreRepository.updateChoreRating(chore, newRating,userId).await()
+            } catch (e: Exception) {
+                _error.value = e.message ?: "An error occurred"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+
     }
 }
