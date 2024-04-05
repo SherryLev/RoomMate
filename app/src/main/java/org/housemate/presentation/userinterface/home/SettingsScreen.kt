@@ -85,6 +85,8 @@ fun SettingsScreen(
     var groupCode by remember { mutableStateOf<String?>(null)}
 
     val username by settingsViewModel.username.collectAsState()
+    val groupName by settingsViewModel.groupName.collectAsState()
+    val groupMembers by settingsViewModel.members.collectAsState()
 
     var groupCodeValidationErrorMessage by remember { mutableStateOf<String?>(null) }
     var groupSwitchSuccessMessage by remember { mutableStateOf<String?>(null) }
@@ -96,6 +98,8 @@ fun SettingsScreen(
         val userId = userRepository.getCurrentUserId()
         groupCode = userRepository.getGroupCodeForUser(userId!!)
         settingsViewModel.getUsername(userId = userRepository.getCurrentUserId()!!)
+        settingsViewModel.fetchUserGroupName(userId)
+        settingsViewModel.fetchGroupMembers(userId)
     }
 
     // Observe logout state
@@ -147,10 +151,14 @@ fun SettingsScreen(
 
                 item {
                     // View Group Code
-                    Section("Your Group Code") {
+                    Section("Your Household Info") {
                         val code = groupCode
                         if (code != null) {
-                            Text(code, modifier = Modifier.padding(vertical = 16.dp))
+                            Text("Code: $code", modifier = Modifier.padding(top = 8.dp))
+                            Text("Household: $groupName", modifier = Modifier.padding(vertical = 4.dp))
+                            val memberList = groupMembers.map { it?.username ?: "" }.joinToString(", ")
+                            Text("Housemates: $memberList", modifier = Modifier.padding(bottom = 4.dp))
+
                         } else {
                             Text("Loading...", modifier = Modifier.padding(vertical = 8.dp))
                         }

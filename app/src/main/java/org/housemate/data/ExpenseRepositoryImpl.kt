@@ -126,22 +126,40 @@ class ExpenseRepositoryImpl(
             val currentUser = auth.currentUser
             val userId = currentUser?.uid
             if (userId != null) {
-                val querySnapshot = firestore.collection("payments")
-                    .orderBy("timestamp", Query.Direction.DESCENDING)
-                    .get()
-                    .await()
+                // Retrieve the current user's group code from the users collection
+                val userDocument = firestore.collection("users").document(userId).get().await()
+                val groupCode = userDocument.getString("groupCode")
+                if (groupCode != null) {
+                    // Fetch the list of member user IDs from the groups collection
+                    val groupDocument = firestore.collection("groups").document(groupCode).get().await()
+                    val members = groupDocument.get("members") as? List<*>
+                    if (members != null) {
+                        // Query payments where the payerId is within the group
+                        val querySnapshot = firestore.collection("payments")
+                            .whereIn("payerId", members)
+                            .orderBy("timestamp", Query.Direction.DESCENDING)
+                            .get()
+                            .await()
 
-                for (document in querySnapshot.documents) {
-                    val payment = document.toObject(Payment::class.java)
-                    payment?.let {
-                        payments.add(it)
+                        for (document in querySnapshot.documents) {
+                            val payment = document.toObject(Payment::class.java)
+                            payment?.let {
+                                payments.add(it)
+                            }
+                        }
+                    } else {
+                        throw IllegalStateException("Members list not found in group document")
                     }
+                } else {
+                    throw IllegalStateException("Group code not found for user")
                 }
             } else {
                 throw IllegalStateException("User is not authenticated.")
             }
+            Log.d(TAG, "Payments retrieved successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Error getting payments", e)
+            // You can handle the exception here, e.g., return an empty list or throw it to be handled by the caller
         }
         return payments
     }
