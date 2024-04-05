@@ -40,7 +40,7 @@ This is our largest update to Housemate yet!
 - Simplified app interface by removing the calendar tab, focusing on core functionalities to enhance usability and clarity for all users.
 
 **_Download Installer_**
-Download our installer for HouseMate here: 
+Download our installer for HouseMate here: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/blob/main/housemate-sprint4.apk
 
 For a full list of changes, visit our issues list on GitLab: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues
 
