@@ -222,9 +222,19 @@ fun getCurrentWeekTasks(chores: List<Chore>): List<Chore> {
 
 
 @Composable
-fun TaskWeekItem(chore: Chore) {
-    var rating by remember { mutableStateOf(1f) }
-    Log.d("Rating", "Rating is: " + rating)
+fun TaskWeekItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel()) {
+    val userId by choresViewModel.userId.collectAsState()
+    val (rating, setRating) = remember { mutableStateOf(chore.userRating[userId] ?: 0f) }
+
+    println("UserId: "+ userId)
+    println("choreID is:" + chore.choreId)
+    val updateRating: (Float) -> Unit = { newRating ->
+        setRating(newRating)
+        // Update the rating in the ViewModel
+        println(newRating)
+        userId?.let { choresViewModel.updateChoreRating(chore, newRating, it) }
+    }
+
     Surface(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
@@ -257,7 +267,7 @@ fun TaskWeekItem(chore: Chore) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(start = 18.dp)
             )
-            StarRatingBar(maxStars = 5, rating = rating, onRatingChanged = { rating = it })
+            StarRatingBar(maxStars = 5, rating = rating, onRatingChanged = updateRating)
         }
     }
     Spacer(modifier = Modifier.height(8.dp))
