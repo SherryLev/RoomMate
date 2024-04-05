@@ -209,9 +209,21 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
                     .height(150.dp)
                     .width(300.dp)
             ) {
-                LazyColumn {
-                    items(averageRatings.size) { index ->
-                        displayEachChore(currentUserChores, index, averageRatings[index])
+                if (averageRatings.isEmpty()) {
+                    Text(
+                        "You have no chore ratings yet.",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(top = 16.dp, start = 60.dp),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.LightGray
+                    )
+                } else {
+                    LazyColumn {
+                        items(averageRatings.size) { index ->
+                            displayEachChore(currentUserChores, index, averageRatings[index])
+                        }
                     }
                 }
             }

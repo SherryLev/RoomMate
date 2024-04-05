@@ -79,8 +79,6 @@ import org.housemate.theme.md_theme_light_error
 import java.time.LocalDate
 import java.util.Calendar
 
-//var choresList = mutableListOf<Chore>()
-
 @Composable
 fun DeleteConfirmationDialog(
     showDialog: Boolean,
