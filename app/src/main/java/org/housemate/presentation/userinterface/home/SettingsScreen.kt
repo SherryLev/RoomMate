@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -84,6 +85,12 @@ fun SettingsScreen(
     var groupCode by remember { mutableStateOf<String?>(null)}
 
     val username by settingsViewModel.username.collectAsState()
+
+    var groupCodeValidationErrorMessage by remember { mutableStateOf<String?>(null) }
+    var groupSwitchSuccessMessage by remember { mutableStateOf<String?>(null) }
+    var alreadyInGroupMessage by remember { mutableStateOf<String?>(null) }
+    val darkGreen = Color(0xFF006400)
+    val lightPurple = Color(0xFF8307f0)
 
     LaunchedEffect(Unit) {
         val userId = userRepository.getCurrentUserId()
@@ -171,6 +178,33 @@ fun SettingsScreen(
                             onTrailingIconClick = null,
                             leadingIcon = Icons.Default.Groups
                         )
+
+                        // HERE
+                        groupSwitchSuccessMessage?.let { successMessage ->
+                            Text(
+                                text = successMessage,
+                                color = darkGreen,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                        groupCodeValidationErrorMessage?.let { errorMessage ->
+                            Text(
+                                text = errorMessage,
+                                color = Color.Red,
+                                modifier = Modifier
+                                    .padding(top = 8.dp)
+                                    //.align(Alignment.CenterVertically)
+                            )
+                        }
+                        alreadyInGroupMessage?.let { message ->
+                            Text(
+                                text = message,
+                                color = lightPurple,
+                                modifier = Modifier
+                                    //.align(Alignment.CenterHorizontally)
+                                    .padding(top = 8.dp)
+                            )
+                        }
                         Spacer(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -180,10 +214,13 @@ fun SettingsScreen(
                             onClick = {
                                 coroutineScope.launch {
                                     val newGroupCode = enteredGroupCode.value
+                                    val currentUserId = userRepository.getCurrentUserId()
                                     if (newGroupCode.isNotBlank()) {
                                         val currentUserId = userRepository.getCurrentUserId()
                                         currentUserId?.let { userId ->
                                             val newGroup = groupRepository.getGroupByCode(newGroupCode)
+                                            val currentGroupCode = userRepository.getGroupCodeForUser(userId)
+
                                             if (newGroup != null) {
                                                 val currentGroupCode = userRepository.getGroupCodeForUser(userId)
                                                 if (currentGroupCode != null) {
@@ -191,22 +228,30 @@ fun SettingsScreen(
                                                 }
 
                                                 val addMemberResult = groupRepository.addMemberToGroup(newGroupCode, userId)
-                                                if (addMemberResult) {
-                                                    userRepository.updateUserGroupCode(userId, newGroupCode)
-
-                                                    // SUCCESS MESSAGE OR NAVIGATION
+                                                if (currentGroupCode == newGroupCode) {
+                                                    alreadyInGroupMessage = "You are already in this group"
+                                                    groupCodeValidationErrorMessage = null
                                                 } else {
-                                                    // HANDLE FAILURE
+                                                    alreadyInGroupMessage = null
+                                                    if (addMemberResult) {
+                                                        userRepository.updateUserGroupCode(userId, newGroupCode)
+                                                        groupSwitchSuccessMessage = "Successfully switched groups!"
+                                                    } else {
+                                                        // HANDLE FAILURE
+                                                        groupCodeValidationErrorMessage = "Failed to join the group. Please try again."
+                                                    }
                                                 }
                                             } else {
                                                 // HANDLE FAILURE FOR NON EXISTENT GROUP CODE
+                                                groupCodeValidationErrorMessage = "Group code not found. Please check the code and try again"
                                             }
                                         } ?: run {
-                                            // HANDLE WHERE NO CURRENT USER ID
+                                            groupCodeValidationErrorMessage = "Error: User not identified"
                                         }
 
                                     } else {
                                         // HANDLE VALIDATION ERROR
+                                        groupCodeValidationErrorMessage = "Group code cannot be blank."
                                     }
 
                                 }
