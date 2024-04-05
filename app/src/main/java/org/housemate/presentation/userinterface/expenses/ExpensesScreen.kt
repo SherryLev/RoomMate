@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.housemate.domain.model.Expense
 import org.housemate.domain.model.Payment
+import org.housemate.domain.model.User
 import org.housemate.domain.repositories.UserRepository
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
@@ -289,7 +290,8 @@ fun ExpensesScreen(
                                                         onDismiss = {
                                                             showDialog.value = false
                                                             expenseViewModel.dismissDialog()
-                                                        } // Dismiss the dialog when needed
+                                                        },
+                                                        housemates = housemates// Dismiss the dialog when needed
                                                     )
                                                 }
                                                 Row(
@@ -488,7 +490,8 @@ fun ExpensePopupDialog(
     expense: Expense,
     onEditExpense: () -> Unit,
     onDeleteExpense: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    housemates: List<User>
 )  {
     val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     val formattedDate = dateFormatter.format(expense.timestamp.toDate())
@@ -546,8 +549,9 @@ fun ExpensePopupDialog(
                     Text(text = "Date: $formattedDate")
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(text = "Owing Amounts:")
-                    expense.owingAmounts.forEach { (person, amount) ->
-                        Text(text = "- $person: $${"%.2f".format(amount)}")
+                    expense.owingAmounts.forEach { (personId, amount) ->
+                        val username = housemates.find { it.uid == personId }?.username ?: ""
+                        Text(text = "- $username: $${"%.2f".format(amount)}")
                     }
                 }
             }

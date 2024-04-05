@@ -72,10 +72,10 @@ class ExpenseViewModel @Inject constructor(
 
     init {
         // Fetch expenses from the repository when the ViewModel is initialized
+        fetchAllHousemates()
         fetchCurrentUser()
         fetchExpenses()
         fetchPayments()
-        fetchAllHousemates()
     }
 
     private val _usernamesMap = MutableStateFlow<Map<String, String>>(emptyMap())
