@@ -2,6 +2,7 @@ package org.housemate.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.tasks.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -147,6 +148,19 @@ class ChoresViewModel @Inject constructor(
                 _error.value = e.message ?: "An error occurred"
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun deleteMultipleChores(chorePrefix: String, userId: String){
+        viewModelScope.launch {
+            try {
+                choreRepository.deleteMultipleChores(chorePrefix, userId).await()
+            } catch (e: Exception) {
+                _error.value = e.message ?: "An error occurred"
+            } finally {
+                _isLoading.value = false
+                getAllChores()
             }
         }
     }

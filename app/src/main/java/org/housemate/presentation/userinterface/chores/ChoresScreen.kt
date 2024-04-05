@@ -1,6 +1,7 @@
 package org.housemate.presentation.userinterface.chores
 
 
+import android.content.ContentValues.TAG
 import android.util.Log
 import android.widget.GridLayout
 import androidx.compose.foundation.layout.*
@@ -117,7 +118,7 @@ fun StarRatingBar(
 }
 
 @Composable
-fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
+fun TaskItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel(),chorePrefix: String, userId: String) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
@@ -182,7 +183,8 @@ fun TaskItem(chore: Chore, deleteTask: (Chore) -> Unit) {
             Box(modifier = Modifier.padding(end = 5.dp)) {
                 IconButton(
                     onClick = {
-                        deleteTask(chore)
+                       choresViewModel.deleteMultipleChores(chorePrefix, userId)
+                        //deleteTask(chore)
                         //deleteChore(chore.choreId, userId: String)
                     },
                     modifier = Modifier
@@ -274,16 +276,16 @@ fun stringToDayOfWeek(dayString: String): DayOfWeek? {
 }
 
 @Composable
-fun TaskDisplayHouse(chores: List<Chore>) {
+fun TaskDisplayHouse(chores: List<Chore>, choresViewModel: ChoresViewModel = hiltViewModel()) {
     val uniqueChoreTypes = mutableSetOf<String>()
+
     LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
         items(chores) { chore ->
             val choreType = extractChoreType(chore.choreId)
             print(choreType)
             if (uniqueChoreTypes.add(choreType)) { // Check if the chore type is already added
-                TaskItem(chore) {
-                    // deleteTask(chore)
-                }
+                val chorePrefix = chore.choreId.substringBefore("-") + "-"
+                TaskItem(chore, choresViewModel,chorePrefix, chore.assigneeId)
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -330,8 +332,6 @@ fun TaskDisplayWeek(chores: List<Chore>, day: DayOfWeek) {
 @Composable
 fun MainLayout(navController: NavHostController = rememberNavController(),
                choresViewModel: ChoresViewModel = hiltViewModel()) {
-    //val chores = remember { choresList }
-    //val (chores, setChores) = remember { mutableStateOf(choresList) }
     val dialogDismissed by choresViewModel.dialogDismissed.collectAsState()
     val chores by choresViewModel.chores.collectAsState()
 
@@ -351,16 +351,14 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
 //    var chores by remember { mutableStateOf(choresList) }
     var selectedDay by remember { mutableStateOf("Week") }
 
-//    val deleteTask: (Chore) -> Unit = { choreToDelete ->
-//        chores = chores.toMutableList().apply { remove(choreToDelete) }
-//    }
-
     LaunchedEffect(dialogDismissed) {
         if (dialogDismissed) {
             choresViewModel.getAllChores()
             choresViewModel.setDialogDismissed(false) // Reset the state after refreshing
         }
     }
+
+
 
     Box(
         Modifier

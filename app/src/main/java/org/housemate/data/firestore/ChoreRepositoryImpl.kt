@@ -1,11 +1,14 @@
 package org.housemate.data.firestore
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import org.housemate.domain.model.Chore
 import org.housemate.domain.repositories.ChoreRepository
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
+import com.google.firebase.firestore.FieldPath
 
 class ChoreRepositoryImpl : ChoreRepository{
     private val db = FirebaseFirestore.getInstance()
@@ -84,5 +87,33 @@ class ChoreRepositoryImpl : ChoreRepository{
             .collection("userChores")
             .document(choreId)
             .delete()
+    }
+   override fun deleteMultipleChores(chorePrefix: String, userId: String): Task<Void> {
+        val completionSource = TaskCompletionSource<Void>()
+        val batch = db.batch()
+
+        db.collection("chores")
+            .document(userId)
+            .collection("userChores")
+            .whereGreaterThan(FieldPath.documentId(), chorePrefix)
+            .whereLessThan(FieldPath.documentId(), "$chorePrefix\uf8ff")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                for (document in querySnapshot.documents) {
+                    batch.delete(document.reference)
+                }
+                batch.commit()
+                    .addOnSuccessListener {
+                        completionSource.setResult(null)
+                    }
+                    .addOnFailureListener { exception ->
+                        completionSource.setException(exception)
+                    }
+            }
+            .addOnFailureListener { exception ->
+                completionSource.setException(exception)
+            }
+
+        return completionSource.task
     }
 }

@@ -11,4 +11,5 @@ interface ChoreRepository {
     fun updateChore(chore: Chore): Task<Void>
 
     fun deleteChore(choreId: String, userId: String): Task<Void>
+    fun deleteMultipleChores(chorePrefix: String, userId: String): Task<Void>
 }
