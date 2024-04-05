@@ -72,7 +72,6 @@ class ChoreRepositoryImpl (
 //    }
 
     override fun getAllChores(): Task<List<Chore>> {
-        println("ingetallchores")
         val choreList = mutableListOf<Chore>()
         val taskCompletionSource = TaskCompletionSource<List<Chore>>()
 
