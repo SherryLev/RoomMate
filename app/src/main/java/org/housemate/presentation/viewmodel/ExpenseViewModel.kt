@@ -151,6 +151,13 @@ class ExpenseViewModel @Inject constructor(
         return filteredExpenses.sumOf { BigDecimal.valueOf(it.owingAmounts[currentUser]!!) }
     }
 
+    fun calculateTotalAmountSpentByHouse(): BigDecimal {
+        val allExpenses = _expenseItems.value
+
+        // Calculate total amount spent by the house
+        return allExpenses.sumOf { BigDecimal.valueOf(it.amount) }
+    }
+
     fun deleteExpenseById(expenseId: String) {
         viewModelScope.launch {
             try {
