@@ -61,6 +61,7 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
 
     var userId by remember { mutableStateOf<String?>(null) }
 
+    var groupCodeErrorMessage by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) {
         userId = userRepository.getCurrentUserId()
     }
@@ -223,6 +224,16 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
 
+            groupCodeErrorMessage?.let { errorMessage ->
+                Text (
+                    text = errorMessage,
+                    color = Color.Red,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 4.dp)
+                )
+            }
+
             Button(
                 onClick = {
                     coroutineScope.launch {
@@ -244,10 +255,12 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
                                         showErrorMessage = "Failed to update user with group code. Please try again"
                                     }
                                 } else {
+                                    groupCodeErrorMessage = "Group code cannot be found. Please try again"
                                     showErrorMessage =
                                         "Failed to join the group. Please check the code and try again."
                                 }
                             } else {
+                                groupCodeErrorMessage = "Group code cannot be found. Please try again"
                                 showErrorMessage =
                                     "No group found with that code. Please check the code and try again"
                             }
