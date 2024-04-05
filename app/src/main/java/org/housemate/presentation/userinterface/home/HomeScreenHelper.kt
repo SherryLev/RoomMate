@@ -1,5 +1,7 @@
 package org.housemate.presentation.userinterface.home
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -23,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -91,6 +94,7 @@ fun HomeScreenHelper(
     navController: NavHostController = rememberNavController(),
     onNavigateToSettingsScreen: () -> Unit,expenseViewModel: ExpenseViewModel = hiltViewModel(),
     choresViewModel: ChoresViewModel = hiltViewModel()) {
+
     LaunchedEffect(key1 = "fetchUserIdandchores") {
         choresViewModel.fetchCurrentUserId()
         choresViewModel.getAllChores()
