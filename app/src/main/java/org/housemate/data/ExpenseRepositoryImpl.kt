@@ -35,34 +35,6 @@ class ExpenseRepositoryImpl(
         }
     }
 
-//    override suspend fun getExpenses(): List<Expense> {
-//        val expenses = mutableListOf<Expense>()
-//        try {
-//            val currentUser = auth.currentUser
-//            val userId = currentUser?.uid
-//            if (userId != null) {
-//                val querySnapshot = firestore.collection("expenses")
-//                    .orderBy("timestamp", Query.Direction.DESCENDING)
-//                    .get()
-//                    .await()
-//
-//                for (document in querySnapshot.documents) {
-//                    val expense = document.toObject(Expense::class.java)
-//                    expense?.let {
-//                        expenses.add(it)
-//                    }
-//                }
-//            } else {
-//                throw IllegalStateException("User is not authenticated.")
-//            }
-//            Log.d(TAG, "Expenses retrieved successfully")
-//        } catch (e: Exception) {
-//            Log.e(TAG, "Error getting expenses", e)
-//            // You can handle the exception here, e.g., return an empty list or throw it to be handled by the caller
-//        }
-//        return expenses
-//    }
-
     override suspend fun getExpenses(): List<Expense> {
         val expenses = mutableListOf<Expense>()
         try {
@@ -110,10 +82,19 @@ class ExpenseRepositoryImpl(
 
     override suspend fun updateExpenseById(expenseId: String, updatedExpense: Expense) {
         try {
+            // Retrieve the existing timestamp value from Firestore
+            val existingExpense = firestore.collection("expenses").document(expenseId).get().await()
+            val timestamp = existingExpense.getTimestamp("timestamp") // Adjust this based on your Firestore document structure
+
+            // Update the updated expense with the existing timestamp
+            val expenseWithTimestamp = timestamp?.let { updatedExpense.copy(timestamp = it) }
+
             val currentUser = auth.currentUser
             val userId = currentUser?.uid
             if (userId != null) {
-                firestore.collection("expenses").document(expenseId).set(updatedExpense).await()
+                if (expenseWithTimestamp != null) {
+                    firestore.collection("expenses").document(expenseId).set(expenseWithTimestamp).await()
+                }
                 Log.d(TAG, "Expense updated successfully")
             } else {
                 throw IllegalStateException("User is not authenticated.")

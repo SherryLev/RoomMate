@@ -249,204 +249,218 @@ fun ExpensesScreen(
                                     )
                                 }
                             } else {
-                                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-                                    expenseAndPaymentItems.forEach { item ->
-                                        when (item) {
-                                            is Expense -> {
-                                                val timestamp =
-                                                    item.timestamp.toDate() // Convert Firestore timestamp to Date
+                                Box (modifier = Modifier.padding(bottom = 16.dp)) {
+                                    Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                                        expenseAndPaymentItems.forEach { item ->
+                                            when (item) {
+                                                is Expense -> {
+                                                    val timestamp =
+                                                        item.timestamp.toDate() // Convert Firestore timestamp to Date
 
-                                                val dateFormatter = SimpleDateFormat(
-                                                    "MMM",
-                                                    Locale.getDefault()
-                                                ) // Format for month (e.g., "Dec")
-                                                val month =
-                                                    dateFormatter.format(timestamp)
+                                                    val dateFormatter = SimpleDateFormat(
+                                                        "MMM",
+                                                        Locale.getDefault()
+                                                    ) // Format for month (e.g., "Dec")
+                                                    val month =
+                                                        dateFormatter.format(timestamp)
 
-                                                val dayOfMonth = SimpleDateFormat(
-                                                    "dd",
-                                                    Locale.getDefault()
-                                                ).format(timestamp)
+                                                    val dayOfMonth = SimpleDateFormat(
+                                                        "dd",
+                                                        Locale.getDefault()
+                                                    ).format(timestamp)
 
-                                                val amountLentOrBorrowed: Double =
-                                                    if (item.payerId == (currentUser?.uid ?: ""))
-                                                     {
-                                                        // Calculate sum of what others owe you
-                                                        item.owingAmounts.values.sum() - (item.owingAmounts[currentUser!!.uid]
-                                                            ?: 0.00)
-                                                    } else {
-                                                        // Get the amount that you owe
-                                                        -(item.owingAmounts[currentUser!!.uid] ?: 0.00)
-                                                    }
-
-                                                val showDialog = remember { mutableStateOf(false) }
-                                                if (showDialog.value) {
-                                                    ExpensePopupDialog(
-                                                        expense = item,
-                                                        onEditExpense = {
-                                                            expenseViewModel.onEditExpenseClicked(item)
-                                                            navController.navigate(AppScreenRoutes.AddExpenseScreen.route)
-                                                                        },
-                                                        onDeleteExpense = { expenseViewModel.deleteExpenseById(item.id) },
-
-                                                        onDismiss = {
-                                                            showDialog.value = false
-                                                            expenseViewModel.dismissDialog()
-                                                        },
-                                                        housemates = housemates// Dismiss the dialog when needed
-                                                    )
-                                                }
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    modifier = Modifier
-                                                        .padding(vertical = 8.dp)
-                                                        .clickable {
-                                                            // Show the popup dialog when an expense item is clicked
-                                                            showDialog.value = true
+                                                    val amountLentOrBorrowed: Double =
+                                                        if (item.payerId == (currentUser?.uid
+                                                                ?: "")
+                                                        ) {
+                                                            // Calculate sum of what others owe you
+                                                            item.owingAmounts.values.sum() - (item.owingAmounts[currentUser!!.uid]
+                                                                ?: 0.00)
+                                                        } else {
+                                                            // Get the amount that you owe
+                                                            -(item.owingAmounts[currentUser!!.uid]
+                                                                ?: 0.00)
                                                         }
-                                                ) {
-                                                    Column(
-                                                        horizontalAlignment = Alignment.Start,
-                                                        modifier = Modifier.weight(2f)
-                                                    ) {
-                                                        Text(
-                                                            text = month,
-                                                            color = Color.Gray,
-                                                            fontSize = 14.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                        )
-                                                        Text(
-                                                            text = dayOfMonth,
-                                                            color = md_theme_light_primary,
-                                                            fontSize = 18.sp,
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                    }
 
-                                                    Column(
-                                                        modifier = Modifier.weight(6f)
-                                                    ) {
-                                                        Text(
-                                                            text = item.description
-                                                        )
-                                                        Text(
-                                                            text = "${item.payerName} paid $${
-                                                                "%.2f".format(
-                                                                    item.amount
+                                                    val showDialog =
+                                                        remember { mutableStateOf(false) }
+                                                    if (showDialog.value) {
+                                                        ExpensePopupDialog(
+                                                            expense = item,
+                                                            onEditExpense = {
+                                                                expenseViewModel.onEditExpenseClicked(
+                                                                    item
                                                                 )
-                                                            }",
-                                                            textAlign = TextAlign.Left,
-                                                            fontSize = 14.sp,
-                                                            color = Color.Gray,
-                                                            fontWeight = FontWeight.Bold
+                                                                navController.navigate(
+                                                                    AppScreenRoutes.AddExpenseScreen.route
+                                                                )
+                                                            },
+                                                            onDeleteExpense = {
+                                                                expenseViewModel.deleteExpenseById(
+                                                                    item.id
+                                                                )
+                                                            },
+
+                                                            onDismiss = {
+                                                                showDialog.value = false
+                                                                expenseViewModel.dismissDialog()
+                                                            },
+                                                            housemates = housemates// Dismiss the dialog when needed
                                                         )
                                                     }
-
-                                                    val lentOrBorrowedText = when {
-                                                        amountLentOrBorrowed < 0 -> "you borrowed"
-                                                        amountLentOrBorrowed > 0 -> "you lent"
-                                                        else -> "not involved"
-                                                    }
-
-                                                    val lentOrBorrowedColor = when {
-                                                        amountLentOrBorrowed < 0 -> md_theme_light_error
-                                                        amountLentOrBorrowed > 0 -> green
-                                                        else -> Color.Gray
-                                                    }
-
-                                                    Column(
-                                                        modifier = Modifier.weight(3f),
-                                                        horizontalAlignment = Alignment.End
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        modifier = Modifier
+                                                            .padding(vertical = 8.dp)
+                                                            .clickable {
+                                                                // Show the popup dialog when an expense item is clicked
+                                                                showDialog.value = true
+                                                            }
                                                     ) {
-                                                        Text(
-                                                            text = lentOrBorrowedText,
-                                                            fontSize = 14.sp,
-                                                            textAlign = TextAlign.End,
-                                                            color = lentOrBorrowedColor,
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                        Text(
-                                                            text = "$${
-                                                                "%.2f".format(
-                                                                    abs(
-                                                                        amountLentOrBorrowed
+                                                        Column(
+                                                            horizontalAlignment = Alignment.Start,
+                                                            modifier = Modifier.weight(2f)
+                                                        ) {
+                                                            Text(
+                                                                text = month,
+                                                                color = Color.Gray,
+                                                                fontSize = 14.sp,
+                                                                fontWeight = FontWeight.Bold,
+                                                            )
+                                                            Text(
+                                                                text = dayOfMonth,
+                                                                color = md_theme_light_primary,
+                                                                fontSize = 18.sp,
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                        }
+
+                                                        Column(
+                                                            modifier = Modifier.weight(6f)
+                                                        ) {
+                                                            Text(
+                                                                text = item.description
+                                                            )
+                                                            Text(
+                                                                text = "${item.payerName} paid $${
+                                                                    "%.2f".format(
+                                                                        item.amount
                                                                     )
-                                                                )
-                                                            }",
-                                                            textAlign = TextAlign.End,
-                                                            color = lentOrBorrowedColor
-                                                        )
+                                                                }",
+                                                                textAlign = TextAlign.Left,
+                                                                fontSize = 14.sp,
+                                                                color = Color.Gray,
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                        }
+
+                                                        val lentOrBorrowedText = when {
+                                                            amountLentOrBorrowed < 0 -> "you borrowed"
+                                                            amountLentOrBorrowed > 0 -> "you lent"
+                                                            else -> "not involved"
+                                                        }
+
+                                                        val lentOrBorrowedColor = when {
+                                                            amountLentOrBorrowed < 0 -> md_theme_light_error
+                                                            amountLentOrBorrowed > 0 -> green
+                                                            else -> Color.Gray
+                                                        }
+
+                                                        Column(
+                                                            modifier = Modifier.weight(3f),
+                                                            horizontalAlignment = Alignment.End
+                                                        ) {
+                                                            Text(
+                                                                text = lentOrBorrowedText,
+                                                                fontSize = 14.sp,
+                                                                textAlign = TextAlign.End,
+                                                                color = lentOrBorrowedColor,
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                            Text(
+                                                                text = "$${
+                                                                    "%.2f".format(
+                                                                        abs(
+                                                                            amountLentOrBorrowed
+                                                                        )
+                                                                    )
+                                                                }",
+                                                                textAlign = TextAlign.End,
+                                                                color = lentOrBorrowedColor
+                                                            )
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            is Payment -> {
-                                                val timestamp =
-                                                    item.timestamp.toDate() // Convert Firestore timestamp to Date
 
-                                                val dateFormatter = SimpleDateFormat(
-                                                    "MMM",
-                                                    Locale.getDefault()
-                                                ) // Format for month (e.g., "Dec")
-                                                val month =
-                                                    dateFormatter.format(timestamp)
+                                                is Payment -> {
+                                                    val timestamp =
+                                                        item.timestamp.toDate() // Convert Firestore timestamp to Date
 
-                                                val dayOfMonth = SimpleDateFormat(
-                                                    "dd",
-                                                    Locale.getDefault()
-                                                ).format(timestamp)
+                                                    val dateFormatter = SimpleDateFormat(
+                                                        "MMM",
+                                                        Locale.getDefault()
+                                                    ) // Format for month (e.g., "Dec")
+                                                    val month =
+                                                        dateFormatter.format(timestamp)
 
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    modifier = Modifier.padding(
-                                                        vertical = 8.dp
-                                                    )
-                                                ) {
-                                                    Column(
-                                                        horizontalAlignment = Alignment.Start,
-                                                        modifier = Modifier.weight(2f)
+                                                    val dayOfMonth = SimpleDateFormat(
+                                                        "dd",
+                                                        Locale.getDefault()
+                                                    ).format(timestamp)
+
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        modifier = Modifier.padding(
+                                                            vertical = 8.dp
+                                                        )
                                                     ) {
-                                                        Text(
-                                                            text = month,
-                                                            color = Color.Gray,
-                                                            fontSize = 14.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                        )
-                                                        Text(
-                                                            text = dayOfMonth,
-                                                            color = md_theme_light_primary,
-                                                            fontSize = 18.sp,
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                    }
+                                                        Column(
+                                                            horizontalAlignment = Alignment.Start,
+                                                            modifier = Modifier.weight(2f)
+                                                        ) {
+                                                            Text(
+                                                                text = month,
+                                                                color = Color.Gray,
+                                                                fontSize = 14.sp,
+                                                                fontWeight = FontWeight.Bold,
+                                                            )
+                                                            Text(
+                                                                text = dayOfMonth,
+                                                                color = md_theme_light_primary,
+                                                                fontSize = 18.sp,
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                        }
 
-                                                    Column(
-                                                        modifier = Modifier.weight(6f)
-                                                    ) {
-                                                        Text(
-                                                            text = "${item.payerName} paid ${item.payeeName} $${
-                                                                "%.2f".format(
-                                                                    item.amount
-                                                                )
-                                                            }",
-                                                            textAlign = TextAlign.Left,
-                                                            fontSize = 14.sp,
-                                                            color = Color.Gray,
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                    }
+                                                        Column(
+                                                            modifier = Modifier.weight(6f)
+                                                        ) {
+                                                            Text(
+                                                                text = "${item.payerName} paid ${item.payeeName} $${
+                                                                    "%.2f".format(
+                                                                        item.amount
+                                                                    )
+                                                                }",
+                                                                textAlign = TextAlign.Left,
+                                                                fontSize = 14.sp,
+                                                                color = Color.Gray,
+                                                                fontWeight = FontWeight.Bold
+                                                            )
+                                                        }
 
 
-                                                    Column(
-                                                        modifier = Modifier.weight(3f),
-                                                        horizontalAlignment = Alignment.End
-                                                    ) {
-                                                        Icon(
-                                                            imageVector = Icons.Outlined.Paid,
-                                                            contentDescription = "Cash",
-                                                            tint = green,
-                                                            modifier = Modifier
-                                                                .size(22.dp)
-                                                        )
+                                                        Column(
+                                                            modifier = Modifier.weight(3f),
+                                                            horizontalAlignment = Alignment.End
+                                                        ) {
+                                                            Icon(
+                                                                imageVector = Icons.Outlined.Paid,
+                                                                contentDescription = "Cash",
+                                                                tint = green,
+                                                                modifier = Modifier
+                                                                    .size(22.dp)
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }

@@ -105,6 +105,7 @@ class ExpenseViewModel @Inject constructor(
         // Set all the values to be edited in the UI
         _expenseId.value = expense.id
         _selectedPayer.value = expense.payerName
+        _selectedPayerId.value = expense.payerId
         _expenseDescription.value = expense.description
         _expenseAmount.value = expense.amount.toBigDecimal()
         val convertedOwingAmounts = expense.owingAmounts.mapValues { it.value.toBigDecimal() }
