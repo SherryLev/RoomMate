@@ -25,8 +25,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.domain.model.Chore
 import org.housemate.presentation.viewmodel.ChoresViewModel
+import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.pretty_purple
 import org.housemate.utils.AppScreenRoutes
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -54,7 +56,7 @@ data class Task(val name: String)
     }
 }
 @Composable
-fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = hiltViewModel()) {
+fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = hiltViewModel(), expenseViewModel: ExpenseViewModel = hiltViewModel()) {
     var tasks by remember { mutableStateOf(emptyList<Task>()) }
     LaunchedEffect(key1 = "fetchUserIdandchores") {
         choresViewModel.fetchCurrentUserId()
@@ -64,11 +66,21 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
 
     val chores by choresViewModel.chores.collectAsState()
     val currentUserID by choresViewModel.userId.collectAsState()
-    val currentUser by choresViewModel.currentUser.collectAsState()
     val currentDate = LocalDate.now()
     val currentUserChores = chores.filter { it.assigneeId == currentUserID &&
             it.dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate() == currentDate}
 
+    val expenses by expenseViewModel.expenseItems.collectAsState()
+    // Filter expenses where the payerId matches the current user's ID
+    val expensesPaidByUser = expenses.filter { it.payerId == currentUserID }
+
+    val filteredExpenses = expensesPaidByUser.filter { expense ->
+        val owingAmountForCurrentUser = expense.owingAmounts[currentUserID]
+        owingAmountForCurrentUser != null
+    }
+    val youSpentThisMonth = filteredExpenses.sumOf { BigDecimal.valueOf(it.owingAmounts[currentUserID]!!) }
+
+    val houseSpentThisMonth = expenses.sumOf { BigDecimal.valueOf(it.amount) }
 
     val averageRatings = currentUserChores.map { chore ->
         val ratings = chore.userRating.values
@@ -106,22 +118,60 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
         ) {
 
             Text(
-                "Statistics",
+                "Your spending history this month:",
                 modifier = Modifier
-                    .padding(top = 20.dp, start = 6.dp)
+                    .padding(top = 40.dp)
                     .align(Alignment.CenterHorizontally),
-                fontSize = 42.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
-
-            Text(
-                "View your spending history below",
+            Box(
                 modifier = Modifier
-                    .padding(top = 30.dp, start = 6.dp)
-                    .align(Alignment.CenterHorizontally),
-                fontSize = 20.sp
-            )
+                    .padding(16.dp)
+                    .height(150.dp)
+                    .width(300.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // Row to display spending by you this month
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 40.dp, top = 18.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "You spent:",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "$$youSpentThisMonth",
+                            fontSize = 16.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(30.dp))
+                    // Row to display spending by the house this month
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 40.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Household spent:",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
 
+                        Text(
+                            text = "$$houseSpentThisMonth",
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+            }
 
             Text(
                 "Your Average Chore Rating is:",
