@@ -36,7 +36,7 @@ fun NetworkErrorDialog(
             Text(text = "Network Error")
         },
         text = {
-            Text(text = "Please connect to the internet to use the app. Reconnect and open the app again!")
+            Text(text = "Please connect to the internet to use the app. Reconnect and open the app again! Goodbye.")
         },
         confirmButton = {
             Button(
