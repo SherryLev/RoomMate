@@ -14,7 +14,7 @@ data class Chore(
     val votedUser: List<String>? = null, // nullable
     val repeat: String
 ) {
-    constructor() : this("", "", "", "", "", "", null, emptyMap(), null, "")
+    constructor() : this("", "", "", "", "", "", null, emptyMap(), emptyList(), "")
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "choreId" to choreId,

@@ -320,7 +320,7 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                             assignee = assigneeChoice,
                             assigneeId = assigneeId,
                             dueDate = choreDueDate,
-                            userRating = emptyMap(),
+                            userRating = emptyMap(), // Initialize as an empty map instead of empty list
                             votedUser = emptyList(),
                             repeat = repetitionChoice
                         )
