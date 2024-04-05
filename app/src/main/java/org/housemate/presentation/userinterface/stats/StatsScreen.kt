@@ -123,7 +123,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
             Text(
                 "Your spending history this month:",
                 modifier = Modifier
-                    .padding(top = 46.dp)
+                    .padding(top = 52.dp)
                     .align(Alignment.CenterHorizontally),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -198,7 +198,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
             Text(
                 "Your Chore Ratings:",
                 modifier = Modifier
-                    .padding(top = 25.dp)
+                    .padding(top = 8.dp)
                     .align(Alignment.CenterHorizontally),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -218,7 +218,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
             Text(
                 "Your Average Chore Rating is:",
                 modifier = Modifier
-                    .padding(top = 25.dp)
+                    .padding(top = 40.dp)
                     .align(Alignment.CenterHorizontally),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
