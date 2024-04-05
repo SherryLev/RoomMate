@@ -33,6 +33,44 @@ Download out installer for HouseMate here: https://git.uwaterloo.ca/gmmoroie/tea
 
 For a full list of the changes visit our issues list on GitLab
 
+## Release Notes Version 1.2.0
+**_What's New_**
+This is our largest update to Housemate yet! 
+- **Group Visability:** Users can now see what their Household name is and what their group code is https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/38
+- **Switch Groups Functionality:** Users can now switch groups on the settings page as long as they provide a valid group code with messages on blank or incorrect codes and a success message upon a group switch https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/38
+- **Group and User Data Management:** Users are now added to the members list in the group collection in firestore and their group code is added to their user collection in firestore https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/38
+- **Group Creation Screen:** Users can now see what their Household name and group code is once they create a group upon registration https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/38
+- **Group Joining Screen:** Users can now see what their Household name and group code is once they join a group https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/38
+- **Household Personalization:** Users can now create a personalized name for their Household upon registration which is then shown on the HomePage https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/38
+- **Chore Management:** Users can now delete chores and choose to repeat certain chores at their desired frequency https://git.uwaterloo.ca/gmmoroie/team-101-13/-/merge_requests/33
+- **Chore Data Management:** Chores are now uploaded to the firestore upon creation with them being repeated over a four month term, they are also removed from the firestore upon deletion https://git.uwaterloo.ca/gmmoroie/team-101-13/-/merge_requests/33
+- **Chore Visability:** A users upcoming chores are now shown on the HomeScreen https://git.uwaterloo.ca/gmmoroie/team-101-13/-/merge_requests/42
+- **Username Selection:** Users can now choose a user name when they are registering their account https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/48
+- **Expenses Data Management:** Expenses in the firestore are now connected to specific userId's given on who is involved in the payments
+- **Expenses Summary:** Expenses summary is now connected to the firestore https://git.uwaterloo.ca/gmmoroie/team-101-13/-/merge_requests/36
+- **Bug Fixes for Expenses:** We have fixed bugs in the expenses page, that is the error on splitting equally and the total adding to 1 cent more or less than the original payment https://git.uwaterloo.ca/gmmoroie/team-101-13/-/merge_requests/36
+- **Settle Up UI:** We have created the settle up UI and functionality https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/44 , https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/43
+- **Expense History:** Payments now show up in expense history and are updated in the firestore
+- **Chore Ratings:** Chores can now be rated on a scale of 1-5 stars based on quality by other group mates https://git.uwaterloo.ca/gmmoroie/team-101-13/-/merge_requests/39
+- **Expense Deletion:** Expenses can now be deleted once they are settled https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/47
+- **Calendar Removed:** We have made the UI for Housemate more clear and easy to understand by removing the calendar tab https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/45 
+- **User Login Memorization:** If a user does not log out and closes the app they remain logged in https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/41
+
+**_Enhancements_**
+- Streamlined navigation and user interface for an improved overall user experience, making it easier for users to access their households, manage chores, and keep track of expenses.
+- Enhanced security features to ensure the safety and privacy of user data, with robust encryption for sensitive information and improved authentication processes.
+- Upgraded group visibility and management capabilities, allowing users to easily see their household names and group codes, switch groups, and manage group membership directly from the app.
+- Improved chore management system, including the ability to delete chores, set repeat frequencies, and view upcoming chores on the HomeScreen for better organization.
+- Refined expenses tracking and management, with a comprehensive summary connected to Firestore, streamlined expense splitting, and the introduction of a user-friendly 'Settle Up' UI.
+- Optimized user experience with the introduction of personalized household naming upon registration, a choice of username during account setup, and the memorization of login status for convenience.
+- Enhanced chore and expense feedback mechanisms, including the ability to rate chores based on quality and view a detailed history of expenses for better group dynamics and financial transparency.
+- Simplified app interface by removing the calendar tab, focusing on core functionalities to enhance usability and clarity for all users.
+
+**_Download Installer_**
+Download our installer for HouseMate here: 
+
+For a full list of changes, visit our issues list on GitLab: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues
+
 ## Release Notes Version 1.1.0
 **_What's New_**
 - **Authentication Enhancements:** Redesigned the authentication UI and backend mechanisms to provide a smoother login and sign-up experience, increasing both security and user-friendliness https://git.uwaterloo.ca/gmmoroie/team-101-13/-/issues/33
