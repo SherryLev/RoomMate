@@ -51,7 +51,6 @@ class ChoresViewModel @Inject constructor(
     val dialogDismissed: StateFlow<Boolean> = _dialogDismissed
 
 
-
     fun setDialogDismissed(dismissed: Boolean) {
         getAllChores()
         _dialogDismissed.value = dismissed
@@ -62,11 +61,13 @@ class ChoresViewModel @Inject constructor(
             _userId.value = userRepository.getCurrentUserId()
         }
     }
+
     fun fetchCurrentUser() {
         viewModelScope.launch {
             _currentUser.value = _userId.value?.let { userRepository.getUserById(it) }
         }
     }
+
     fun fetchAllHousemates() {
         viewModelScope.launch {
             try {
@@ -155,7 +156,7 @@ class ChoresViewModel @Inject constructor(
         }
     }
 
-    fun deleteMultipleChores(chorePrefix: String, userId: String){
+    fun deleteMultipleChores(chorePrefix: String, userId: String) {
         viewModelScope.launch {
             try {
                 choreRepository.deleteMultipleChores(chorePrefix, userId).await()
@@ -167,10 +168,11 @@ class ChoresViewModel @Inject constructor(
             }
         }
     }
+
     fun updateChoreRating(chore: Chore, newRating: Float, userId: String) {
         viewModelScope.launch {
             try {
-                choreRepository.updateChoreRating(chore, newRating,userId).await()
+                choreRepository.updateChoreRating(chore, newRating, userId).await()
             } catch (e: Exception) {
                 _error.value = e.message ?: "An error occurred"
             } finally {
@@ -178,9 +180,4 @@ class ChoresViewModel @Inject constructor(
             }
         }
     }
-
-    // Function to get the rating of a specific chore
-//    suspend fun getChoreRating(chore: Chore, userId: String): Float? {
-//        return choreRepository.getChoreRating(chore, userId)
-//    }
 }
