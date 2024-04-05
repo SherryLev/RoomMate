@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -72,10 +73,55 @@ import org.housemate.data.firestore.UserRepositoryImpl
 import com.google.firebase.firestore.FirebaseFirestore
 import org.housemate.presentation.userinterface.expenses.CustomDropdown
 import org.housemate.presentation.viewmodel.ChoresViewModel
+import org.housemate.theme.light_purple
+import org.housemate.theme.light_red
+import org.housemate.theme.md_theme_light_error
 import java.time.LocalDate
 import java.util.Calendar
 
 //var choresList = mutableListOf<Chore>()
+
+@Composable
+fun DeleteConfirmationDialog(
+    showDialog: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { onDismiss() },
+            title = { Text("Delete Confirmation") },
+            text = { Text("Are you sure you want to delete this chore?") },
+            confirmButton = {
+                Button(onClick = {
+                    onConfirm()
+                    onDismiss()
+                },
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = light_purple,
+                        contentColor = md_theme_light_primary
+                    ),
+                    elevation = ButtonDefaults.elevation(0.dp)) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { onDismiss() },
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = light_red,
+                        contentColor = md_theme_light_error
+                    ),
+                    elevation = ButtonDefaults.elevation(0.dp)) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
 
 //CITE: https://medium.com/@imitiyaz125/star-rating-bar-in-jetpack-compose-5ae54a2b5b23
 @Composable
@@ -119,6 +165,8 @@ fun StarRatingBar(
 
 @Composable
 fun TaskItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel(),chorePrefix: String, userId: String) {
+    val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
+
     Surface(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
@@ -183,7 +231,7 @@ fun TaskItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel(),ch
             Box(modifier = Modifier.padding(end = 5.dp)) {
                 IconButton(
                     onClick = {
-                       choresViewModel.deleteMultipleChores(chorePrefix, userId)
+                       setShowDialog(true)
                         //deleteTask(chore)
                         //deleteChore(chore.choreId, userId: String)
                     },
@@ -194,6 +242,14 @@ fun TaskItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel(),ch
                     Icon(painterResource(R.drawable.delete), "Delete", tint = Color.DarkGray)
                 }
             }
+            DeleteConfirmationDialog(
+                showDialog = showDialog,
+                onConfirm = {
+                    // Call your delete function here
+                    choresViewModel.deleteMultipleChores(chorePrefix, userId)
+                },
+                onDismiss = { setShowDialog(false) }
+            )
         }
     }
     Spacer(modifier = Modifier.height(8.dp))
