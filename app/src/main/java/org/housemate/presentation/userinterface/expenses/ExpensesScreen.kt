@@ -41,7 +41,9 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material.icons.outlined.Paid
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
@@ -49,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.housemate.domain.model.Expense
 import org.housemate.domain.model.Payment
+import org.housemate.domain.repositories.UserRepository
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_purple
@@ -79,6 +82,7 @@ fun ExpensesScreen(
     val dialogDismissed by expenseViewModel.dialogDismissed.collectAsState()
 
     val currentUser by expenseViewModel.currentUser.collectAsState()
+    val housemates by expenseViewModel.housemates.collectAsState()
 
     // Observe dialogDismissed and trigger recomposition
     if (dialogDismissed) {
@@ -173,13 +177,23 @@ fun ExpensesScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        // instead of hard coded values, use calculated amounts from viewmodel
-                        netAmountOwed.forEach { (housemate, amount) ->
-                            var youOwe = false
-                            if (amount.toDouble() < 0.00) {
-                                youOwe = true
-                            }
-                            BalancesInfoRow(name = housemate, amount = "$${"%.2f".format(amount.abs())}", youOwe = youOwe, navController, expenseViewModel)
+
+                        netAmountOwed.forEach { (userId, amount) ->
+                            // Find the user object with the corresponding userId
+                            val housemate = housemates.find { it.uid == userId }
+                            // Get the username from the user object, or use a default value if not found
+                            val username = housemate?.username ?: ""
+                            // Determine if the user owes or is owed money
+                            val youOwe = amount < BigDecimal.ZERO
+
+                            // Call BalancesInfoRow with the username and other parameters
+                            BalancesInfoRow(
+                                name = username,
+                                amount = "$${"%.2f".format(amount.abs())}",
+                                youOwe = youOwe,
+                                navController,
+                                expenseViewModel
+                            )
                         }
                     }
                 }
