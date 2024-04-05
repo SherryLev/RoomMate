@@ -11,4 +11,6 @@ interface ExpenseRepository {
     suspend fun deleteExpenseById(expenseId: String)
     suspend fun getPayments(): List<Payment>
     suspend fun addPayment(payment: Payment)
+    suspend fun updatePaymentById(paymentId: String, updatedPayment: Payment)
+    suspend fun deletePaymentById(paymentId: String)
 }

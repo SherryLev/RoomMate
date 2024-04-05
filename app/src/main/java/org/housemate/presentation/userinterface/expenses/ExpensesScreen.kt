@@ -408,11 +408,41 @@ fun ExpensesScreen(
                                                         Locale.getDefault()
                                                     ).format(timestamp)
 
+
+                                                    val showDialog =
+                                                        remember { mutableStateOf(false) }
+                                                    if (showDialog.value) {
+                                                       PaymentPopupDialog(
+                                                            payment = item,
+                                                            onEditPayment = {
+                                                                expenseViewModel.onEditPaymentClicked(
+                                                                    item
+                                                                )
+                                                                navController.navigate(
+                                                                    AppScreenRoutes.SettleUpScreen.route
+                                                                )
+                                                            },
+                                                            onDeletePayment = {
+                                                                expenseViewModel.deletePaymentById(
+                                                                    item.id
+                                                                )
+                                                            },
+
+                                                            onDismiss = {
+                                                                showDialog.value = false
+                                                                expenseViewModel.dismissDialog()
+                                                            },
+                                                            housemates = housemates// Dismiss the dialog when needed
+                                                        )
+                                                    }
                                                     Row(
                                                         verticalAlignment = Alignment.CenterVertically,
-                                                        modifier = Modifier.padding(
-                                                            vertical = 8.dp
-                                                        )
+                                                        modifier = Modifier
+                                                            .padding(vertical = 8.dp)
+                                                            .clickable {
+                                                                // Show the popup dialog when an expense item is clicked
+                                                                showDialog.value = true
+                                                            }
                                                     ) {
                                                         Column(
                                                             horizontalAlignment = Alignment.Start,
@@ -498,6 +528,73 @@ fun ExpensesScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun PaymentPopupDialog(
+    payment: Payment,
+    onEditPayment: () -> Unit,
+    onDeletePayment: () -> Unit,
+    onDismiss: () -> Unit,
+    housemates: List<User>
+)  {
+    val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    val formattedDate = dateFormatter.format(payment.timestamp.toDate())
+
+    Box(
+        modifier = Modifier
+            .width(260.dp)
+            .padding(horizontal = 20.dp)
+    ) {
+        AlertDialog(
+            onDismissRequest = {
+                onDismiss()
+            },
+            title = {
+                Text(text = "Payment Details                             ")
+            },
+            buttons = {
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                ) {
+                    Button(
+                        onClick = { onEditPayment() },
+                        shape = RoundedCornerShape(25.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = light_purple,
+                            contentColor = md_theme_light_primary
+                        ),
+                        elevation = ButtonDefaults.elevation(0.dp),
+                    ) {
+                        Text(text = "Edit Payment")
+                    }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Button(
+                        onClick = { onDeletePayment() },
+                        shape = RoundedCornerShape(25.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = light_red,
+                            contentColor = md_theme_light_error
+                        ),
+                        elevation = ButtonDefaults.elevation(0.dp),
+                    ) {
+                        Text(text = "Delete Payment")
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            },
+            text = {
+                Column(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(text = "${payment.payerName} paid ${payment.payeeName}")
+                    Text(text = "Amount: $${"%.2f".format(payment.amount)}")
+                    Text(text = "Date: $formattedDate")
+                }
+            }
+        )
     }
 }
 

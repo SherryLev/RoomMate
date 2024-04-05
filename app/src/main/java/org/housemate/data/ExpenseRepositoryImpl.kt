@@ -151,7 +151,9 @@ class ExpenseRepositoryImpl(
             val currentUser = auth.currentUser
             val userId = currentUser?.uid
             if (userId != null) {
-                firestore.collection("payments").add(payment).await()
+                val documentReference = firestore.collection("payments").add(payment).await()
+                val paymentWithId = payment.copy(id = documentReference.id)
+                firestore.collection("payments").document(documentReference.id).set(paymentWithId).await()
             } else {
                 throw IllegalStateException("User is not authenticated.")
             }
@@ -160,4 +162,45 @@ class ExpenseRepositoryImpl(
             throw e
         }
     }
+
+    override suspend fun updatePaymentById(paymentId: String, updatedPayment: Payment) {
+        try {
+            // Retrieve the existing timestamp value from Firestore
+            val existingPayment = firestore.collection("payments").document(paymentId).get().await()
+            val timestamp = existingPayment.getTimestamp("timestamp") // Adjust this based on your Firestore document structure
+
+            // Update the updated expense with the existing timestamp
+            val paymentWithTimestamp = timestamp?.let { updatedPayment.copy(timestamp = it) }
+
+            val currentUser = auth.currentUser
+            val userId = currentUser?.uid
+            if (userId != null) {
+                if (paymentWithTimestamp != null) {
+                    firestore.collection("payments").document(paymentId).set(paymentWithTimestamp).await()
+                }
+                Log.d(TAG, "Payment updated successfully")
+            } else {
+                throw IllegalStateException("User is not authenticated.")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating payment", e)
+            throw e
+        }
+    }
+
+    override suspend fun deletePaymentById(paymentId: String) {
+        try {
+            val currentUser = auth.currentUser
+            val userId = currentUser?.uid
+            if (userId != null) {
+                firestore.collection("payments").document(paymentId).delete().await()
+            } else {
+                throw IllegalStateException("User is not authenticated.")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error deleting payment", e)
+            throw e
+        }
+    }
+
 }

@@ -80,7 +80,7 @@ fun SettleUpScreen(
     val payeeName = if (selectedOweStatus) selectedHousemate else currentUser?.username
     val payeeId = if (selectedOweStatus) currentUser?.uid else selectedHousemateId
     val payerId = if (selectedOweStatus) selectedHousemateId else currentUser?.uid
-
+    val paymentId by expenseViewModel.paymentId.collectAsState()
 
     val showEmptyFieldsErrorDialog = remember { mutableStateOf(false) }
     if (showEmptyFieldsErrorDialog.value) {
@@ -294,13 +294,25 @@ fun SettleUpScreen(
                                 if (payeeName != null) {
                                     if (payerId != null) {
                                         if (payeeId != null) {
-                                            expenseViewModel.addPayment(
-                                                payerId,
-                                                payerName,
-                                                payeeId,
-                                                payeeName,
-                                                paymentAmount
-                                            )
+                                            if (paymentId == "") {
+                                                expenseViewModel.addPayment(
+                                                    paymentId,
+                                                    payerId,
+                                                    payerName,
+                                                    payeeId,
+                                                    payeeName,
+                                                    paymentAmount
+                                                )
+                                            } else {
+                                                expenseViewModel.updatePaymentById(
+                                                    paymentId,
+                                                    payerName,
+                                                    payerId,
+                                                    payeeName,
+                                                    payeeId,
+                                                    paymentAmount
+                                                )
+                                            }
                                         }
                                     }
                                 }

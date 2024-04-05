@@ -1,6 +1,8 @@
 package org.housemate.presentation.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
@@ -47,6 +49,9 @@ class ExpenseViewModel @Inject constructor(
 
     private val _expenseId = MutableStateFlow("")
     val expenseId = _expenseId.asStateFlow()
+
+    private val _paymentId = MutableStateFlow("")
+    val paymentId = _paymentId.asStateFlow()
 
     private val _expenseItems = MutableStateFlow<List<Expense>>(emptyList())
     val expenseItems: StateFlow<List<Expense>> = _expenseItems
@@ -101,6 +106,22 @@ class ExpenseViewModel @Inject constructor(
         _dialogDismissed.value = false
     }
 
+    fun onEditPaymentClicked(payment: Payment) {
+        val currentUserValue = _currentUser.value
+        val currentUserUid = currentUserValue?.uid
+
+        // Determine if the current user is the payer
+        val isCurrentUserPayer = payment.payerId == currentUserUid
+
+        // Assign values to the corresponding state flow variables
+        _paymentId.value = payment.id
+        _paymentAmount.value = payment.amount.toBigDecimal().setScale(2)
+        _selectedHousemate.value = if (!isCurrentUserPayer) payment.payeeName else payment.payerName
+        _selectedHousemateId.value = if (!isCurrentUserPayer) payment.payeeId else payment.payerId
+        _selectedOweStatus.value = !isCurrentUserPayer // Set selected owe status based on current user's role
+        _selectedOwingAmount.value = payment.amount.toBigDecimal().toString()
+    }
+
     fun onEditExpenseClicked(expense: Expense) {
         // Set all the values to be edited in the UI
         _expenseId.value = expense.id
@@ -148,6 +169,20 @@ class ExpenseViewModel @Inject constructor(
         }
     }
 
+    fun deletePaymentById(paymentId: String) {
+        viewModelScope.launch {
+            try {
+                expenseRepository.deletePaymentById(paymentId)
+                clearExpenseAndPaymentItems()
+                fetchExpenses()
+                fetchPayments()
+                println("Payment deleted successfully")
+            } catch (e: Exception) {
+                println("Failed to delete payment: ${e.message}")
+            }
+        }
+    }
+
     fun updateExpenseById(expenseId: String, updatedPayer: String, updatedPayerId: String, updatedDescription: String, updatedExpenseAmount: BigDecimal, updatedOwingAmounts: Map<String, BigDecimal>) {
         // Convert BigDecimal values to Double, since Firestore doesn't accept BigDecimal
         val expenseAmountDouble = updatedExpenseAmount.toDouble()
@@ -165,6 +200,25 @@ class ExpenseViewModel @Inject constructor(
                 fetchPayments()
             } catch (e: Exception) {
                 println("Failed to update expense: ${e.message}")
+            }
+        }
+    }
+
+    fun updatePaymentById(paymentId: String, updatedPayerName: String, updatedPayerId: String, updatedPayeeName: String, updatedPayeeId: String, updatedAmount: BigDecimal) {
+        // Convert BigDecimal values to Double, since Firestore doesn't accept BigDecimal
+        val AmountDouble = updatedAmount.toDouble()
+        // Create the updated Expense object with converted values
+        val updatedPayment = Payment(paymentId, updatedPayerName, updatedPayerId, updatedPayeeName, updatedPayeeId, AmountDouble, Timestamp.now())
+
+        viewModelScope.launch {
+            try {
+                expenseRepository.updatePaymentById(paymentId, updatedPayment)
+                println("Payment updated successfully")
+                clearExpenseAndPaymentItems()
+                fetchExpenses()
+                fetchPayments()
+            } catch (e: Exception) {
+                println("Failed to update payment: ${e.message}")
             }
         }
     }
@@ -270,12 +324,13 @@ class ExpenseViewModel @Inject constructor(
     }
 
     // Function to add a payment
-    fun addPayment(payerId: String, payerName: String, payeeId: String, payeeName: String, amount: BigDecimal) {
+    fun addPayment(id: String, payerId: String, payerName: String, payeeId: String, payeeName: String, amount: BigDecimal) {
+
         viewModelScope.launch {
             try {
                 val paymentAmountDouble = amount.toDouble()
                 // Create the Payment object
-                val payment = Payment(payerName, payerId, payeeName, payeeId, paymentAmountDouble, Timestamp.now())
+                val payment = Payment(id, payerName, payerId, payeeName, payeeId, paymentAmountDouble, Timestamp.now())
                 // Call the addPayment function from the repository to add the payment to Firestore
                 expenseRepository.addPayment(payment)
                 // After adding the payment, fetch the updated list of payments
@@ -303,7 +358,6 @@ class ExpenseViewModel @Inject constructor(
 
         _expenseAndPaymentItems.value = combinedList
     }
-
 
     private val _selectedHousemate = MutableStateFlow("")
     val selectedHousemate: StateFlow<String> = _selectedHousemate
