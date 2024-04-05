@@ -209,7 +209,7 @@ fun HomeScreenHelper(
                shape = RoundedCornerShape(8.dp),
                elevation = 4.dp,
                modifier = Modifier
-                   .padding(start = 20.dp)
+                   .padding(start = 24.dp)
                    .width((LocalConfiguration.current.screenWidthDp * 0.80).dp)
                    .height(100.dp),
 
