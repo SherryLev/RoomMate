@@ -173,7 +173,7 @@ fun HomeScreenHelper(
             Spacer(modifier = Modifier.height(6.dp))
             Box(
                 modifier = Modifier
-                    .height(200.dp)
+                    .height(230.dp)
                     .fillMaxWidth()
             ){
                 /*if(chores.isNotEmpty()){
@@ -264,7 +264,7 @@ fun HomeScreenHelper(
                    }
                }
            }
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Box(
                 modifier = Modifier
                     .padding(16.dp)

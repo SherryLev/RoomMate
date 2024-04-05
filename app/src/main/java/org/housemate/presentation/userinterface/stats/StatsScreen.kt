@@ -10,7 +10,9 @@ import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import org.housemate.domain.model.Chore
 import org.housemate.presentation.viewmodel.ChoresViewModel
 import org.housemate.presentation.viewmodel.ExpenseViewModel
+import org.housemate.theme.md_theme_light_primary
 import org.housemate.theme.pretty_purple
 import org.housemate.utils.AppScreenRoutes
 import java.math.BigDecimal
@@ -120,7 +123,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
             Text(
                 "Your spending history this month:",
                 modifier = Modifier
-                    .padding(top = 40.dp)
+                    .padding(top = 46.dp)
                     .align(Alignment.CenterHorizontally),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -141,40 +144,59 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
                             .padding(start = 40.dp, top = 18.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = null,
+                            tint = md_theme_light_primary
+                        )
                         Text(
                             text = "You spent:",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
+                        Spacer(modifier = Modifier.width(90.dp))
+
                         Text(
                             text = "$$youSpentThisMonth",
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.DarkGray
                         )
                     }
-                    Spacer(modifier = Modifier.height(30.dp))
+                    Spacer(modifier = Modifier.height(40.dp))
                     // Row to display spending by the house this month
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 40.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = null,
+                            tint = md_theme_light_primary
+                        )
+
                         Text(
                             text = "Household spent:",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
+                        Spacer(modifier = Modifier.width(30.dp))
 
                         Text(
                             text = "$$houseSpentThisMonth",
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.DarkGray
                         )
                     }
                 }
             }
 
             Text(
-                "Your Average Chore Rating is:",
+                "Your Chore Ratings:",
                 modifier = Modifier
                     .padding(top = 25.dp)
                     .align(Alignment.CenterHorizontally),

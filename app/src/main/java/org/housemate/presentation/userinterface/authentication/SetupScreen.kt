@@ -302,17 +302,6 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
             ) {
                 Text("Enter Here")
             }
-
-            Button(
-                onClick = {
-                    onNavigateToGroupSuccessScreen()
-                },
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(vertical = 25.dp)
-            ) {
-                Text("Finish Setup")
-            }
         }
     }
 }
