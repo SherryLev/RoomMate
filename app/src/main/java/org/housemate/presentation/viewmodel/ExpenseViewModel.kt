@@ -134,6 +134,23 @@ class ExpenseViewModel @Inject constructor(
         }
     }
 
+    // Function to calculate total amount spent by the current user
+    fun calculateTotalAmountSpent(): BigDecimal {
+        val currentUser = _currentUser.value?.uid
+
+        // Filter expenses where the payerId matches the current user's ID
+        val expensesPaidByUser = _expenseItems.value.filter { it.payerId == currentUser }
+
+
+        val filteredExpenses = expensesPaidByUser.filter { expense ->
+            val owingAmountForCurrentUser = expense.owingAmounts[currentUser]
+            owingAmountForCurrentUser != null
+        }
+
+        // Calculate total amount spent by the current user
+        return filteredExpenses.sumOf { BigDecimal.valueOf(it.owingAmounts[currentUser]!!) }
+    }
+
     fun deleteExpenseById(expenseId: String) {
         viewModelScope.launch {
             try {
