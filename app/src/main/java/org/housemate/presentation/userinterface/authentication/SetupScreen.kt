@@ -67,6 +67,7 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
     }
 
     var newGroupname by remember { mutableStateOf("")}
+    var groupNameError by remember { mutableStateOf<String?>(null) }
 
     Box(
         Modifier
@@ -109,47 +110,72 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
             // CREATE GROUP NAME
             TextField(
                 value = newGroupname,
-                onValueChange = { newGroupname = it },
+                onValueChange = {
+                    newGroupname = it
+                    groupNameError = null
+                                },
                 label = { Text("Household Name") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(16.dp)
+                //isError = groupNameError != null
             )
+
+            if (groupNameError != null) {
+                Text(
+                    text = groupNameError!!,
+                    color = Color.Red,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(horizontal = 16.dp)
+
+                )
+            }
 
             Button(
                 onClick = {
-
+                    if (newGroupname.isBlank()) {
+                        groupNameError = "Household name cannot be blank"
+                    } else {
                     // Initiate the process to create a new group
-                    coroutineScope.launch {
-                        val uniqueGroupCode = UUID.randomUUID().toString().replace("-","").substring(0,4)
-                        // group code will be of length 4
-                        val newGroup = Group(uniqueGroupCode, newGroupname, userId, listOf(userId))
-                        try {
-                            val success = groupRepository.createGroup(newGroup)
-                            if (success) {
-                                val userDocRef = FirebaseFirestore.getInstance().collection("users").document(
-                                    userId.toString()
-                                )
-                                userDocRef.update("groupCode", uniqueGroupCode).addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        // This will be changed through another issue
-                                        //navController.navigate("success/$uniqueGroupCode")
+                        groupNameError = null
+                        coroutineScope.launch {
+                            val uniqueGroupCode =
+                                UUID.randomUUID().toString().replace("-", "").substring(0, 4)
+                            // group code will be of length 4
+                            val newGroup =
+                                Group(uniqueGroupCode, newGroupname, userId, listOf(userId))
+                            try {
+                                val success = groupRepository.createGroup(newGroup)
+                                if (success) {
+                                    val userDocRef =
+                                        FirebaseFirestore.getInstance().collection("users")
+                                            .document(
+                                                userId.toString()
+                                            )
+                                    userDocRef.update("groupCode", uniqueGroupCode)
+                                        .addOnCompleteListener { task ->
+                                            if (task.isSuccessful) {
+                                                // This will be changed through another issue
+                                                //navController.navigate("success/$uniqueGroupCode")
 
-                                        onNavigateToGroupSuccessScreen()
-                                        showSuccessMessage = true
-                                    } else {
-                                        showErrorMessage = "Failed to update user with group code. Please try again"
-                                    }
+                                                onNavigateToGroupSuccessScreen()
+                                                showSuccessMessage = true
+                                            } else {
+                                                showErrorMessage =
+                                                    "Failed to update user with group code. Please try again"
+                                            }
+                                        }
+
+                                    showSuccessMessage = true
+                                    groupCode = uniqueGroupCode
+                                    showGroupCodeDialog = true
+
+                                } else {
+                                    showErrorMessage = "Failed to create group. Please try again"
                                 }
-
-                                showSuccessMessage = true
-                                groupCode = uniqueGroupCode
-                                showGroupCodeDialog = true
-
-                            } else {
-                                showErrorMessage = "Failed to create group. Please try again"
+                            } catch (e: Exception) {
+                                showErrorMessage = "An error occured: ${e.message}"
                             }
-                        } catch (e: Exception) {
-                            showErrorMessage = "An error occured: ${e.message}"
                         }
                     }
                     //showDialog = true
