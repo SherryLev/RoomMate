@@ -32,6 +32,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowRightAlt
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,13 +66,21 @@ fun SettleUpScreen(
     val selectedHousemate by expenseViewModel.selectedHousemate.collectAsState()
     val selectedOwingAmount by expenseViewModel.selectedOwingAmount.collectAsState()
     val selectedOweStatus by expenseViewModel.selectedOweStatus.collectAsState()
-
-    val payerName = if (selectedOweStatus) "You" else selectedHousemate
-    val payeeName = if (selectedOweStatus) selectedHousemate else "You"
+    val selectedHousemateId by expenseViewModel.selectedHousemateId.collectAsState()
 
     var paymentAmountState by remember {
         mutableStateOf(TextFieldValue(text = selectedOwingAmount))
     }
+    LaunchedEffect(key1 = "fetchUser") {
+        expenseViewModel.fetchCurrentUser()
+    }
+    val currentUser by expenseViewModel.currentUser.collectAsState()
+
+    val payerName = if (selectedOweStatus) currentUser?.username else selectedHousemate
+    val payeeName = if (selectedOweStatus) selectedHousemate else currentUser?.username
+    val payeeId = if (selectedOweStatus) currentUser?.uid else selectedHousemateId
+    val payerId = if (selectedOweStatus) selectedHousemateId else currentUser?.uid
+
 
     val showEmptyFieldsErrorDialog = remember { mutableStateOf(false) }
     if (showEmptyFieldsErrorDialog.value) {
@@ -199,13 +208,15 @@ fun SettleUpScreen(
                     .fillMaxWidth()
                     .padding(vertical = 12.dp, horizontal = 30.dp)
             ) {
-                Text(
-                    payerName,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.DarkGray,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                if (payerName != null) {
+                    Text(
+                        payerName,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.DarkGray,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
@@ -220,13 +231,15 @@ fun SettleUpScreen(
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Text(
-                    text = payeeName,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.DarkGray,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                if (payeeName != null) {
+                    Text(
+                        text = payeeName,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.DarkGray,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             }
         }
     }
@@ -277,13 +290,21 @@ fun SettleUpScreen(
                             // Show the error dialog
                             showEmptyFieldsErrorDialog.value = true
                         } else {
-                            expenseViewModel.addPayment(
-                                "testPayerId",
-                                payerName,
-                                "testPayeeId",
-                                payeeName,
-                                paymentAmount
-                            )
+                            if (payerName != null) {
+                                if (payeeName != null) {
+                                    if (payerId != null) {
+                                        if (payeeId != null) {
+                                            expenseViewModel.addPayment(
+                                                payerId,
+                                                payerName,
+                                                payeeId,
+                                                payeeName,
+                                                paymentAmount
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                             // clear the form fields after saving the payment
                             expenseViewModel.setPaymentAmount(BigDecimal.ZERO)
 

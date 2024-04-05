@@ -203,9 +203,9 @@ class ExpenseViewModel @Inject constructor(
 
             // If the payer is "You", you received the payment, else you made the payment
             if (payer == currentUserUid) {
-                netAmountOwed[payment.payeeId] = (netAmountOwed[payment.payeeId] ?: BigDecimal.ZERO) + amountPaid
+                netAmountOwed[payment.payeeId] = (netAmountOwed[payment.payeeId] ?: BigDecimal.ZERO) - amountPaid
             } else {
-                netAmountOwed[payer] = (netAmountOwed[payer] ?: BigDecimal.ZERO) - amountPaid
+                netAmountOwed[payer] = (netAmountOwed[payer] ?: BigDecimal.ZERO) + amountPaid
             }
         }
 
@@ -308,14 +308,19 @@ class ExpenseViewModel @Inject constructor(
     private val _selectedHousemate = MutableStateFlow("")
     val selectedHousemate: StateFlow<String> = _selectedHousemate
 
+    private val _selectedHousemateId = MutableStateFlow("")
+    val selectedHousemateId: StateFlow<String> = _selectedHousemateId
+
+
     private val _selectedOwingAmount = MutableStateFlow("")
     val selectedOwingAmount: StateFlow<String> = _selectedOwingAmount
 
     private val _selectedOweStatus = MutableStateFlow(false)
     val selectedOweStatus: StateFlow<Boolean> = _selectedOweStatus
 
-    fun onSettleUpClicked(name: String, amount: String, youOwe: Boolean) {
+    fun onSettleUpClicked(name: String, id: String, amount: String, youOwe: Boolean) {
         _selectedHousemate.value = name
+        _selectedHousemateId.value = id
         _selectedOwingAmount.value = amount
         _selectedOweStatus.value = youOwe
         setPaymentAmount(amount.toBigDecimalOrNull() ?: BigDecimal.ZERO)

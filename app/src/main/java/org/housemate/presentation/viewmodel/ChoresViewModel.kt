@@ -50,6 +50,8 @@ class ChoresViewModel @Inject constructor(
     private val _dialogDismissed = MutableStateFlow(false)
     val dialogDismissed: StateFlow<Boolean> = _dialogDismissed
 
+
+
     fun setDialogDismissed(dismissed: Boolean) {
         getAllChores()
         _dialogDismissed.value = dismissed
@@ -175,6 +177,10 @@ class ChoresViewModel @Inject constructor(
                 _isLoading.value = false
             }
         }
-
     }
+
+    // Function to get the rating of a specific chore
+//    suspend fun getChoreRating(chore: Chore, userId: String): Float? {
+//        return choreRepository.getChoreRating(chore, userId)
+//    }
 }

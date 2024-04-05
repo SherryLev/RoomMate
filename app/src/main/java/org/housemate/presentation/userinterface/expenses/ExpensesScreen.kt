@@ -184,12 +184,14 @@ fun ExpensesScreen(
                             val housemate = housemates.find { it.uid == userId }
                             // Get the username from the user object, or use a default value if not found
                             val username = housemate?.username ?: ""
+                            val id = housemate?.uid ?: ""
                             // Determine if the user owes or is owed money
                             val youOwe = amount < BigDecimal.ZERO
 
                             // Call BalancesInfoRow with the username and other parameters
                             BalancesInfoRow(
                                 name = username,
+                                id = id,
                                 amount = "$${"%.2f".format(amount.abs())}",
                                 youOwe = youOwe,
                                 navController,
@@ -560,7 +562,7 @@ fun ExpensePopupDialog(
 }
 
 @Composable
-fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean, navController: NavController, expenseViewModel: ExpenseViewModel) {
+fun BalancesInfoRow(name: String, id: String, amount: String, youOwe: Boolean, navController: NavController, expenseViewModel: ExpenseViewModel) {
     Box(
         modifier = Modifier.padding(horizontal = 40.dp, vertical = 10.dp)
     ) {
@@ -606,7 +608,7 @@ fun BalancesInfoRow(name: String, amount: String, youOwe: Boolean, navController
 
             Button(
                 onClick = {
-                    expenseViewModel.onSettleUpClicked(name, "%.2f".format(amountValue), youOwe)
+                    expenseViewModel.onSettleUpClicked(name, id, "%.2f".format(amountValue), youOwe)
                     navController.navigate(AppScreenRoutes.SettleUpScreen.route)
                           },
                 shape = RoundedCornerShape(25.dp),
