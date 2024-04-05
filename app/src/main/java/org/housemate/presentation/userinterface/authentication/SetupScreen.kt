@@ -230,7 +230,7 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
                     color = Color.Red,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .padding(top = 4.dp)
+                        .padding(top = 8.dp)
                 )
             }
 
