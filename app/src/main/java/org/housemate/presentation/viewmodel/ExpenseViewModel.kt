@@ -265,7 +265,7 @@ class ExpenseViewModel @Inject constructor(
             // If the payer is "You", you received the payment, else you made the payment
             if (payer == currentUserUid) {
                 netAmountOwed[payment.payeeId] = (netAmountOwed[payment.payeeId] ?: BigDecimal.ZERO) - amountPaid
-            } else {
+            } else if (payment.payeeId == currentUserUid) {
                 netAmountOwed[payer] = (netAmountOwed[payer] ?: BigDecimal.ZERO) + amountPaid
             }
         }

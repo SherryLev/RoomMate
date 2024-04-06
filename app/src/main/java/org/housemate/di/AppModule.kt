@@ -49,10 +49,11 @@ object AppModule {
     @Singleton
     fun provideAuthRepository(
         userRepository: UserRepository,
+        groupRepository: GroupRepository,
         firestore: FirebaseFirestore,
         auth: FirebaseAuth
     ):AuthRepository{
-        return AuthRepositoryImpl(userRepository, firestore, auth)
+        return AuthRepositoryImpl(userRepository, groupRepository, firestore, auth)
     }
 
     @Singleton
@@ -78,7 +79,6 @@ object AppModule {
     @Provides
     @Singleton
     fun provideChoreRepository(
-        firestore : FirebaseFirestore,
         auth: FirebaseAuth
     ): ChoreRepository {
         return ChoreRepositoryImpl(auth)

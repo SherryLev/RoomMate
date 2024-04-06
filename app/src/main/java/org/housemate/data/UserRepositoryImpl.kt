@@ -63,7 +63,7 @@ class UserRepositoryImpl (
             }.await()
             true
         } catch (e: Exception) {
-            Log.e("UserRepository", "Error updatin user's group code", e)
+            Log.e("UserRepository", "Error updating user's group code", e)
             false
         }
     }

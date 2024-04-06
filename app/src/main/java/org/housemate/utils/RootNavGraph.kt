@@ -23,8 +23,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import org.housemate.R
 import org.housemate.data.AuthRepositoryImpl
+import org.housemate.data.GroupRepositoryImpl
 import org.housemate.data.UserRepositoryImpl
 import org.housemate.domain.repositories.AuthRepository
+import org.housemate.domain.repositories.UserRepository
 import org.housemate.presentation.userinterface.home.HomeScreen
 
 @Composable
@@ -33,9 +35,13 @@ fun RootNavigationGraph(navController: NavHostController) {
     val firestore = FirebaseFirestore.getInstance()
 
     val authRepository: AuthRepository
+    val userRepository: UserRepository
+
+    userRepository = UserRepositoryImpl(firestore)
 
     authRepository = AuthRepositoryImpl(
         UserRepositoryImpl(firestore),  // Replace with actual implementation
+        GroupRepositoryImpl(userRepository),
         firestore,
         FirebaseAuth.getInstance()
     )

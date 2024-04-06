@@ -135,6 +135,8 @@ fun MainLayout( onNavigateToGroupSuccessScreen: () -> Unit, navController: NavCo
                 onClick = {
                     if (newGroupname.isBlank()) {
                         groupNameError = "Household name cannot be blank"
+                    } else if (newGroupname.count() > 20)  {
+                        groupNameError = "Household name is too long, must be under 20 letters"
                     } else {
                     // Initiate the process to create a new group
                         groupNameError = null

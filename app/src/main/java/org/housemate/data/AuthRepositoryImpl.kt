@@ -11,12 +11,14 @@ import org.housemate.domain.repositories.AuthRepository
 
 import com.google.firebase.firestore.FirebaseFirestore
 import org.housemate.domain.model.User
+import org.housemate.domain.repositories.GroupRepository
 import org.housemate.domain.repositories.UserRepository
 import org.housemate.presentation.viewmodel.DeleteAccountResult
 
 
 class AuthRepositoryImpl (
     private val userRepository: UserRepository,
+    private val groupRepository: GroupRepository,
     private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth
 )  : AuthRepository {
@@ -122,7 +124,13 @@ class AuthRepositoryImpl (
                 currentUser.reauthenticate(credential).await()
 
                 val userId = currentUser.uid
+                // delete them from the users collection
                 userRepository.deleteUserById(userId)
+                // remove them from the group
+                val currentGroupCode = userRepository.getGroupCodeForUser(userId)
+                if (currentGroupCode != null) {
+                    groupRepository.removeMemberFromGroup(currentGroupCode, userId)
+                }
                 currentUser.delete().await()
                 return DeleteAccountResult.Success
             } else {

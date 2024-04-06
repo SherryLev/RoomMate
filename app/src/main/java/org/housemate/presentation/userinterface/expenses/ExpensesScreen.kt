@@ -173,7 +173,6 @@ fun ExpensesScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-
                         netAmountOwed.forEach { (userId, amount) ->
                             // Find the user object with the corresponding userId
                             val housemate = housemates.find { it.uid == userId }
