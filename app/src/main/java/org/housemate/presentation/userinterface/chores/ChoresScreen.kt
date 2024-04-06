@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.Timestamp
 //import com.google.android.libraries.places.api.model.LocalDate
@@ -101,12 +102,15 @@ fun StarRatingBar(
     onRatingChanged: (Float) -> Unit
 ) {
     val density = LocalDensity.current.density
-    val starSize = (12f * density).dp
+    val starSize = (11.5f * density).dp
     val starSpacing = (0.5f * density).dp
 
     Row(
-        modifier = Modifier.selectableGroup(),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier
+            .selectableGroup()
+            .padding(start = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
         for (i in 1..maxStars) {
             val isSelected = i <= rating
@@ -268,32 +272,54 @@ fun TaskWeekItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel(
             .height(80.dp),
         elevation = 5.dp
     ) {
-        Column(
+        Row (modifier = Modifier
+                .padding(start = 10.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .width(60.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Icon(
+                    painter = painterResource(R.drawable.person),
+                    contentDescription = "local",
+                    modifier = Modifier
+                        .size(30.dp)
+                )
+                Text(
+                    text = chore.assignee,
+                    style = TextStyle(fontSize = 14.sp),
+                    textAlign = TextAlign.Center,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp)
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.person),
-                contentDescription = "local",
-                modifier = Modifier.size(30.dp)
-            )
-            Text(
-                text = chore.assignee,
-                style = TextStyle(fontSize = 14.sp),
-                textAlign = TextAlign.Center
-            )
-        }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(start = 30.dp, top = 16.dp)
-        ) {
-            Text(
-                text = chore.choreName,
-                style = TextStyle(fontSize = 18.sp),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(start = 18.dp)
-            )
-            StarRatingBar(maxStars = 5, rating = rating, onRatingChanged = updateRating)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(top = 12.dp, bottom = 12.dp, end = 20.dp)
+                    .fillMaxWidth()
+            ) {
+                if (userId != chore.assigneeId) {
+                    Text(
+                        text = chore.choreName,
+                        style = TextStyle(fontSize = 16.sp),
+                        textAlign = TextAlign.Center,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    // Render the StarRatingBar only if the current user is not the assignee
+                    StarRatingBar(maxStars = 5, rating = rating, onRatingChanged = updateRating)
+                } else {
+                    Text(
+                        text = chore.choreName,
+                        style = TextStyle(fontSize = 16.sp),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 16.dp),
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
     }
     Spacer(modifier = Modifier.height(8.dp))
