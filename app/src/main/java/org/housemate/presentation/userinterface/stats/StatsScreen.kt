@@ -3,7 +3,9 @@ package org.housemate.presentation.userinterface.stats
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -21,6 +23,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.domain.model.Chore
+import org.housemate.domain.model.User
+import org.housemate.presentation.userinterface.home.userAverageRatings
 import org.housemate.presentation.viewmodel.ChoresViewModel
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.purple_primary
@@ -32,8 +36,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 
-
-data class Task(val name: String)
 
 @Composable fun DisplayEachChore(currentUserChores: List<Chore>, index: Int, rating: Float){
     val roundedTotalAverageRating = if (rating != 0.0f) {
@@ -64,12 +66,76 @@ data class Task(val name: String)
         )
     }
 }
+
+
+
+
+@Composable
+fun WeeklyChoreRateSurface(users: List<User>, chores: List<Chore>) {
+    val currentWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+    val currentWeekEnd = currentWeekStart.plusDays(6)
+    val userAverageRatings = calculateUserAverageRatings(users, chores, currentWeekStart, currentWeekEnd)
+
+    Surface {
+        LazyColumn {
+            items(userAverageRatings.toList()) { (userName, averageRating) ->
+                UserChoreRateItem(userName, averageRating)
+            }
+        }
+    }
+}
+
+@Composable
+fun UserChoreRateItem(userName: String, averageRating: Float) {
+    Surface(modifier = Modifier.fillMaxWidth()) {
+        Column {
+            Text(text = "User: $userName")
+            Text(text = "Weekly Chore Average Rating: $averageRating")
+        }
+    }
+}
+fun getUserDisplayName(userId: String, users: List<User>): String {
+    val user = users.find { it.uid == userId }
+    return user?.username ?: "Unknown User"
+}
+@Composable
+fun calculateUserAverageRatings(
+    users: List<User>,
+    chores: List<Chore>,
+    currentWeekStart: LocalDate,
+    currentWeekEnd: LocalDate
+): Map<String, Float> {
+    val userAverageRatings = mutableMapOf<String, Float>()
+    users.forEach { user ->
+        val currentWeekUserChoresForUser = chores.filter { chore ->
+            chore.assigneeId == user.uid &&
+                    chore.dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()!! in currentWeekStart..currentWeekEnd
+        }
+        val averageRatings = currentWeekUserChoresForUser.mapNotNull { chore ->
+            chore.userRating.values.takeIf { it.isNotEmpty() }?.average()?.toFloat()
+        }
+        val totalAverageRating = if (averageRatings.isNotEmpty()) {
+            averageRatings.average().toFloat()
+        } else {
+            0f
+        }
+        val userName = getUserDisplayName(user.uid, users)
+        userAverageRatings[userName] = totalAverageRating
+    }
+    return userAverageRatings
+}
+
+
+
+
 @Composable
 fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = hiltViewModel(), expenseViewModel: ExpenseViewModel = hiltViewModel()) {
     LaunchedEffect(key1 = "fetchUserIdandchores") {
+        choresViewModel.fetchAllHousemates()
         choresViewModel.fetchCurrentUserId()
         choresViewModel.getAllChores()
         choresViewModel.fetchCurrentUser()
+
     }
 
     val chores by choresViewModel.chores.collectAsState()
@@ -78,7 +144,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
     val currentWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val currentWeekEnd = currentWeekStart.plusDays(6)
 
-    val currentWeekUserChores = chores.filter { chore ->
+    val currentWeekUserChoresForUser = chores.filter { chore ->
         chore.assigneeId == currentUserID &&
                 chore.dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate() in currentWeekStart..currentWeekEnd
     }
@@ -96,7 +162,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
     val filteredPayments = payments.filter { payment ->
         payment.payeeId == currentUserID
     }
-
+    val users by choresViewModel.housemates.collectAsState()
 
     val currentDate = LocalDate.now()
     val startOfMonth = currentDate.withDayOfMonth(1)
@@ -121,7 +187,8 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
         }
         .sumOf { BigDecimal.valueOf(it.amount) }
 
-    val averageRatings = currentWeekUserChores.map { chore ->
+
+    val averageRatings = currentWeekUserChoresForUser.map { chore ->
         val ratings = chore.userRating.values
         if (ratings.isNotEmpty()) {
             println("sum: " + ratings.sum())
@@ -143,6 +210,8 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
         .setScale(2, RoundingMode.HALF_UP)
         .stripTrailingZeros()
         .toPlainString()
+
+
 
     Box(
         Modifier
@@ -259,49 +328,12 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
                 } else {
                     LazyColumn {
                         items(averageRatings.size) { index ->
-                            DisplayEachChore(currentWeekUserChores, index, averageRatings[index])
+                            DisplayEachChore(currentWeekUserChoresForUser, index, averageRatings[index])
                         }
                     }
                 }
             }
-            Text(
-                "Your average chore rating is:",
-                modifier = Modifier
-                    .padding(top = 40.dp)
-                    .align(Alignment.CenterHorizontally),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.Center,
-               verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.EmojiEvents,
-                    contentDescription = null,
-                    tint = pretty_purple,
-                    modifier = Modifier.size(40.dp)
-                )
-                Spacer(modifier = Modifier.width(30.dp))
-                Text(
-
-                    text = "$roundedTotalAverageRating",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp, // Increase the font size
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-                Spacer(modifier = Modifier.width(30.dp))
-                Icon(
-                    imageVector = Icons.Default.EmojiEvents,
-                    contentDescription = null,
-                    tint = pretty_purple,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
+            WeeklyChoreRateSurface(users, chores)
 
         }
     }
