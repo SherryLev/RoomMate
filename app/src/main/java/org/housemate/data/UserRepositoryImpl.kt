@@ -1,4 +1,4 @@
-package org.housemate.data.firestore
+package org.housemate.data
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth

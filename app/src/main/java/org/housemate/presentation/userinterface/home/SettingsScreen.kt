@@ -17,11 +17,9 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.VpnKey
@@ -33,7 +31,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -43,25 +40,18 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.coroutineScope
 import org.housemate.presentation.sharedcomponents.TextEntryModule
 import org.housemate.presentation.viewmodel.DeleteAccountResult
-import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.presentation.viewmodel.SettingsViewModel
 import org.housemate.theme.light_purple
-import org.housemate.theme.md_theme_light_error
-import org.housemate.theme.md_theme_light_primary
-import org.housemate.utils.AuthScreen
-import org.housemate.utils.Graph
+import org.housemate.theme.red_error
+import org.housemate.theme.purple_primary
 import kotlinx.coroutines.launch
 
 import org.housemate.domain.repositories.GroupRepository
-import org.housemate.domain.model.Group
 import org.housemate.domain.repositories.UserRepository
-import kotlin.coroutines.coroutineContext
 
 @Composable
 fun SettingsScreen(
@@ -180,7 +170,7 @@ fun SettingsScreen(
                             hint = "Group code",
                             textValue = enteredGroupCode.value,
                             textColor = Color.Gray,
-                            cursorColor = md_theme_light_primary,
+                            cursorColor = purple_primary,
                             onValueChanged = { newCode -> enteredGroupCode.value = newCode },
                             trailingIcon = null,
                             onTrailingIconClick = null,
@@ -310,7 +300,7 @@ fun SettingsScreen(
                             onClick = { showDeleteAccountDialog = true },
                             shape = RoundedCornerShape(25.dp),
                             colors = ButtonDefaults.buttonColors(
-                                backgroundColor = md_theme_light_error,
+                                backgroundColor = red_error,
                                 contentColor = Color.White,
                             ),
                             modifier = Modifier
@@ -380,7 +370,7 @@ fun DeleteAccountDialog(
                         hint = "Enter password",
                         textValue = password,
                         textColor = Color.Gray,
-                        cursorColor = md_theme_light_primary,
+                        cursorColor = purple_primary,
                         onValueChanged = { password = it },
                         trailingIcon = Icons.Default.RemoveRedEye,
                         onTrailingIconClick = {
@@ -396,7 +386,7 @@ fun DeleteAccountDialog(
                     if (showIncorrectPasswordError) {
                         Text(
                             text = "Incorrect password. Please try again.",
-                            color = md_theme_light_error,
+                            color = red_error,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
@@ -422,7 +412,7 @@ fun DeleteAccountDialog(
                     shape = RoundedCornerShape(25.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = light_purple,
-                        contentColor = md_theme_light_primary
+                        contentColor = purple_primary
                     ),
                     elevation = ButtonDefaults.elevation(0.dp)
                 ) {

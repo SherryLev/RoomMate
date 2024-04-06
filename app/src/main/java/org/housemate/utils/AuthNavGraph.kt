@@ -5,15 +5,13 @@ import androidx.activity.compose.BackHandler
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.google.firebase.firestore.FirebaseFirestore
 import org.housemate.presentation.userinterface.authentication.LoginScreen
 import org.housemate.presentation.userinterface.authentication.RegisterScreen
 import org.housemate.presentation.userinterface.authentication.SetupScreen
-import org.housemate.data.firestore.GroupRepositoryImpl
-import org.housemate.data.firestore.UserRepositoryImpl
+import org.housemate.data.GroupRepositoryImpl
+import org.housemate.data.UserRepositoryImpl
 import org.housemate.presentation.userinterface.authentication.GroupSuccessScreen
 
 fun NavGraphBuilder.authNavGraph(navController: NavHostController) {

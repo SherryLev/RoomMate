@@ -23,7 +23,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.housemate.theme.md_theme_light_primary
+import org.housemate.theme.purple_primary
 
 @Composable
 fun TextEntryModule(
@@ -111,7 +111,7 @@ fun TextEntryModulePreview(){
         leadingIcon = Icons.Default.Email,
         textValue = "TextInput",
         textColor = Color.Black,
-        cursorColor = md_theme_light_primary,
+        cursorColor = purple_primary,
         onValueChanged = {},
         trailingIcon = Icons.Filled.RemoveRedEye,
         onTrailingIconClick = {},

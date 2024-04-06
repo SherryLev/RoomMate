@@ -1,4 +1,4 @@
-package org.housemate.data.firestore
+package org.housemate.data
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import org.housemate.domain.model.Group

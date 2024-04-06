@@ -10,8 +10,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import org.housemate.theme.md_theme_light_primary
-import org.housemate.theme.md_theme_light_primaryContainer
+import org.housemate.theme.purple_primary
+import org.housemate.theme.light_purple_background
 
 @Composable
 fun HeaderBackground(
@@ -38,8 +38,8 @@ fun HeaderBackground(
 @Composable
 fun HeaderBackgroundPreview() {
     HeaderBackground(
-        leftColor = md_theme_light_primary,
-        rightColor = md_theme_light_primaryContainer,
+        leftColor = purple_primary,
+        rightColor = light_purple_background,
         modifier = Modifier
             .fillMaxSize()
     )

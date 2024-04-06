@@ -1,14 +1,11 @@
-package org.housemate.data.firestore
+package org.housemate.data
 
-import android.content.ContentValues.TAG
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 import org.housemate.domain.model.Chore
 import org.housemate.domain.repositories.ChoreRepository
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
-import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FieldPath
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth

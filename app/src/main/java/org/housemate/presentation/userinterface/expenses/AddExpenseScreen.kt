@@ -68,8 +68,8 @@ import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_gray
 import org.housemate.theme.light_purple
-import org.housemate.theme.md_theme_dark_error
-import org.housemate.theme.md_theme_light_primary
+import org.housemate.theme.red_error_background
+import org.housemate.theme.purple_primary
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -408,7 +408,7 @@ fun AddExpenseScreen(
                     shape = RoundedCornerShape(25.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = light_purple,
-                        contentColor = md_theme_light_primary
+                        contentColor = purple_primary
                     ),
                     elevation = ButtonDefaults.elevation(0.dp)
                 ) {
@@ -592,7 +592,7 @@ fun EquallySplitUI(
                     },
                     modifier = Modifier.padding(end = 8.dp),
                     colors = CheckboxDefaults.colors(
-                        checkedColor = md_theme_light_primary,
+                        checkedColor = purple_primary,
                         uncheckedColor = Color.Gray
                     )
                 )
@@ -608,13 +608,13 @@ fun EquallySplitUI(
                 Spacer(modifier = Modifier.height(22.dp))
                 // Calculation of how much each person owes
                 val text = AnnotatedString.Builder().apply {
-                    withStyle(style = SpanStyle(color = md_theme_light_primary, fontWeight = FontWeight.Bold)) {
+                    withStyle(style = SpanStyle(color = purple_primary, fontWeight = FontWeight.Bold)) {
                         append("$${amountPerPerson.value}")
                     }
                     withStyle(style = SpanStyle(color = Color.Gray, fontWeight = FontWeight.Bold)) {
                         append("/person\n")
                     }
-                    withStyle(style = SpanStyle(color = md_theme_light_primary, fontWeight = FontWeight.Bold)) {
+                    withStyle(style = SpanStyle(color = purple_primary, fontWeight = FontWeight.Bold)) {
                         append("$selectedCount")
                     }
                     withStyle(style = SpanStyle(color = Color.Gray, fontWeight = FontWeight.Bold)) {
@@ -742,7 +742,7 @@ fun ExactAmountSplitUI(
                             withStyle(style = SpanStyle(color = Color.Gray, fontWeight = FontWeight.Bold)) {
                                 append("Remaining amount: ")
                             }
-                            withStyle(style = SpanStyle(color = md_theme_light_primary, fontWeight = FontWeight.Bold)) {
+                            withStyle(style = SpanStyle(color = purple_primary, fontWeight = FontWeight.Bold)) {
                                 append("$${remainingAmount.setScale(2)}")
                             }
                         }
@@ -755,7 +755,7 @@ fun ExactAmountSplitUI(
                             }
                         }
                         remainingAmount < BigDecimal.ZERO -> {
-                            withStyle(style = SpanStyle(color = md_theme_dark_error, fontWeight = FontWeight.Bold)) {
+                            withStyle(style = SpanStyle(color = red_error_background, fontWeight = FontWeight.Bold)) {
                                 append("Oops! The amounts add up to more than the total.")
                             }
                         }
@@ -813,7 +813,7 @@ fun CustomDropdown(
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = selectedItem,
-                color = md_theme_light_primary,
+                color = purple_primary,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -821,7 +821,7 @@ fun CustomDropdown(
             Icon(
                 imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                 contentDescription = "Dropdown Arrow",
-                tint = md_theme_light_primary,
+                tint = purple_primary,
                 modifier = Modifier
                     .size(24.dp)
                     .padding(0.dp)
@@ -890,7 +890,7 @@ fun UserDropdown(
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = selectedUser,
-                color = md_theme_light_primary,
+                color = purple_primary,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -898,7 +898,7 @@ fun UserDropdown(
             Icon(
                 imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                 contentDescription = "Dropdown Arrow",
-                tint = md_theme_light_primary,
+                tint = purple_primary,
                 modifier = Modifier
                     .size(24.dp)
                     .padding(0.dp)

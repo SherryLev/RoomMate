@@ -23,7 +23,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import org.housemate.R
 import org.housemate.data.AuthRepositoryImpl
-import org.housemate.data.firestore.UserRepositoryImpl
+import org.housemate.data.UserRepositoryImpl
 import org.housemate.domain.repositories.AuthRepository
 import org.housemate.presentation.userinterface.home.HomeScreen
 

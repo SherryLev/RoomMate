@@ -1,15 +1,11 @@
 package org.housemate.presentation.userinterface.home
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import com.google.firebase.Timestamp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -25,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -34,12 +29,11 @@ import org.housemate.presentation.viewmodel.ChoresViewModel
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_purple
-import org.housemate.theme.md_theme_light_error
+import org.housemate.theme.red_error
 import org.housemate.theme.pretty_purple
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZoneId
-import kotlin.time.ExperimentalTime
 
 @Composable
 fun textShow(chore: Chore) {
@@ -190,7 +184,7 @@ fun HomeScreenHelper(
                 }
                 else{
                     Text(
-                        text = "You have no chores on this day!",
+                        text = "You have no chores today!",
                         style = TextStyle(
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
@@ -264,7 +258,7 @@ fun HomeScreenHelper(
                            textAlign = TextAlign.Center
                        )
                        // instead of hard coded values, use calculated amounts from viewmodel
-                       Text("$${"%.2f".format(totalAmountYouOwe)}", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = if (totalAmountYouOwe != BigDecimal.ZERO) md_theme_light_error else green)
+                       Text("$${"%.2f".format(totalAmountYouOwe)}", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = if (totalAmountYouOwe != BigDecimal.ZERO) red_error else green)
                    }
                }
            }

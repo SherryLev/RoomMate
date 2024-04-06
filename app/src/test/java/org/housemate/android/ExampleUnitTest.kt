@@ -1,4 +1,4 @@
-package com.example.android
+package org.housemate.android
 
 import org.junit.Test
 

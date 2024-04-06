@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import org.housemate.presentation.sharedcomponents.*
 import org.housemate.presentation.viewmodel.LoginViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import org.housemate.theme.*
 
 @Composable
@@ -82,8 +81,8 @@ fun LoginScreen(
             contentAlignment = Alignment.Center
         ){
             HeaderBackground(
-                leftColor = md_theme_light_primary,
-                rightColor = md_theme_light_primaryContainer,
+                leftColor = purple_primary,
+                rightColor = light_purple_background,
                 modifier = Modifier
                     .fillMaxSize()
             )
@@ -122,7 +121,7 @@ fun LoginScreen(
                 .padding(top = 200.dp)
                 .fillMaxWidth(0.9f)
                 .shadow(5.dp, RoundedCornerShape(15.dp))
-                .background(md_theme_light_primaryContainer, RoundedCornerShape(15.dp))
+                .background(light_purple_background, RoundedCornerShape(15.dp))
                 .padding(10.dp, 15.dp, 10.dp, 5.dp)
                 .align(Alignment.TopCenter)
         )
@@ -143,7 +142,7 @@ fun LoginScreen(
                     .clickable {
                         onNavigateToRegisterScreen()
                     },
-                color = md_theme_light_primary,
+                color = purple_primary,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.body2
             )
@@ -177,7 +176,7 @@ fun LoginContainer(
             hint = "Enter valid email",
             textValue = emailValue(),
             textColor = Color.Gray,
-            cursorColor = md_theme_light_primary,
+            cursorColor = purple_primary,
             onValueChanged = onEmailChanged,
             trailingIcon = null,
             onTrailingIconClick = null,
@@ -190,7 +189,7 @@ fun LoginContainer(
             hint = "Enter password",
             textValue = passwordValue(),
             textColor = Color.Gray,
-            cursorColor = md_theme_light_primary,
+            cursorColor = purple_primary,
             onValueChanged = onPasswordChanged,
             trailingIcon = Icons.Default.RemoveRedEye,
             onTrailingIconClick = {
@@ -209,7 +208,7 @@ fun LoginContainer(
         ){
             AuthButton(
                 text = "Login",
-                backgroundColor = md_theme_light_primary,
+                backgroundColor = purple_primary,
                 contentColor = Color.White,
                 enabled = buttonEnabled(),
                 modifier = Modifier

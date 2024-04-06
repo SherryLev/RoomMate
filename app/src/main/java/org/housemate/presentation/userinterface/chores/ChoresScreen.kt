@@ -1,24 +1,16 @@
 package org.housemate.presentation.userinterface.chores
 
 
-import android.content.ContentValues.TAG
-import android.util.Log
-import android.widget.GridLayout
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.*
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.Text
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -26,57 +18,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.domain.model.Chore
-import java.time.format.DateTimeFormatter
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.Timestamp
 //import com.google.android.libraries.places.api.model.LocalDate
 import org.housemate.R
-import org.housemate.data.firestore.ChoreRepositoryImpl
-import org.housemate.presentation.sharedcomponents.TextEntryModule
-import org.housemate.presentation.userinterface.home.Section
-import org.housemate.theme.md_theme_light_primary
-import org.housemate.theme.starColor
+import org.housemate.theme.purple_primary
 import java.time.DayOfWeek
-import kotlin.math.sqrt
-import org.housemate.data.firestore.UserRepositoryImpl
-import com.google.firebase.firestore.FirebaseFirestore
 import org.housemate.presentation.userinterface.expenses.CustomDropdown
 import org.housemate.presentation.viewmodel.ChoresViewModel
 import org.housemate.theme.light_purple
 import org.housemate.theme.light_red
-import org.housemate.theme.md_theme_light_error
-import java.time.LocalDate
+import org.housemate.theme.red_error
 import java.util.Calendar
 
 @Composable
@@ -99,7 +71,7 @@ fun DeleteConfirmationDialog(
                     shape = RoundedCornerShape(25.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = light_purple,
-                        contentColor = md_theme_light_primary
+                        contentColor = purple_primary
                     ),
                     elevation = ButtonDefaults.elevation(0.dp)) {
                     Text("Yes")
@@ -110,7 +82,7 @@ fun DeleteConfirmationDialog(
                     shape = RoundedCornerShape(25.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = light_red,
-                        contentColor = md_theme_light_error
+                        contentColor = red_error
                     ),
                     elevation = ButtonDefaults.elevation(0.dp)) {
                     Text("Cancel")
@@ -448,7 +420,7 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.LightGray,
                         contentColor = Color.Gray,
-                        disabledBackgroundColor = md_theme_light_primary,
+                        disabledBackgroundColor = purple_primary,
                         disabledContentColor = Color.White
                     ),
                     enabled = !isPersonal,
@@ -467,7 +439,7 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.LightGray,
                         contentColor = Color.Gray,
-                        disabledBackgroundColor = md_theme_light_primary,
+                        disabledBackgroundColor = purple_primary,
                         disabledContentColor = Color.White
                     ),
                     enabled = !isHouse,

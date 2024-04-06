@@ -1,19 +1,14 @@
 package org.housemate.presentation.userinterface.stats
 
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CutCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,9 +23,8 @@ import androidx.navigation.compose.rememberNavController
 import org.housemate.domain.model.Chore
 import org.housemate.presentation.viewmodel.ChoresViewModel
 import org.housemate.presentation.viewmodel.ExpenseViewModel
-import org.housemate.theme.md_theme_light_primary
+import org.housemate.theme.purple_primary
 import org.housemate.theme.pretty_purple
-import org.housemate.utils.AppScreenRoutes
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZoneId
@@ -147,7 +141,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
                         Icon(
                             imageVector = Icons.Default.AccountCircle,
                             contentDescription = null,
-                            tint = md_theme_light_primary
+                            tint = purple_primary
                         )
                         Text(
                             text = "You spent:",
@@ -175,7 +169,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
                         Icon(
                             imageVector = Icons.Default.Home,
                             contentDescription = null,
-                            tint = md_theme_light_primary
+                            tint = purple_primary
                         )
 
                         Text(

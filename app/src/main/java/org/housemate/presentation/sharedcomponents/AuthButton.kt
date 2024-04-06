@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.housemate.theme.md_theme_light_primary
+import org.housemate.theme.purple_primary
 
 @Composable
 fun AuthButton(
@@ -54,7 +54,7 @@ fun AuthButton(
 fun AuthButtonPreview() {
     AuthButton(
         text = "Login",
-        backgroundColor = md_theme_light_primary,
+        backgroundColor = purple_primary,
         contentColor = Color.White,
         onButtonClick = { /*TODO*/ },
         isLoading = true,

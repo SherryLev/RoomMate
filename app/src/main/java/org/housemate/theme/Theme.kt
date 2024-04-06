@@ -6,34 +6,16 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 
-private val DarkColorPalette = darkColors(
-    primary = md_theme_dark_primary,
-    primaryVariant = md_theme_dark_surfaceVariant,
-    secondary = md_theme_dark_secondary
-)
 
 private val LightColorPalette = lightColors(
-    primary = md_theme_light_primary,
-    primaryVariant = md_theme_light_surfaceVariant,
+    primary = purple_primary,
+    primaryVariant = purple_gray_background,
     secondary = md_theme_light_secondary
-
-    /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
 )
 
 @Composable
-fun HousemateTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
+fun HousemateTheme(content: @Composable () -> Unit) {
+    val colors = LightColorPalette
 
     MaterialTheme(
         colors = colors,

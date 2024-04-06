@@ -74,8 +74,8 @@ fun RegisterScreen(
             contentAlignment = Alignment.Center
         ){
             HeaderBackground(
-                leftColor = md_theme_light_primary,
-                rightColor = md_theme_light_primaryContainer,
+                leftColor = purple_primary,
+                rightColor = light_purple_background,
                 modifier = Modifier
                     .fillMaxSize()
             )
@@ -129,7 +129,7 @@ fun RegisterScreen(
                 .padding(top = 200.dp)
                 .fillMaxWidth(0.9f)
                 .shadow(5.dp, RoundedCornerShape(15.dp))
-                .background(md_theme_light_primaryContainer, RoundedCornerShape(15.dp))
+                .background(light_purple_background, RoundedCornerShape(15.dp))
                 .padding(10.dp, 15.dp, 10.dp, 5.dp)
                 .align(Alignment.TopCenter)
         )
@@ -150,7 +150,7 @@ fun RegisterScreen(
                         onNavigateToLoginScreen()
                     },
                 text = "Login",
-                color = md_theme_light_primary,
+                color = purple_primary,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.body2
             )
@@ -191,7 +191,7 @@ fun RegisterContainer(
             leadingIcon = Icons.Default.Email,
             textValue = emailValue(),
             textColor = Color.Gray,
-            cursorColor = md_theme_light_primary,
+            cursorColor = purple_primary,
             onValueChanged = onEmailChanged,
             trailingIcon = null,
             onTrailingIconClick = null
@@ -205,7 +205,7 @@ fun RegisterContainer(
             leadingIcon = Icons.Default.AccountCircle,
             textValue = usernameValue(),
             textColor = Color.Gray,
-            cursorColor = md_theme_light_primary,
+            cursorColor = purple_primary,
             onValueChanged = onUsernameChanged,
             trailingIcon = null,
             onTrailingIconClick = null
@@ -219,7 +219,7 @@ fun RegisterContainer(
             leadingIcon = Icons.Default.VpnKey,
             textValue = passwordValue(),
             textColor = Color.Gray,
-            cursorColor = md_theme_light_primary,
+            cursorColor = purple_primary,
             onValueChanged = onPasswordChanged,
             keyboardType = KeyboardType.Password,
             visualTransformation = if (isPasswordShown()) {
@@ -238,7 +238,7 @@ fun RegisterContainer(
             leadingIcon = Icons.Default.VpnKey,
             textValue = passwordRepeatedValue(),
             textColor = Color.Gray,
-            cursorColor = md_theme_light_primary,
+            cursorColor = purple_primary,
             onValueChanged = onPasswordRepeatedChanged,
             keyboardType = KeyboardType.Password,
             visualTransformation = if (isPasswordRepeatedShown()) {
@@ -256,7 +256,7 @@ fun RegisterContainer(
         ) {
             AuthButton(
                 text = "Register",
-                backgroundColor = md_theme_light_primary,
+                backgroundColor = purple_primary,
                 contentColor = Color.White,
                 enabled = buttonEnabled(),
                 modifier = Modifier

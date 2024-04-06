@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import org.housemate.domain.model.BottomNavItem
-import org.housemate.theme.md_theme_light_primary
-import org.housemate.theme.md_theme_light_surfaceVariant
+import org.housemate.theme.purple_primary
+import org.housemate.theme.purple_gray_background
 
 
 @Composable
@@ -29,7 +29,7 @@ fun BottomNavigationBar (
     val backStackEntry = navController.currentBackStackEntryAsState()
     BottomNavigation(
         modifier = modifier,
-        backgroundColor = md_theme_light_surfaceVariant,
+        backgroundColor = purple_gray_background,
         elevation = 5.dp
     ) {
         items.forEach { item ->
@@ -37,7 +37,7 @@ fun BottomNavigationBar (
             BottomNavigationItem(
                 selected = selected,
                 onClick = { onItemClick(item) },
-                selectedContentColor = md_theme_light_primary,
+                selectedContentColor = purple_primary,
                 unselectedContentColor = Color.Gray,
                 icon = {
                     Column(horizontalAlignment = CenterHorizontally ) {

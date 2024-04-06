@@ -21,16 +21,12 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowRightAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,7 +49,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.light_purple
-import org.housemate.theme.md_theme_light_primary
+import org.housemate.theme.purple_primary
 import java.math.BigDecimal
 
 @Composable
@@ -237,7 +233,7 @@ fun SettleUpScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowRightAlt,
                     contentDescription = "To",
-                    tint = md_theme_light_primary,
+                    tint = purple_primary,
                     modifier = Modifier
                         .size(48.dp)
                         .padding(top = 8.dp)
@@ -289,7 +285,7 @@ fun SettleUpScreen(
                     shape = RoundedCornerShape(25.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = light_purple,
-                        contentColor = md_theme_light_primary
+                        contentColor = purple_primary
                     ),
                     elevation = ButtonDefaults.elevation(0.dp)
                 ) {

@@ -1,7 +1,5 @@
 package org.housemate.utils
 
-import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -11,8 +9,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.google.firebase.firestore.FirebaseFirestore
-import org.housemate.data.firestore.GroupRepositoryImpl
-import org.housemate.data.firestore.UserRepositoryImpl
+import org.housemate.data.GroupRepositoryImpl
+import org.housemate.data.UserRepositoryImpl
 import org.housemate.presentation.userinterface.chores.ChoresScreen
 import org.housemate.presentation.userinterface.expenses.AddExpenseScreen
 import org.housemate.presentation.userinterface.expenses.ExpensesScreen

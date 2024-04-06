@@ -37,13 +37,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
 import androidx.compose.material.icons.outlined.Paid
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
@@ -52,13 +48,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.housemate.domain.model.Expense
 import org.housemate.domain.model.Payment
 import org.housemate.domain.model.User
-import org.housemate.domain.repositories.UserRepository
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_purple
 import org.housemate.theme.light_red
-import org.housemate.theme.md_theme_light_error
-import org.housemate.theme.md_theme_light_primary
+import org.housemate.theme.red_error
+import org.housemate.theme.purple_primary
 import org.housemate.utils.AppScreenRoutes
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
@@ -161,7 +156,7 @@ fun ExpensesScreen(
                                     textAlign = TextAlign.Center
                                 )
                                 // instead of hard coded values, use calculated amounts from viewmodel
-                                Text("$${"%.2f".format(totalAmountYouOwe)}", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = if (totalAmountYouOwe != BigDecimal.ZERO) md_theme_light_error else green)
+                                Text("$${"%.2f".format(totalAmountYouOwe)}", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = if (totalAmountYouOwe != BigDecimal.ZERO) red_error else green)
                             }
                         }
                     }
@@ -329,7 +324,7 @@ fun ExpensesScreen(
                                                             )
                                                             Text(
                                                                 text = dayOfMonth,
-                                                                color = md_theme_light_primary,
+                                                                color = purple_primary,
                                                                 fontSize = 18.sp,
                                                                 fontWeight = FontWeight.Bold
                                                             )
@@ -361,7 +356,7 @@ fun ExpensesScreen(
                                                         }
 
                                                         val lentOrBorrowedColor = when {
-                                                            amountLentOrBorrowed < 0 -> md_theme_light_error
+                                                            amountLentOrBorrowed < 0 -> red_error
                                                             amountLentOrBorrowed > 0 -> green
                                                             else -> Color.Gray
                                                         }
@@ -456,7 +451,7 @@ fun ExpensesScreen(
                                                             )
                                                             Text(
                                                                 text = dayOfMonth,
-                                                                color = md_theme_light_primary,
+                                                                color = purple_primary,
                                                                 fontSize = 18.sp,
                                                                 fontWeight = FontWeight.Bold
                                                             )
@@ -564,7 +559,7 @@ fun PaymentPopupDialog(
                         shape = RoundedCornerShape(25.dp),
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = light_purple,
-                            contentColor = md_theme_light_primary
+                            contentColor = purple_primary
                         ),
                         elevation = ButtonDefaults.elevation(0.dp),
                     ) {
@@ -576,7 +571,7 @@ fun PaymentPopupDialog(
                         shape = RoundedCornerShape(25.dp),
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = light_red,
-                            contentColor = md_theme_light_error
+                            contentColor = red_error
                         ),
                         elevation = ButtonDefaults.elevation(0.dp),
                     ) {
@@ -631,7 +626,7 @@ fun ExpensePopupDialog(
                         shape = RoundedCornerShape(25.dp),
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = light_purple,
-                            contentColor = md_theme_light_primary
+                            contentColor = purple_primary
                         ),
                         elevation = ButtonDefaults.elevation(0.dp),
                     ) {
@@ -643,7 +638,7 @@ fun ExpensePopupDialog(
                         shape = RoundedCornerShape(25.dp),
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = light_red,
-                            contentColor = md_theme_light_error
+                            contentColor = red_error
                         ),
                         elevation = ButtonDefaults.elevation(0.dp),
                     ) {
@@ -696,7 +691,7 @@ fun BalancesInfoRow(name: String, id: String, amount: String, youOwe: Boolean, n
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val textColour = if (youOwe) {
-                    md_theme_light_error
+                    red_error
                 } else {
                     green
                 }
@@ -713,7 +708,7 @@ fun BalancesInfoRow(name: String, id: String, amount: String, youOwe: Boolean, n
                     text = amount,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    color = if (youOwe) md_theme_light_error else green
+                    color = if (youOwe) red_error else green
                 )
             }
 
@@ -725,7 +720,7 @@ fun BalancesInfoRow(name: String, id: String, amount: String, youOwe: Boolean, n
                 shape = RoundedCornerShape(25.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = light_purple,
-                    contentColor = md_theme_light_primary
+                    contentColor = purple_primary
                     ),
                 elevation = ButtonDefaults.elevation(0.dp),
                 enabled = (amountValue != 0.00)
