@@ -321,7 +321,6 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                             assigneeId = assigneeId,
                             dueDate = choreDueDate,
                             userRating = emptyMap(), // Initialize as an empty map instead of empty list
-                            votedUser = emptyList(),
                             repeat = repetitionChoice
                         )
                         choresViewModel.addChore(chore)

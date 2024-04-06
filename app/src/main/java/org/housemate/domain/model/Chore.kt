@@ -11,10 +11,9 @@ data class Chore(
     val category: String,
     val dueDate: Timestamp? = null,
     val userRating : Map<String, Float> = emptyMap(),  // nullable
-    val votedUser: List<String>? = null, // nullable
     val repeat: String
 ) {
-    constructor() : this("", "", "", "", "", "", null, emptyMap(), emptyList(), "")
+    constructor() : this("", "", "", "", "", "", null, emptyMap(), "")
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "userId" to userId,
@@ -25,7 +24,6 @@ data class Chore(
             "category" to category,
             "dueDate" to dueDate,
             "userRating" to userRating,
-            "votedUser" to votedUser,
             "repeat" to repeat
         )
     }

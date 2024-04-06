@@ -36,10 +36,15 @@ import java.time.temporal.TemporalAdjusters
 data class Task(val name: String)
 
 @Composable fun DisplayEachChore(currentUserChores: List<Chore>, index: Int, rating: Float){
-    val roundedTotalAverageRating = BigDecimal(rating.toDouble())
-        .setScale(2, RoundingMode.HALF_UP)
-        .stripTrailingZeros()
-        .toPlainString()
+    val roundedTotalAverageRating = if (rating != 0.0f) {
+        BigDecimal(rating.toDouble())
+            .setScale(2, RoundingMode.HALF_UP)
+            .stripTrailingZeros()
+            .toPlainString()
+    } else {
+        "No ratings yet"
+    }
+
     Row(
         modifier = Modifier
             .padding(start = 50.dp, bottom = 16.dp, top = 16.dp)
@@ -54,7 +59,8 @@ data class Task(val name: String)
         Text(
             text = roundedTotalAverageRating,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = if (rating != 0.0f) Color.DarkGray else Color.LightGray
         )
     }
 }
@@ -78,6 +84,8 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
     }
 
     val expenses by expenseViewModel.expenseItems.collectAsState()
+    val payments by expenseViewModel.paymentItems.collectAsState()
+
     // Filter expenses where the payerId matches the current user's ID
     val expensesPaidByUser = expenses.filter { it.payerId == currentUserID }
 
@@ -85,16 +93,26 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
         val owingAmountForCurrentUser = expense.owingAmounts[currentUserID]
         owingAmountForCurrentUser != null
     }
+    val filteredPayments = payments.filter { payment ->
+        payment.payeeId == currentUserID
+    }
+
+
     val currentDate = LocalDate.now()
     val startOfMonth = currentDate.withDayOfMonth(1)
     val endOfMonth = currentDate.with(TemporalAdjusters.lastDayOfMonth())
+
+    val youPaidThisMonth = filteredPayments
+        .sumOf { BigDecimal.valueOf(it.amount) }
 
     val youSpentThisMonth = filteredExpenses
         .filter { expense ->
             val expenseDate = expense.timestamp.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
             expenseDate in startOfMonth..endOfMonth
         }
-        .sumOf { BigDecimal.valueOf(it.owingAmounts[currentUserID]!!) }
+        .sumOf { (it.owingAmounts[currentUserID]?.toBigDecimal() ?: BigDecimal.ZERO) }
+
+    val totalYouSpentThisMonth = youPaidThisMonth + youSpentThisMonth
 
     val houseSpentThisMonth = expenses
         .filter { expense ->
@@ -119,10 +137,6 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
     } else {
         0f
     }
-
-    /*averageRatings.forEachIndexed { index, rating ->
-        println("Chore ${currentUserChores[index].choreName}: $rating")
-    }*/
 
 
     val roundedTotalAverageRating = BigDecimal(totalAverageRating.toDouble())
@@ -176,10 +190,10 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.width(90.dp))
-                        val scaledYouSpentThisMonth = youSpentThisMonth.setScale(2, RoundingMode.HALF_EVEN)
+                        val scaledTotalYouSpentThisMonth = totalYouSpentThisMonth.setScale(2, RoundingMode.HALF_EVEN)
 
                         Text(
-                            text = "$$scaledYouSpentThisMonth",
+                            text = "$$scaledTotalYouSpentThisMonth",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.DarkGray
