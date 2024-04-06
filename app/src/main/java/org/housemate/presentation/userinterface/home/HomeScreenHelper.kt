@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,9 +33,25 @@ import org.housemate.theme.light_purple
 import org.housemate.theme.red_error
 import org.housemate.theme.pretty_purple
 import java.math.BigDecimal
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.temporal.TemporalAdjusters
 
+val userAverageRatings = mutableMapOf<String, Float>()
+fun findUserWithHighestAverageRating(userAverageRatings: Map<String, Float>): String? {
+    var maxRatingUser: String? = null
+    var maxRating = Float.MIN_VALUE
+
+    userAverageRatings.forEach { (userId, rating) ->
+        if (rating > maxRating) {
+            maxRating = rating
+            maxRatingUser = userId
+        }
+    }
+
+    return maxRatingUser
+}
 @Composable
 fun textShow(chore: Chore) {
     Surface(
@@ -90,10 +107,12 @@ fun HomeScreenHelper(
     choresViewModel: ChoresViewModel = hiltViewModel()) {
 
     LaunchedEffect(key1 = "fetchUserIdandchores") {
+        choresViewModel.fetchAllHousemates()
         choresViewModel.fetchCurrentUserId()
         choresViewModel.getAllChores()
         choresViewModel.fetchCurrentUser()
     }
+    var highest = "Loading..."
     val chores by choresViewModel.chores.collectAsState()
     val currentUserID by choresViewModel.userId.collectAsState()
     val currentUser by choresViewModel.currentUser.collectAsState()
@@ -107,6 +126,28 @@ fun HomeScreenHelper(
     //val totalTasks =  chores.size
     val totalAmountOwedToYou by expenseViewModel.totalAmountOwedToYou.collectAsState()
     val totalAmountYouOwe by expenseViewModel.totalAmountYouOwe.collectAsState()
+    val users by choresViewModel.housemates.collectAsState()
+    val currentWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+    val currentWeekEnd = currentWeekStart.plusDays(6)
+
+
+    users.forEach { user ->
+        val currentWeekUserChoresForUser = chores.filter { chore ->
+            chore.assigneeId == user.uid &&
+                    chore.dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate() in currentWeekStart..currentWeekEnd
+        }
+        val averageRatings = currentWeekUserChoresForUser.mapNotNull { chore ->
+            chore.userRating.values.takeIf { it.isNotEmpty() }?.average()?.toFloat()
+        }
+        val totalAverageRating = if (averageRatings.isNotEmpty()) {
+            averageRatings.average().toFloat()
+        } else {
+            0f
+        }
+        userAverageRatings[user.username] = totalAverageRating
+    }
+
+    highest = findUserWithHighestAverageRating(userAverageRatings)?.toString() ?: "Loading..."
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -263,7 +304,7 @@ fun HomeScreenHelper(
                }
            }
             Spacer(modifier = Modifier.height(20.dp))
-            Box(
+            /*Box(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
@@ -275,11 +316,49 @@ fun HomeScreenHelper(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "You are doing great!",
+                    text = "This week's winner is: $highestScore",
                     style = MaterialTheme.typography.h5,
                     color = Color.White,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(16.dp)
+                )
+            }*/
+            Text(
+                "The current leader is:",
+                modifier = Modifier
+                    .padding(top = 40.dp)
+                    .align(Alignment.CenterHorizontally),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.EmojiEvents,
+                    contentDescription = null,
+                    tint = pretty_purple,
+                    modifier = Modifier.size(40.dp)
+                )
+                Spacer(modifier = Modifier.width(30.dp))
+                Text(
+
+                    text = highest,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp, // Increase the font size
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                Spacer(modifier = Modifier.width(30.dp))
+                Icon(
+                    imageVector = Icons.Default.EmojiEvents,
+                    contentDescription = null,
+                    tint = pretty_purple,
+                    modifier = Modifier.size(40.dp)
                 )
             }
         }
