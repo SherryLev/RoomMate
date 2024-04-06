@@ -691,7 +691,7 @@ fun ExactAmountSplitUI(
                             textFieldValueStates[housemate.username] = formatAmount(newValue)
                             val newAmount =
                                 formattedValue.text.toBigDecimalOrNull() ?: BigDecimal.ZERO
-                            enteredAmounts[housemate.username] = newAmount
+                            enteredAmounts[housemate.uid] = newAmount
                             onAmountChanged(enteredAmounts.toMap())
                         },
                         placeholder = {

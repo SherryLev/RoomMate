@@ -2,7 +2,6 @@ package org.housemate.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.tasks.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +10,6 @@ import kotlinx.coroutines.tasks.await
 import org.housemate.domain.model.Chore
 import org.housemate.domain.model.User
 import org.housemate.domain.repositories.ChoreRepository
-import org.housemate.domain.repositories.ExpenseRepository
 import org.housemate.domain.repositories.GroupRepository
 import org.housemate.domain.repositories.UserRepository
 import javax.inject.Inject
@@ -91,7 +89,7 @@ class ChoresViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-                val allChores = choreRepository.getAllChores().await()
+                val allChores = choreRepository.getGroupChores().await()
                 _chores.value = allChores
             } catch (e: Exception) {
                 _error.value = e.message ?: "An error occurred"
@@ -110,20 +108,6 @@ class ChoresViewModel @Inject constructor(
             } catch (e: Exception) {
                 _error.value = e.message ?: "An error occurred"
                 println("Failed to add expense: ${e.message}")
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    fun getChoresByUserId(userId: String) {
-        viewModelScope.launch {
-            try {
-                _isLoading.value = true
-                val chores = choreRepository.getChoresByUserId(userId).await()
-                _chores.value = chores
-            } catch (e: Exception) {
-                _error.value = e.message ?: "An error occurred"
             } finally {
                 _isLoading.value = false
             }

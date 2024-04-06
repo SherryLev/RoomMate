@@ -26,17 +26,23 @@ import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.purple_primary
 import org.housemate.theme.pretty_purple
 import java.math.BigDecimal
+import java.math.RoundingMode
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.temporal.TemporalAdjusters
 
 
 data class Task(val name: String)
 
-@Composable fun displayEachChore(currentUserChores: List<Chore>, index: Int, rating: Float){
-    val roundedTotalAverageRating = String.format("%.2f", rating)
+@Composable fun DisplayEachChore(currentUserChores: List<Chore>, index: Int, rating: Float){
+    val roundedTotalAverageRating = BigDecimal(rating.toDouble())
+        .setScale(2, RoundingMode.HALF_UP)
+        .stripTrailingZeros()
+        .toPlainString()
     Row(
         modifier = Modifier
-            .padding(start = 40.dp, bottom = 16.dp, top = 16.dp)
+            .padding(start = 50.dp, bottom = 16.dp, top = 16.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -54,7 +60,6 @@ data class Task(val name: String)
 }
 @Composable
 fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = hiltViewModel(), expenseViewModel: ExpenseViewModel = hiltViewModel()) {
-    var tasks by remember { mutableStateOf(emptyList<Task>()) }
     LaunchedEffect(key1 = "fetchUserIdandchores") {
         choresViewModel.fetchCurrentUserId()
         choresViewModel.getAllChores()
@@ -62,10 +67,15 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
     }
 
     val chores by choresViewModel.chores.collectAsState()
+
     val currentUserID by choresViewModel.userId.collectAsState()
-    val currentDate = LocalDate.now()
-    val currentUserChores = chores.filter { it.assigneeId == currentUserID &&
-            it.dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate() == currentDate}
+    val currentWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+    val currentWeekEnd = currentWeekStart.plusDays(6)
+
+    val currentWeekUserChores = chores.filter { chore ->
+        chore.assigneeId == currentUserID &&
+                chore.dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate() in currentWeekStart..currentWeekEnd
+    }
 
     val expenses by expenseViewModel.expenseItems.collectAsState()
     // Filter expenses where the payerId matches the current user's ID
@@ -75,11 +85,25 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
         val owingAmountForCurrentUser = expense.owingAmounts[currentUserID]
         owingAmountForCurrentUser != null
     }
-    val youSpentThisMonth = filteredExpenses.sumOf { BigDecimal.valueOf(it.owingAmounts[currentUserID]!!) }
+    val currentDate = LocalDate.now()
+    val startOfMonth = currentDate.withDayOfMonth(1)
+    val endOfMonth = currentDate.with(TemporalAdjusters.lastDayOfMonth())
 
-    val houseSpentThisMonth = expenses.sumOf { BigDecimal.valueOf(it.amount) }
+    val youSpentThisMonth = filteredExpenses
+        .filter { expense ->
+            val expenseDate = expense.timestamp.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+            expenseDate in startOfMonth..endOfMonth
+        }
+        .sumOf { BigDecimal.valueOf(it.owingAmounts[currentUserID]!!) }
 
-    val averageRatings = currentUserChores.map { chore ->
+    val houseSpentThisMonth = expenses
+        .filter { expense ->
+            val expenseDate = expense.timestamp.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+            expenseDate in startOfMonth..endOfMonth
+        }
+        .sumOf { BigDecimal.valueOf(it.amount) }
+
+    val averageRatings = currentWeekUserChores.map { chore ->
         val ratings = chore.userRating.values
         if (ratings.isNotEmpty()) {
             println("sum: " + ratings.sum())
@@ -101,8 +125,11 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
     }*/
 
 
-    val roundedTotalAverageRating = String.format("%.2f", totalAverageRating)
-    //val rating = 4.3
+    val roundedTotalAverageRating = BigDecimal(totalAverageRating.toDouble())
+        .setScale(2, RoundingMode.HALF_UP)
+        .stripTrailingZeros()
+        .toPlainString()
+
     Box(
         Modifier
             .fillMaxSize()
@@ -149,9 +176,10 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.width(90.dp))
+                        val scaledYouSpentThisMonth = youSpentThisMonth.setScale(2, RoundingMode.HALF_EVEN)
 
                         Text(
-                            text = "$$youSpentThisMonth",
+                            text = "$$scaledYouSpentThisMonth",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.DarkGray
@@ -178,9 +206,10 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.width(30.dp))
+                        val scaledHouseSpentThisMonth = houseSpentThisMonth.setScale(2, RoundingMode.HALF_EVEN)
 
                         Text(
-                            text = "$$houseSpentThisMonth",
+                            text = "$$scaledHouseSpentThisMonth",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.DarkGray
@@ -190,7 +219,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
             }
 
             Text(
-                "Your Chore Ratings:",
+                "Your chore ratings for this week:",
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .align(Alignment.CenterHorizontally),
@@ -216,13 +245,13 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
                 } else {
                     LazyColumn {
                         items(averageRatings.size) { index ->
-                            displayEachChore(currentUserChores, index, averageRatings[index])
+                            DisplayEachChore(currentWeekUserChores, index, averageRatings[index])
                         }
                     }
                 }
             }
             Text(
-                "Your Average Chore Rating is:",
+                "Your average chore rating is:",
                 modifier = Modifier
                     .padding(top = 40.dp)
                     .align(Alignment.CenterHorizontally),

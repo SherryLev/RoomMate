@@ -17,6 +17,7 @@ data class Chore(
     constructor() : this("", "", "", "", "", "", null, emptyMap(), emptyList(), "")
     fun toMap(): Map<String, Any?> {
         return mapOf(
+            "userId" to userId,
             "choreId" to choreId,
             "choreName" to choreName,
             "assignee" to assignee,
