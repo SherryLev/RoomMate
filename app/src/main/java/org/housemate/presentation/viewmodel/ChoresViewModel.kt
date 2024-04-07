@@ -44,7 +44,6 @@ class ChoresViewModel @Inject constructor(
 
     private val _choreCategories = MutableStateFlow<List<String>>(emptyList())
     val choreCategories: StateFlow<List<String>> = _choreCategories
-
     init {
         getAllChores()
         fetchAllHousemates()
@@ -116,7 +115,7 @@ class ChoresViewModel @Inject constructor(
                 println("Chore added successfully")
             } catch (e: Exception) {
                 _error.value = e.message ?: "An error occurred"
-                println("Failed to add expense: ${e.message}")
+                println("Failed to add chore: ${e.message}")
             } finally {
                 _isLoading.value = false
             }
@@ -126,12 +125,8 @@ class ChoresViewModel @Inject constructor(
     fun addChoreType(newChore: String, userId: String) {
         viewModelScope.launch {
             try {
-                val addChoreTypeTask = choreRepository.addChoreType(newChore, userId)
-                addChoreTypeTask.addOnSuccessListener {
-                    fetchChoreTypes()
-                }.addOnFailureListener { e ->
-                    println("Failed to add chore type: ${e.message}")
-                }
+                choreRepository.addChoreType(newChore, userId).await()
+                fetchChoreTypes()
             } catch (e: Exception) {
                 println("Failed to add chore type: ${e.message}")
             }
@@ -166,11 +161,9 @@ class ChoresViewModel @Inject constructor(
                     // Update the _choreCategories StateFlow object with the fetched chore categories
                     _choreCategories.value = fetchedChoreCategories
                 }.addOnFailureListener { e ->
-                    // Handle failure
                     println("Failed to fetch chore categories: ${e.message}")
                 }
             } catch (e: Exception) {
-                // Handle other exceptions
                 println("Failed to fetch chore categories: ${e.message}")
             }
         }
@@ -180,14 +173,10 @@ class ChoresViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Call the addChoreCategories function from the repository to add a chore category
-                val addChoreCategoryTask = choreRepository.addCategory(newCategory, userId)
-                addChoreCategoryTask.addOnSuccessListener {
-                    // Since the chore category is added successfully, we can fetch the updated list of chore categories
-                    fetchChoreCategories()
-                }.addOnFailureListener { e ->
-                    // Handle failure
-                    println("Failed to add chore category: ${e.message}")
-                }
+               choreRepository.addCategory(newCategory, userId).await()
+                // Since the chore category is added successfully, we can fetch the updated list of chore categories
+                fetchChoreCategories()
+
             } catch (e: Exception) {
                 // Handle other exceptions
                 println("Failed to add chore category: ${e.message}")

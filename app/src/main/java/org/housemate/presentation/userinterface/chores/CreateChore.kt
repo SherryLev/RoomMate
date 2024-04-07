@@ -48,6 +48,7 @@ import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextAlign
+import kotlinx.coroutines.launch
 import org.housemate.theme.lavender
 import org.housemate.theme.light_gray
 import org.housemate.theme.light_purple
@@ -55,6 +56,7 @@ import org.housemate.theme.light_purple_background
 import org.housemate.theme.pretty_purple
 import org.housemate.theme.purple_gray_background
 import org.housemate.theme.purple_primary
+import org.housemate.utils.HomeNavGraph
 
 @Composable
 fun ReadonlyTextField(
@@ -230,14 +232,33 @@ fun AddCustomChoreDialog(
     )
 }
 
+@Composable
+fun SnackbarMessage(
+    message: String,
+    onDismiss: () -> Unit
+) {
+    Snackbar(
+        action = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Dismiss")
+            }
+        },
+        modifier = Modifier.padding(16.dp)
+    ) {
+        Text(text = message)
+    }
+}
 
 @Composable
-fun alignButton(options: List<String>, label: String, onCategorySelected: (String) -> Unit, choresViewModel: ChoresViewModel) {
+fun alignButton(options: List<String>, label: String, onCategorySelected: (String) -> Unit, choresViewModel: ChoresViewModel, snackbarHostState: SnackbarHostState) {
+
     var choreTypeText by remember { mutableStateOf("") }
     var choreCategoryText by remember { mutableStateOf("") }
 
     val userId by choresViewModel.userId.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box (modifier = Modifier.width(240.dp)) {
@@ -261,12 +282,32 @@ fun alignButton(options: List<String>, label: String, onCategorySelected: (Strin
                     },
                     confirmButtonText = "Add Chore Type",
                     onConfirmButtonClicked = {
-                        userId?.let {
-                            choresViewModel.addChoreType(
-                                choreTypeText,
-                                it
-                            )
-                        }
+                        scope.launch {
+                            try {
+                                userId?.let {
+                                    choresViewModel.addChoreType(
+                                        choreTypeText,
+                                        it
+                                    )
+                                }
+                                    // Show the Snackbar after deletion is successful
+                                    val result = snackbarHostState.showSnackbar(
+                                        message = "Custom chore type added successfully!",
+                                        actionLabel = "Dismiss",
+                                        duration = SnackbarDuration.Long
+                                    )
+                                } catch (e: Exception) {
+                                    val errorMessage =
+                                        e.message ?: "Failed add custom chore type."
+                                    val result = snackbarHostState.showSnackbar(
+                                        message = errorMessage,
+                                        actionLabel = "Dismiss",
+                                        duration = SnackbarDuration.Long
+                                    )
+                                    // Handle Snackbar action if needed
+                                }
+                            }
+                        showDialog = false
                     },
                     dismissButtonText = "Cancel",
                     onDismissButtonClicked = { showDialog = false }
@@ -288,12 +329,31 @@ fun alignButton(options: List<String>, label: String, onCategorySelected: (Strin
                     },
                     confirmButtonText = "Add Chore Category",
                     onConfirmButtonClicked = {
-                        userId?.let {
-                            choresViewModel.addChoreCategory(
-                                choreCategoryText,
-                                it
-                            )
+                        scope.launch {
+                            try {
+                                userId?.let {
+                                    choresViewModel.addChoreCategory(
+                                        choreCategoryText,
+                                        it
+                                    )
+                                }
+                                // Show the Snackbar after deletion is successful
+                                val result = snackbarHostState.showSnackbar(
+                                    message = "Custom chore category added successfully!",
+                                    actionLabel = "Dismiss",
+                                    duration = SnackbarDuration.Long
+                                )
+                            } catch (e: Exception) {
+                                val errorMessage =
+                                    e.message ?: "Failed add custom chore category."
+                                val result = snackbarHostState.showSnackbar(
+                                    message = errorMessage,
+                                    actionLabel = "Dismiss",
+                                    duration = SnackbarDuration.Long
+                                )
+                            }
                         }
+                        showDialog = false
                     },
                     dismissButtonText = "Cancel",
                     onDismissButtonClicked = { showDialog = false }
@@ -342,21 +402,31 @@ fun alignButtonforUser(
 
 @Composable
 fun ChoreCreator(onDialogDismiss: () -> Unit,
-                 choresViewModel: ChoresViewModel = hiltViewModel()
-){
+                 choresViewModel: ChoresViewModel = hiltViewModel(),
+                 snackbarHostState: SnackbarHostState
+) {
     val housemates by choresViewModel.housemates.collectAsState()
 
     val categories by choresViewModel.choreCategories.collectAsState()
     val choreList by choresViewModel.choreTypes.collectAsState()
 
-    val labels =  listOf("Chore","Category", "Assignee" )
+    val labels = listOf("Chore", "Category", "Assignee")
     var categoryChoice by remember { mutableStateOf("") }
     var choreChoice by remember { mutableStateOf("") }
     var assigneeChoice by remember { mutableStateOf("") }
     var assigneeId by remember { mutableStateOf("") }
 
     val selectedDate = remember { mutableStateOf<Timestamp?>(null) }
-    val repetitionOptions = listOf("None", "Every day", "Every 2 days", "Every 3 days", "Every week", "Every 2 wks", "Every 3 wks", "Every 4 wks")
+    val repetitionOptions = listOf(
+        "None",
+        "Every day",
+        "Every 2 days",
+        "Every 3 days",
+        "Every week",
+        "Every 2 wks",
+        "Every 3 wks",
+        "Every 4 wks"
+    )
     var repetitionChoice by remember { mutableStateOf("None") }
     var choreCounter by remember { mutableStateOf(0) }
     val choreId = UUID.randomUUID().toString() // Generate unique chore ID
@@ -375,11 +445,25 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
         choresViewModel.fetchAllHousemates()
     }
 
+
     Column(
-        modifier = Modifier.padding(16.dp)) {
-        alignButton(choreList, labels[0],onCategorySelected = { category -> choreChoice = category }, choresViewModel)
+        modifier = Modifier.padding(16.dp)
+    ) {
+        alignButton(
+            choreList,
+            labels[0],
+            onCategorySelected = { category -> choreChoice = category },
+            choresViewModel,
+            snackbarHostState
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        alignButton(categories,labels[1], onCategorySelected = { category -> categoryChoice = category }, choresViewModel)
+        alignButton(
+            categories,
+            labels[1],
+            onCategorySelected = { category -> categoryChoice = category },
+            choresViewModel,
+            snackbarHostState
+        )
         Spacer(modifier = Modifier.height(16.dp))
         alignButtonforUser(housemates, labels[2]) { housemate ->
             assigneeChoice = housemate.username
@@ -387,7 +471,7 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
         }
         Spacer(modifier = Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TasksDatePicker { date ->selectedDate.value = date }
+            TasksDatePicker { date -> selectedDate.value = date }
             Spacer(modifier = Modifier.width(16.dp))
             SelectionDropdown(
                 options = repetitionOptions,
@@ -431,14 +515,18 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                                 selectedDate.value != null
                     if (allFieldsSelected) {
                         val dueDate =
-                            selectedDate.value ?: return@Button // Ensure due date is not null
+                            selectedDate.value
+                                ?: return@Button // Ensure due date is not null
 
                         val calendar = Calendar.getInstance()
                         calendar.time = dueDate.toDate() // Convert to Date type
 
                         val repetitions = when (repetitionChoice) {
                             "Every day" -> {
-                                calendar.add(Calendar.MONTH, 4) // Add 4 months to the due date
+                                calendar.add(
+                                    Calendar.MONTH,
+                                    4
+                                ) // Add 4 months to the due date
                                 val endDate = calendar.time // Get the end date
                                 val daysBetween =
                                     (endDate.time - dueDate.toDate().time) / (1000 * 60 * 60 * 24)
@@ -452,7 +540,10 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                                     "Every 3 days" -> 3
                                     else -> 1 // Default to 1 day if not specified
                                 }
-                                calendar.add(Calendar.MONTH, 4) // Add 4 months to the due date
+                                calendar.add(
+                                    Calendar.MONTH,
+                                    4
+                                ) // Add 4 months to the due date
                                 val endDate = calendar.time // Get the end date
                                 val daysBetween =
                                     (endDate.time - dueDate.toDate().time) / (1000 * 60 * 60 * 24)
@@ -477,7 +568,10 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                             }
 
                             val choreDueDate =
-                                Timestamp(dueDate.seconds + repetitionSeconds, dueDate.nanoseconds)
+                                Timestamp(
+                                    dueDate.seconds + repetitionSeconds,
+                                    dueDate.nanoseconds
+                                )
                             val chore = Chore(
                                 userId = userId ?: "",
                                 choreId = "$choreId-$index", // Ensure unique ID for each chore

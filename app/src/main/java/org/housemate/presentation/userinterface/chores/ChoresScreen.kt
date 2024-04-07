@@ -39,8 +39,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.Timestamp
+import kotlinx.coroutines.launch
 //import com.google.android.libraries.places.api.model.LocalDate
 import org.housemate.R
 import org.housemate.theme.purple_primary
@@ -138,8 +140,10 @@ fun StarRatingBar(
 }
 
 @Composable
-fun TaskItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel(),chorePrefix: String, userId: String) {
+fun TaskItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel(),chorePrefix: String, userId: String, snackbarHostState: SnackbarHostState) {
     val (showDialog, setShowDialog) = remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
 
     Surface(
         shape = RoundedCornerShape(16.dp),
@@ -220,7 +224,27 @@ fun TaskItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel(),ch
                 showDialog = showDialog,
                 onConfirm = {
                     // Call your delete function here
-                    choresViewModel.deleteMultipleChores(chorePrefix, userId)
+                    scope.launch {
+                        // Call delete function and wait for it to finish
+                        try {
+                            choresViewModel.deleteMultipleChores(chorePrefix, userId)
+
+                            // Show the Snackbar after deletion is successful
+                            val result = snackbarHostState.showSnackbar(
+                                message = "Chore deleted successfully!",
+                                actionLabel = "Dismiss",
+                                duration = SnackbarDuration.Short
+                            )
+                        } catch (e: Exception) {
+                            val errorMessage = e.message ?: "Failed to delete chore. Please try again."
+                            val result = snackbarHostState.showSnackbar(
+                                message = errorMessage,
+                                actionLabel = "Dismiss",
+                                duration = SnackbarDuration.Short
+                            )
+                            // Handle Snackbar action if needed
+                        }
+                    }
                 },
                 onDismiss = { setShowDialog(false) }
             )
@@ -338,7 +362,7 @@ fun stringToDayOfWeek(dayString: String): DayOfWeek? {
 }
 
 @Composable
-fun TaskDisplayHouse(chores: List<Chore>, choresViewModel: ChoresViewModel = hiltViewModel()) {
+fun TaskDisplayHouse(chores: List<Chore>, choresViewModel: ChoresViewModel = hiltViewModel(), snackbarHostState: SnackbarHostState) {
     val uniqueChoreTypes = mutableSetOf<String>()
 
     LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
@@ -347,7 +371,7 @@ fun TaskDisplayHouse(chores: List<Chore>, choresViewModel: ChoresViewModel = hil
             print(choreType)
             if (uniqueChoreTypes.add(choreType)) { // Check if the chore type is already added
                 val chorePrefix = chore.choreId.substringBefore("-") + "-"
-                TaskItem(chore, choresViewModel,chorePrefix, chore.assigneeId)
+                TaskItem(chore, choresViewModel,chorePrefix, chore.assigneeId, snackbarHostState = snackbarHostState)
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -396,7 +420,7 @@ fun TaskDisplayWeek(chores: List<Chore>, day: DayOfWeek) {
 
 @Composable
 fun MainLayout(navController: NavHostController = rememberNavController(),
-               choresViewModel: ChoresViewModel = hiltViewModel()) {
+               choresViewModel: ChoresViewModel = hiltViewModel(), snackbarHostState: SnackbarHostState) {
     val dialogDismissed by choresViewModel.dialogDismissed.collectAsState()
     val chores by choresViewModel.chores.collectAsState()
 
@@ -495,7 +519,7 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
             Column(
             ) {
                 if (isHouse) {
-                    TaskDisplayHouse(chores)
+                    TaskDisplayHouse(chores, snackbarHostState = snackbarHostState)
                 } else {
                     val currentWeekTasks = getCurrentWeekTasks(chores)
                     if (selectedDay == "Week") {
@@ -611,7 +635,8 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
                         ChoreCreator(
                             onDialogDismiss = {
                                 showDialog = false
-                            }
+                            },
+                            snackbarHostState = snackbarHostState
                         )
 
                     }
@@ -625,11 +650,22 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
 fun ChoresScreen(
     navController: NavHostController = rememberNavController()
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        MainLayout(navController = navController)
+    val snackbarHostState = remember { SnackbarHostState() }
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = (Modifier.padding(bottom = paddingValues.calculateBottomPadding()))
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                MainLayout(navController = navController, snackbarHostState = snackbarHostState)
+            }
+        }
     }
 }
 
