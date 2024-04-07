@@ -4,18 +4,23 @@ package org.housemate.presentation.userinterface.stats
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -24,11 +29,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.housemate.domain.model.Chore
 import org.housemate.domain.model.User
-import org.housemate.presentation.userinterface.home.userAverageRatings
 import org.housemate.presentation.viewmodel.ChoresViewModel
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.purple_primary
-import org.housemate.theme.pretty_purple
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.DayOfWeek
@@ -37,8 +40,8 @@ import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 
 
-@Composable fun DisplayEachChore(currentUserChores: List<Chore>, index: Int, rating: Float){
-    val roundedTotalAverageRating = if (rating != 0.0f) {
+fun calculateRoundedAverageRating(rating: Float): String {
+    return if (rating != 0.0f) {
         BigDecimal(rating.toDouble())
             .setScale(2, RoundingMode.HALF_UP)
             .stripTrailingZeros()
@@ -46,7 +49,10 @@ import java.time.temporal.TemporalAdjusters
     } else {
         "No ratings yet"
     }
+}
 
+@Composable fun DisplayEachChore(currentUserChores: List<Chore>, index: Int, rating: Float){
+    val roundedAvg = calculateRoundedAverageRating(rating)
     Row(
         modifier = Modifier
             .padding(start = 50.dp, bottom = 16.dp, top = 16.dp)
@@ -59,7 +65,7 @@ import java.time.temporal.TemporalAdjusters
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = roundedTotalAverageRating,
+            text = "$roundedAvg",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = if (rating != 0.0f) Color.DarkGray else Color.LightGray
@@ -76,10 +82,29 @@ fun WeeklyChoreRateSurface(users: List<User>, chores: List<Chore>) {
     val currentWeekEnd = currentWeekStart.plusDays(6)
     val userAverageRatings = calculateUserAverageRatings(users, chores, currentWeekStart, currentWeekEnd)
 
-    Surface {
-        LazyColumn {
-            items(userAverageRatings.toList()) { (userName, averageRating) ->
-                UserChoreRateItem(userName, averageRating)
+    Column {
+        Text(
+            text = "Household chore ratings this week:",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .align(Alignment.CenterHorizontally),
+        )
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 56.dp, top = 24.dp, end = 48.dp),
+            elevation = 4.dp,
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            LazyColumn(
+                modifier = Modifier.padding(8.dp)
+            ){
+                items(userAverageRatings.toList()) { (userName, averageRating) ->
+                    UserChoreRateItem(userName, averageRating)
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
             }
         }
     }
@@ -87,12 +112,39 @@ fun WeeklyChoreRateSurface(users: List<User>, chores: List<Chore>) {
 
 @Composable
 fun UserChoreRateItem(userName: String, averageRating: Float) {
-    Surface(modifier = Modifier.fillMaxWidth()) {
-        Column {
-            Text(text = "User: $userName")
-            Text(text = "Weekly Chore Average Rating: $averageRating")
+    val roundedAvg= calculateRoundedAverageRating(averageRating)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = userName,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Start
+        )
+        if (roundedAvg != "No ratings yet") {
+            Icon(
+                imageVector = Icons.Default.Star,
+                contentDescription = "Star",
+                tint = purple_primary,
+                modifier = Modifier.padding(end = 4.dp)
+            )
+            Text(
+                text = "$roundedAvg",
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.End,
+            )
+        } else{
+            Text(
+                text = "$roundedAvg",
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.End,
+                color = Color.LightGray
+            )
         }
     }
+
 }
 fun getUserDisplayName(userId: String, users: List<User>): String {
     val user = users.find { it.uid == userId }
@@ -302,7 +354,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
             }
 
             Text(
-                "Your chore ratings for this week:",
+                "Your chore ratings this week:",
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .align(Alignment.CenterHorizontally),
@@ -312,7 +364,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
             Box(
                 modifier = Modifier
                     .padding(16.dp)
-                    .height(150.dp)
+                    .height(130.dp)
                     .width(300.dp)
             ) {
                 if (averageRatings.isEmpty()) {
