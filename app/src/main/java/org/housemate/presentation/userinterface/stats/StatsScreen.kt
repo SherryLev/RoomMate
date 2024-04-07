@@ -81,10 +81,10 @@ fun WeeklyChoreRateSurface(users: List<User>, chores: List<Chore>) {
     val currentWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val currentWeekEnd = currentWeekStart.plusDays(6)
     val userAverageRatings = calculateUserAverageRatings(users, chores, currentWeekStart, currentWeekEnd)
-
+    val sortedUserAverageRatings = userAverageRatings.toList().sortedByDescending { it.second }
     Column {
         Text(
-            text = "Household chore ratings this week:",
+            text = "Chore ratings leaderboard",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -101,7 +101,7 @@ fun WeeklyChoreRateSurface(users: List<User>, chores: List<Chore>) {
             LazyColumn(
                 modifier = Modifier.padding(8.dp)
             ){
-                items(userAverageRatings.toList()) { (userName, averageRating) ->
+                items(sortedUserAverageRatings) { (userName, averageRating) ->
                     UserChoreRateItem(userName, averageRating)
                     Spacer(modifier = Modifier.height(14.dp))
                 }
