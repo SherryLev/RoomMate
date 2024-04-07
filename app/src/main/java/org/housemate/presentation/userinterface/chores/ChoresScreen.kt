@@ -223,9 +223,7 @@ fun TaskItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel(),ch
             DeleteConfirmationDialog(
                 showDialog = showDialog,
                 onConfirm = {
-                    // Call your delete function here
                     scope.launch {
-                        // Call delete function and wait for it to finish
                         try {
                             choresViewModel.deleteMultipleChores(chorePrefix, userId)
 

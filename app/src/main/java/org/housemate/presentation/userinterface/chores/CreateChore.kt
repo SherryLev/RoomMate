@@ -233,23 +233,6 @@ fun AddCustomChoreDialog(
 }
 
 @Composable
-fun SnackbarMessage(
-    message: String,
-    onDismiss: () -> Unit
-) {
-    Snackbar(
-        action = {
-            TextButton(onClick = onDismiss) {
-                Text(text = "Dismiss")
-            }
-        },
-        modifier = Modifier.padding(16.dp)
-    ) {
-        Text(text = message)
-    }
-}
-
-@Composable
 fun alignButton(options: List<String>, label: String, onCategorySelected: (String) -> Unit, choresViewModel: ChoresViewModel, snackbarHostState: SnackbarHostState) {
 
     var choreTypeText by remember { mutableStateOf("") }
@@ -294,15 +277,15 @@ fun alignButton(options: List<String>, label: String, onCategorySelected: (Strin
                                     val result = snackbarHostState.showSnackbar(
                                         message = "Custom chore type added successfully!",
                                         actionLabel = "Dismiss",
-                                        duration = SnackbarDuration.Long
+                                        duration = SnackbarDuration.Short
                                     )
                                 } catch (e: Exception) {
                                     val errorMessage =
-                                        e.message ?: "Failed add custom chore type."
+                                        e.message ?: "Failed to add custom chore type."
                                     val result = snackbarHostState.showSnackbar(
                                         message = errorMessage,
                                         actionLabel = "Dismiss",
-                                        duration = SnackbarDuration.Long
+                                        duration = SnackbarDuration.Short
                                     )
                                     // Handle Snackbar action if needed
                                 }
@@ -341,7 +324,7 @@ fun alignButton(options: List<String>, label: String, onCategorySelected: (Strin
                                 val result = snackbarHostState.showSnackbar(
                                     message = "Custom chore category added successfully!",
                                     actionLabel = "Dismiss",
-                                    duration = SnackbarDuration.Long
+                                    duration = SnackbarDuration.Short
                                 )
                             } catch (e: Exception) {
                                 val errorMessage =
@@ -349,7 +332,7 @@ fun alignButton(options: List<String>, label: String, onCategorySelected: (Strin
                                 val result = snackbarHostState.showSnackbar(
                                     message = errorMessage,
                                     actionLabel = "Dismiss",
-                                    duration = SnackbarDuration.Long
+                                    duration = SnackbarDuration.Short
                                 )
                             }
                         }
@@ -438,6 +421,11 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
         if (dialogDismissed) {
             choresViewModel.getAllChores()
             choresViewModel.setDialogDismissed(false) // Reset the state after refreshing
+            snackbarHostState.showSnackbar(
+                message = "Chore added successfully!",
+                actionLabel = "Dismiss",
+                duration = SnackbarDuration.Short
+            )
         }
     }
 
@@ -588,7 +576,6 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                         }
                         choresViewModel.setDialogDismissed(true)
                         onDialogDismiss()
-
                     } else {
                         isErrorVisible = true
                     }
