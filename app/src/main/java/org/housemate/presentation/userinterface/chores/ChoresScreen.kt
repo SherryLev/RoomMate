@@ -28,9 +28,11 @@ import androidx.navigation.compose.rememberNavController
 import org.housemate.domain.model.Chore
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
@@ -361,23 +363,35 @@ fun stringToDayOfWeek(dayString: String): DayOfWeek? {
 
 @Composable
 fun TaskDisplayHouse(chores: List<Chore>, choresViewModel: ChoresViewModel = hiltViewModel(), snackbarHostState: SnackbarHostState) {
-    val uniqueChoreTypes = mutableSetOf<String>()
+    // Remember the unique chore types set to persist its state across recompositions
+    val uniqueChoreTypes = remember { mutableSetOf<String>() }
 
-    LazyColumn(modifier = Modifier.padding(start = 2.dp, top = 10.dp)) {
-        items(chores) { chore ->
+    // Scroll state for the scrollbar
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .verticalScroll(scrollState)
+            .padding(start = 2.dp, top = 10.dp)
+    ) {
+        chores.forEach { chore ->
             val choreType = extractChoreType(chore.choreId)
-            print(choreType)
-            if (uniqueChoreTypes.add(choreType)) { // Check if the chore type is already added
+            if (uniqueChoreTypes.add(choreType)) {
                 val chorePrefix = chore.choreId.substringBefore("-") + "-"
-                TaskItem(chore, choresViewModel,chorePrefix, chore.assigneeId, snackbarHostState = snackbarHostState)
+                TaskItem(
+                    chore,
+                    choresViewModel,
+                    chorePrefix,
+                    chore.assigneeId,
+                    snackbarHostState = snackbarHostState
+                )
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
-        item{
-            Spacer(modifier = Modifier.height(38.dp))
-        }
+        Spacer(modifier = Modifier.height(38.dp))
     }
 }
+
 
 @Composable
 fun TaskDisplayWeek(chores: List<Chore>, day: DayOfWeek) {

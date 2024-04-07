@@ -65,6 +65,7 @@ class ChoreRepositoryImpl (
                                                                     .copy(choreId = document.id)
                                                             choreList.add(chore)
                                                         }
+                                                        choreList.sortBy { it.choreName }
                                                     }
                                             }
                                             // Wait for all fetch chores tasks to complete

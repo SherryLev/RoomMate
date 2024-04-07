@@ -80,7 +80,7 @@ fun ReadonlyTextField(
             ),
             textStyle = TextStyle(textAlign = TextAlign.Center, color = Color.DarkGray, fontWeight = FontWeight.Bold, fontSize = 16.sp),
             label = label,
-            shape = RoundedCornerShape(25.dp) // Set curved corners
+            shape = RoundedCornerShape(25.dp)
         )
         Box(
             modifier = Modifier
@@ -212,21 +212,36 @@ fun AddCustomChoreDialog(
 ) {
     AlertDialog(
         onDismissRequest = { onDismissButtonClicked() },
-        title = { Text(title) },
+        title = {
+            Text(title)
+            Spacer(modifier = Modifier.height(16.dp))
+                },
         text = content,
         confirmButton = {
             Button(
                 onClick = {
                     onConfirmButtonClicked()
                     onDismissButtonClicked()
-                }
+                },
+                shape = RoundedCornerShape(25.dp),
+                elevation = ButtonDefaults.elevation(0.dp)
+
             ) {
-                Text(confirmButtonText)
+                Text(confirmButtonText, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
-            Button(onClick = { onDismissButtonClicked() }) {
-                Text(dismissButtonText)
+            Button(
+                onClick = { onDismissButtonClicked() },
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = light_purple,
+                    contentColor = purple_primary,
+                ),
+                shape = RoundedCornerShape(25.dp),
+                elevation = ButtonDefaults.elevation(0.dp)
+
+            ) {
+                Text(dismissButtonText, fontWeight = FontWeight.Bold)
             }
         }
     )
@@ -255,11 +270,19 @@ fun alignButton(options: List<String>, label: String, onCategorySelected: (Strin
                 AddCustomChoreDialog(
                     title = "Add Chore Type",
                     content = {
-                        Column {
-                            TextField(
+                        Column (
+                            modifier = Modifier.padding(vertical = 12.dp)
+                        ){
+                            Spacer(modifier = Modifier.height(16.dp)) // Add space before the content
+                            OutlinedTextField(
                                 value = choreTypeText,
                                 onValueChange = { choreTypeText = it },
-                                label = { Text("Add a custom chore") }
+                                label = { Text("Add a custom chore") },
+                                colors = TextFieldDefaults.textFieldColors(
+                                    backgroundColor = Color.Transparent,
+                                    focusedIndicatorColor = purple_primary,
+                                    unfocusedIndicatorColor = purple_primary
+                                )
                             )
                         }
                     },
@@ -303,10 +326,15 @@ fun alignButton(options: List<String>, label: String, onCategorySelected: (Strin
                     title = "Add Chore Category",
                     content = {
                         Column {
-                            TextField(
+                            OutlinedTextField(
                                 value = choreCategoryText,
                                 onValueChange = { choreCategoryText = it },
-                                label = { Text("Add a custom category") }
+                                label = { Text("Add a custom category") },
+                                colors = TextFieldDefaults.textFieldColors(
+                                    backgroundColor = Color.Transparent,
+                                    focusedIndicatorColor = purple_primary,
+                                    unfocusedIndicatorColor = purple_primary
+                                )
                             )
                         }
                     },
