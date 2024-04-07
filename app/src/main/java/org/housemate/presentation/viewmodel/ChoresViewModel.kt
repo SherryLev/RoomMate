@@ -123,6 +123,21 @@ class ChoresViewModel @Inject constructor(
         }
     }
 
+    fun addChoreType(newChore: String, userId: String) {
+        viewModelScope.launch {
+            try {
+                val addChoreTypeTask = choreRepository.addChoreType(newChore, userId)
+                addChoreTypeTask.addOnSuccessListener {
+                    fetchChoreTypes()
+                }.addOnFailureListener { e ->
+                    println("Failed to add chore type: ${e.message}")
+                }
+            } catch (e: Exception) {
+                println("Failed to add chore type: ${e.message}")
+            }
+        }
+    }
+
     fun fetchChoreTypes() {
         viewModelScope.launch {
             try {
@@ -161,6 +176,25 @@ class ChoresViewModel @Inject constructor(
         }
     }
 
+    fun addChoreCategory(newCategory: String, userId: String) {
+        viewModelScope.launch {
+            try {
+                // Call the addChoreCategories function from the repository to add a chore category
+                val addChoreCategoryTask = choreRepository.addCategory(newCategory, userId)
+                addChoreCategoryTask.addOnSuccessListener {
+                    // Since the chore category is added successfully, we can fetch the updated list of chore categories
+                    fetchChoreCategories()
+                }.addOnFailureListener { e ->
+                    // Handle failure
+                    println("Failed to add chore category: ${e.message}")
+                }
+            } catch (e: Exception) {
+                // Handle other exceptions
+                println("Failed to add chore category: ${e.message}")
+            }
+        }
+    }
+
     fun createDefaultChoreCategories() {
         viewModelScope.launch {
             try {
@@ -168,20 +202,6 @@ class ChoresViewModel @Inject constructor(
             } catch (e: Exception) {
                 // Handle the exception
                 println("Failed to create default chore categories: ${e.message}")
-            }
-        }
-    }
-
-
-    fun updateChore(chore: Chore) {
-        viewModelScope.launch {
-            try {
-                _isLoading.value = true
-                choreRepository.updateChore(chore).await()
-            } catch (e: Exception) {
-                _error.value = e.message ?: "An error occurred"
-            } finally {
-                _isLoading.value = false
             }
         }
     }

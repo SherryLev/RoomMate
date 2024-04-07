@@ -199,21 +199,115 @@ fun SelectionDropdown(
     }
 }
 
+@Composable
+fun AddCustomChoreDialog(
+    title: String,
+    content: @Composable () -> Unit,
+    confirmButtonText: String,
+    onConfirmButtonClicked: () -> Unit,
+    dismissButtonText: String,
+    onDismissButtonClicked: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = { onDismissButtonClicked() },
+        title = { Text(title) },
+        text = content,
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirmButtonClicked()
+                    onDismissButtonClicked()
+                }
+            ) {
+                Text(confirmButtonText)
+            }
+        },
+        dismissButton = {
+            Button(onClick = { onDismissButtonClicked() }) {
+                Text(dismissButtonText)
+            }
+        }
+    )
+}
+
 
 @Composable
-fun alignButton(options: List<String>, label: String, onCategorySelected: (String) -> Unit) {
+fun alignButton(options: List<String>, label: String, onCategorySelected: (String) -> Unit, choresViewModel: ChoresViewModel) {
+    var choreTypeText by remember { mutableStateOf("") }
+    var choreCategoryText by remember { mutableStateOf("") }
+
+    val userId by choresViewModel.userId.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box (modifier = Modifier.width(240.dp)) {
             SelectionDropdown(options, label, onCategorySelected)
         }
         Spacer(modifier = Modifier.width(8.dp))
+
+        if (label == "Chore") {
+            if (showDialog) {
+                // Add Chore Type Dialog
+                AddCustomChoreDialog(
+                    title = "Add Chore Type",
+                    content = {
+                        Column {
+                            TextField(
+                                value = choreTypeText,
+                                onValueChange = { choreTypeText = it },
+                                label = { Text("Add a custom chore") }
+                            )
+                        }
+                    },
+                    confirmButtonText = "Add Chore Type",
+                    onConfirmButtonClicked = {
+                        userId?.let {
+                            choresViewModel.addChoreType(
+                                choreTypeText,
+                                it
+                            )
+                        }
+                    },
+                    dismissButtonText = "Cancel",
+                    onDismissButtonClicked = { showDialog = false }
+                )
+            }
+        }else if (label == "Category") {
+            if (showDialog) {
+                // Add Chore Category Dialog
+                AddCustomChoreDialog(
+                    title = "Add Chore Category",
+                    content = {
+                        Column {
+                            TextField(
+                                value = choreCategoryText,
+                                onValueChange = { choreCategoryText = it },
+                                label = { Text("Add a custom category") }
+                            )
+                        }
+                    },
+                    confirmButtonText = "Add Chore Category",
+                    onConfirmButtonClicked = {
+                        userId?.let {
+                            choresViewModel.addChoreCategory(
+                                choreCategoryText,
+                                it
+                            )
+                        }
+                    },
+                    dismissButtonText = "Cancel",
+                    onDismissButtonClicked = { showDialog = false }
+                )
+            }
+        }
+
         Box(
             modifier = Modifier
                 .size(48.dp)
                 .background(Color.White, RoundedCornerShape(8.dp)) // Apply rounded corners to the background
         ) {
             IconButton(
-                onClick = {},
+                onClick = { showDialog = true },
                 modifier = Modifier.fillMaxSize()
             ) {
                 Icon(
@@ -283,9 +377,9 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
 
     Column(
         modifier = Modifier.padding(16.dp)) {
-        alignButton(choreList, labels[0],onCategorySelected = { category -> choreChoice = category })
+        alignButton(choreList, labels[0],onCategorySelected = { category -> choreChoice = category }, choresViewModel)
         Spacer(modifier = Modifier.height(16.dp))
-        alignButton(categories,labels[1], onCategorySelected = { category -> categoryChoice = category })
+        alignButton(categories,labels[1], onCategorySelected = { category -> categoryChoice = category }, choresViewModel)
         Spacer(modifier = Modifier.height(16.dp))
         alignButtonforUser(housemates, labels[2]) { housemate ->
             assigneeChoice = housemate.username
