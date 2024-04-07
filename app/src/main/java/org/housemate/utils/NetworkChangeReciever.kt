@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class NetworkChangeReceiver : BroadcastReceiver() {
 
-    private val _isNetworkConnected = MutableStateFlow(false)
+    private val _isNetworkConnected = MutableStateFlow(true)
     val isNetworkConnected = _isNetworkConnected
 
     override fun onReceive(context: Context?, intent: Intent?) {

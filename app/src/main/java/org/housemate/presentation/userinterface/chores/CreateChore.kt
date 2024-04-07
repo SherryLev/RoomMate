@@ -5,7 +5,9 @@ import android.text.Selection
 import android.util.Log
 import android.widget.DatePicker
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -42,14 +44,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextAlign
+import org.housemate.theme.lavender
 import org.housemate.theme.light_gray
+import org.housemate.theme.light_purple
+import org.housemate.theme.light_purple_background
+import org.housemate.theme.pretty_purple
+import org.housemate.theme.purple_gray_background
 import org.housemate.theme.purple_primary
 
 @Composable
-fun ReadonlyOutlinedTextField(
+fun ReadonlyTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -60,10 +68,18 @@ fun ReadonlyOutlinedTextField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = modifier.width(120.dp),
+            modifier = modifier
+                .width(120.dp),
+            enabled = false,
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                backgroundColor = Color.Transparent,
+                focusedBorderColor = purple_primary,
+                unfocusedBorderColor = purple_primary
+            ),
+            textStyle = TextStyle(textAlign = TextAlign.Center, color = Color.DarkGray, fontWeight = FontWeight.Bold, fontSize = 16.sp),
             label = label,
-
-            )
+            shape = RoundedCornerShape(25.dp) // Set curved corners
+        )
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -103,14 +119,14 @@ fun TasksDatePicker(onDateSelected: (Timestamp) -> Unit): Timestamp? {
     Column(
         horizontalAlignment = Alignment.Start
     ) {
-        ReadonlyOutlinedTextField(
+        ReadonlyTextField(
             value = selectedDateText,
             onValueChange = { selectedDateText = it },
             onClick = {
                 datePicker.show()
             }
         ) {
-            Text(text = "Start Date")
+            Text(text = "Start Date", color = purple_primary, textAlign = TextAlign.Center)
         }
     }
     return null
@@ -185,21 +201,32 @@ fun SelectionDropdown(
 
 
 @Composable
-fun alignButton(options: List<String>,label: String, onCategorySelected: (String) -> Unit){
+fun alignButton(options: List<String>, label: String, onCategorySelected: (String) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(
-            onClick = {},
-            modifier = Modifier
-                .size(40.dp)
-                .background(Color.LightGray)
-                .padding(4.dp)
-        ) {
-            Icon(painterResource(R.drawable.add), "Add")
+        Box (modifier = Modifier.width(240.dp)) {
+            SelectionDropdown(options, label, onCategorySelected)
         }
-        Spacer(modifier = Modifier.width(12.dp))
-        SelectionDropdown(options,label, onCategorySelected)
+        Spacer(modifier = Modifier.width(8.dp))
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(Color.White, RoundedCornerShape(8.dp)) // Apply rounded corners to the background
+        ) {
+            IconButton(
+                onClick = {},
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Icon(
+                    Icons.Default.AddBox,
+                    "Add",
+                    tint = purple_primary,
+                    modifier = Modifier.size(48.dp)
+                )
+            }
+        }
     }
 }
+
 
 @Composable
 fun alignButtonforUser(
@@ -208,21 +235,11 @@ fun alignButtonforUser(
     onHousemateSelected: (User) -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(
-            onClick = {},
-            modifier = Modifier
-                .size(40.dp)
-                .background(Color.LightGray)
-                .padding(4.dp)
-        ) {
-            Icon(painterResource(R.drawable.add), "Add")
-        }
-        Spacer(modifier = Modifier.width(12.dp))
         SelectionDropdown(
             options = housemates.map { it.username }, // Map User objects to their usernames
             label = label,
             onCategorySelected = { username ->
-                val selectedHousemate = housemates.find { it.username == username }
+                val selectedHousemate= housemates.find { it.username == username }
                 selectedHousemate?.let { onHousemateSelected(it) }
             }
         )
@@ -284,93 +301,125 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                 onCategorySelected = { repetitionChoice = it }
             )
         }
-        Spacer(modifier = Modifier.padding(top = 10.dp))
+        Spacer(modifier = Modifier.weight(1f))
         var isErrorVisible by remember { mutableStateOf(false) }
-        Button(
-            onClick = {
-                val allFieldsSelected =
-                    choreChoice.isNotEmpty() &&
-                            categoryChoice.isNotEmpty() &&
-                            assigneeChoice.isNotEmpty() &&
-                            selectedDate.value != null
-                if (allFieldsSelected) {
-                    val dueDate = selectedDate.value ?: return@Button // Ensure due date is not null
 
-                    val calendar = Calendar.getInstance()
-                    calendar.time = dueDate.toDate() // Convert to Date type
-
-                    val repetitions = when (repetitionChoice) {
-                        "Every day" -> {
-                            calendar.add(Calendar.MONTH, 4) // Add 4 months to the due date
-                            val endDate = calendar.time // Get the end date
-                            val daysBetween = (endDate.time - dueDate.toDate().time) / (1000 * 60 * 60 * 24)
-                            (daysBetween / 7) * 7
-                        }
-                        "Every 2 days", "Every 3 days" -> {
-                            // Calculate the end date based on the chosen repetition duration
-                            val interval = when (repetitionChoice) {
-                                "Every 2 days" -> 2
-                                "Every 3 days" -> 3
-                                else -> 1 // Default to 1 day if not specified
-                            }
-                            calendar.add(Calendar.MONTH, 4) // Add 4 months to the due date
-                            val endDate = calendar.time // Get the end date
-                            val daysBetween = (endDate.time - dueDate.toDate().time) / (1000 * 60 * 60 * 24)
-                            daysBetween / interval // Calculate the number of repetitions based on the interval
-                        }
-                        "Every week" -> 16
-                        "Every 2 wks" -> 8
-                        "Every 3 wks" -> 4
-                        "Every 4 wks" -> 4
-                        else -> 1
-                    }
-                    repeat(repetitions.toInt()) { index ->
-                        val repetitionSeconds = when (repetitionChoice) {
-                            "Every 2 days" ->  86400 * 2 * index
-                            "Every 3 days" -> 86400 * 3 * index
-                            "Every day" -> 86400 * index
-                            "Every 2 wks" -> 604800 * 2 * index
-                            "Every 3 wks" -> 604800 * 3 * index
-                            "Every 4 wks" -> 604800 * 4 * index
-                            else -> 604800 * index
-                        }
-
-                        val choreDueDate = Timestamp(dueDate.seconds + repetitionSeconds, dueDate.nanoseconds)
-                        val chore = Chore(
-                            userId = userId ?: "",
-                            choreId = "$choreId-$index", // Ensure unique ID for each chore
-                            choreName = choreChoice,
-                            category = categoryChoice,
-                            assignee = assigneeChoice,
-                            assigneeId = assigneeId,
-                            dueDate = choreDueDate,
-                            userRating = emptyMap(), // Initialize as an empty map instead of empty list
-                            repeat = repetitionChoice
-                        )
-                        choresViewModel.addChore(chore)
-                        choreCounter++
-                    }
-                    choresViewModel.setDialogDismissed(true)
-                    onDialogDismiss()
-
-                }else {
-                    isErrorVisible = true
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.End),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.White,
-                //contentColor = Color(darkPurple)
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                "Create",
-                style = TextStyle(
+            Button(
+                onClick = { onDialogDismiss() },
+                modifier = Modifier
+                    .height(46.dp)
+                    .width(100.dp),
+                shape = RoundedCornerShape(25.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = light_purple,
+                    contentColor = purple_primary
+                ),
+                elevation = ButtonDefaults.elevation(0.dp)
+            ) {
+                Text(
+                    "Cancel",
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    modifier = Modifier.padding(vertical = 4.dp)
                 )
-            )
+            }
+
+            Button(
+                onClick = {
+                    val allFieldsSelected =
+                        choreChoice.isNotEmpty() &&
+                                categoryChoice.isNotEmpty() &&
+                                assigneeChoice.isNotEmpty() &&
+                                selectedDate.value != null
+                    if (allFieldsSelected) {
+                        val dueDate =
+                            selectedDate.value ?: return@Button // Ensure due date is not null
+
+                        val calendar = Calendar.getInstance()
+                        calendar.time = dueDate.toDate() // Convert to Date type
+
+                        val repetitions = when (repetitionChoice) {
+                            "Every day" -> {
+                                calendar.add(Calendar.MONTH, 4) // Add 4 months to the due date
+                                val endDate = calendar.time // Get the end date
+                                val daysBetween =
+                                    (endDate.time - dueDate.toDate().time) / (1000 * 60 * 60 * 24)
+                                (daysBetween / 7) * 7
+                            }
+
+                            "Every 2 days", "Every 3 days" -> {
+                                // Calculate the end date based on the chosen repetition duration
+                                val interval = when (repetitionChoice) {
+                                    "Every 2 days" -> 2
+                                    "Every 3 days" -> 3
+                                    else -> 1 // Default to 1 day if not specified
+                                }
+                                calendar.add(Calendar.MONTH, 4) // Add 4 months to the due date
+                                val endDate = calendar.time // Get the end date
+                                val daysBetween =
+                                    (endDate.time - dueDate.toDate().time) / (1000 * 60 * 60 * 24)
+                                daysBetween / interval // Calculate the number of repetitions based on the interval
+                            }
+
+                            "Every week" -> 16
+                            "Every 2 wks" -> 8
+                            "Every 3 wks" -> 4
+                            "Every 4 wks" -> 4
+                            else -> 1
+                        }
+                        repeat(repetitions.toInt()) { index ->
+                            val repetitionSeconds = when (repetitionChoice) {
+                                "Every 2 days" -> 86400 * 2 * index
+                                "Every 3 days" -> 86400 * 3 * index
+                                "Every day" -> 86400 * index
+                                "Every 2 wks" -> 604800 * 2 * index
+                                "Every 3 wks" -> 604800 * 3 * index
+                                "Every 4 wks" -> 604800 * 4 * index
+                                else -> 604800 * index
+                            }
+
+                            val choreDueDate =
+                                Timestamp(dueDate.seconds + repetitionSeconds, dueDate.nanoseconds)
+                            val chore = Chore(
+                                userId = userId ?: "",
+                                choreId = "$choreId-$index", // Ensure unique ID for each chore
+                                choreName = choreChoice,
+                                category = categoryChoice,
+                                assignee = assigneeChoice,
+                                assigneeId = assigneeId,
+                                dueDate = choreDueDate,
+                                userRating = emptyMap(), // Initialize as an empty map instead of empty list
+                                repeat = repetitionChoice
+                            )
+                            choresViewModel.addChore(chore)
+                            choreCounter++
+                        }
+                        choresViewModel.setDialogDismissed(true)
+                        onDialogDismiss()
+
+                    } else {
+                        isErrorVisible = true
+                    }
+                },
+                modifier = Modifier
+                    .height(46.dp)
+                    .width(100.dp),
+                shape = RoundedCornerShape(25.dp),
+                elevation = ButtonDefaults.elevation(0.dp)
+            ) {
+                Text(
+                    "Create",
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = Color.White
+                    )
+                )
+            }
         }
         if (isErrorVisible) {
             AlertDialog(

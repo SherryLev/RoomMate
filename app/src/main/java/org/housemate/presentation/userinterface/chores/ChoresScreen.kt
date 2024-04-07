@@ -412,7 +412,8 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
         DayOfWeek.SATURDAY,
         DayOfWeek.SUNDAY
     )
-    val stringDays = listOf("Week", "Monday", "Tuesday", "Wednesday","Thursday","Friday","Saturday","Sunday")
+    val stringDays =
+        listOf("Week", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 //    var chores by remember { mutableStateOf(choresList) }
     var selectedDay by remember { mutableStateOf("Week") }
 
@@ -460,7 +461,7 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
                     onClick = {
                         isHouse = true
                         isPersonal = false
-                              },
+                    },
                     shape = CutCornerShape(percent = 0),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.LightGray,
@@ -476,28 +477,28 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
                     Text("All Chores")
                 }
             }
-           Row(
-               modifier = Modifier
-                   .width(300.dp), // Set desired fixed width
-               horizontalArrangement = Arrangement.End
+            Row(
+                modifier = Modifier
+                    .width(300.dp), // Set desired fixed width
+                horizontalArrangement = Arrangement.End
             ) {
-               if(!isHouse) {
-                   CustomDropdown(
-                       stringDays,
-                       selectedDay,
-                       onItemSelected = { selectedDay = it },
-                       modifier = Modifier ,
-                       dropdownWidth = 128.dp
-                   )
-               }
-           }
+                if (!isHouse) {
+                    CustomDropdown(
+                        stringDays,
+                        selectedDay,
+                        onItemSelected = { selectedDay = it },
+                        modifier = Modifier,
+                        dropdownWidth = 128.dp
+                    )
+                }
+            }
             Column(
-                ) {
-                if(isHouse){
+            ) {
+                if (isHouse) {
                     TaskDisplayHouse(chores)
                 } else {
                     val currentWeekTasks = getCurrentWeekTasks(chores)
-                    if(selectedDay == "Week") {
+                    if (selectedDay == "Week") {
                         Box(
                             modifier = Modifier
                                 .padding(bottom = 16.dp)
@@ -510,7 +511,8 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
                                 // Iterate over each day of the week
                                 daysOfWeekList.forEach { day ->
                                     // Add a spacer between days
-                                    val camelCaseDay = day.toString().lowercase().replaceFirstChar { it.uppercase() }
+                                    val camelCaseDay = day.toString().lowercase()
+                                        .replaceFirstChar { it.uppercase() }
 
                                     item {
                                         Spacer(modifier = Modifier.height(16.dp))
@@ -538,7 +540,7 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
                                 }
                             }
                         }
-                    } else{
+                    } else {
                         val dayOfWeek: DayOfWeek? = stringToDayOfWeek(selectedDay)
                         Box(
                             modifier = Modifier.width(300.dp),
@@ -562,7 +564,7 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
 
 
         }
-        if(isHouse) {
+        if (isHouse) {
             Column(
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
@@ -587,35 +589,37 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
             }
         }
         if (showDialog) {
-            Dialog( onDismissRequest = {
-                showDialog = false
-                choresViewModel.setDialogDismissed(true)
-            }) {
-                // Content of the modal dialog
-                Box(
+            Dialog(
+                onDismissRequest = {
+                    showDialog = false
+                    choresViewModel.setDialogDismissed(true)
+                }
+            ) {
+                Card(
                     modifier = Modifier
-                        .background(Color.White)
-                    //.padding(16.dp)
+                        .height(370.dp)
+                        .width(320.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    backgroundColor = Color.White
                 ) {
-                    ChoreCreator(
-                        onDialogDismiss = {
-                            showDialog = false
-                        } )
-                    Button(
-                        onClick = { showDialog = false },
+                    Column(
                         modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(bottom = 10.dp, start = 16.dp)
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Cancel")
+                        ChoreCreator(
+                            onDialogDismiss = {
+                                showDialog = false
+                            }
+                        )
+
                     }
                 }
             }
         }
     }
 }
-
-
 
 @Composable
 fun ChoresScreen(
