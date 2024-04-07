@@ -8,6 +8,8 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -34,12 +36,17 @@ import org.housemate.R
 import org.housemate.domain.model.Chore
 import org.housemate.domain.model.User
 import java.util.*
-import org.housemate.domain.repositories.ChoreRepository
-import org.housemate.domain.repositories.UserRepository
-import org.housemate.presentation.userinterface.expenses.CustomDropdown
 import org.housemate.presentation.viewmodel.ChoresViewModel
-import org.housemate.presentation.viewmodel.ExpenseViewModel
-import java.time.temporal.ChronoUnit
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.style.TextAlign
+import org.housemate.theme.light_gray
+import org.housemate.theme.purple_primary
 
 @Composable
 fun ReadonlyOutlinedTextField(
@@ -110,51 +117,73 @@ fun TasksDatePicker(onDateSelected: (Timestamp) -> Unit): Timestamp? {
 }
 
 @Composable
-fun SelectionDropdown(options: List<String>, label: String, onCategorySelected: (String) -> Unit){
-
+fun SelectionDropdown(
+    options: List<String>,
+    label: String,
+    onCategorySelected: (String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf("") }
-    var textFieldSize by remember { mutableStateOf(Size.Zero)}
-    // Up Icon when expanded and down icon when collapsed
-    val icon = if (expanded)
-        Icons.Filled.KeyboardArrowUp
-    else
-        Icons.Filled.KeyboardArrowDown
+    var selectedOption by remember { mutableStateOf(label) }
+    val boxWidth = remember { mutableStateOf(0) }
 
-    Column() {
-        OutlinedTextField(
-            value = selectedOption,
-            onValueChange = { },
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .onGloballyPositioned { coordinates ->
-                    textFieldSize = coordinates.size.toSize()
-                },
-            label = {Text(label)},
-            trailingIcon = {
-                Icon(icon,"contentDescription",
-                    Modifier.clickable { expanded = !expanded })
-            }
-        )
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(25.dp))
+            .background(color = light_gray)
+            .clickable { expanded = !expanded }
+            .padding(8.dp)
+            .onSizeChanged { boxWidth.value = it.width } // Measure the width of the Box
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = selectedOption,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp, end = 8.dp),
+                color = purple_primary,
+                fontWeight = FontWeight.Bold
+            )
+            Icon(
+                imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                contentDescription = "Dropdown Arrow",
+                tint = purple_primary,
+                modifier = Modifier
+                    .size(24.dp)
+                    .padding(0.dp)
+            )
+        }
+
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier
-                .width(with(LocalDensity.current){textFieldSize.width.toDp()})
+                .width(with(LocalDensity.current) { boxWidth.value.toDp() }) // Set width equal to the Box width
+                .heightIn(max = 240.dp) // Set max height for the dropdown menu
         ) {
-            options.forEach { option ->
-                DropdownMenuItem(onClick = {
-                    selectedOption = option
-                    onCategorySelected(option) // Callback to update the category in the Chore object
-                    expanded = false
-                }) {
-                    Text(text = option)
+            Column {
+                options.forEach { option ->
+                    DropdownMenuItem(
+                        onClick = {
+                            selectedOption = option
+                            onCategorySelected(option)
+                            expanded = false
+                        }
+                    ) {
+                        Text(
+                            text = option,
+                            color = Color.Black,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+
 @Composable
 fun alignButton(options: List<String>,label: String, onCategorySelected: (String) -> Unit){
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -206,8 +235,9 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
 ){
     val housemates by choresViewModel.housemates.collectAsState()
 
-    val categories = listOf( "Kitchen", "Living Room", "Dining Room", "Bedrooms", "Stairs", "Backyard", "Front Yard", "Shower")
-    val choreList = listOf( "Clean dishes", "Sweep Floors", "Clean Toilet", "Vacuum Floor", "Clean counters", "Clean stove", "Clean fridge", "Clean mirror", "Clean everything")
+    val categories by choresViewModel.choreCategories.collectAsState()
+    val choreList by choresViewModel.choreTypes.collectAsState()
+
     val labels =  listOf("Chore","Category", "Assignee" )
     var categoryChoice by remember { mutableStateOf("") }
     var choreChoice by remember { mutableStateOf("") }
@@ -231,11 +261,8 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
     }
 
     LaunchedEffect("fetchUserId") {
-        choresViewModel.fetchCurrentUserId()
         choresViewModel.fetchAllHousemates()
     }
-
-    println(housemates)
 
     Column(
         modifier = Modifier.padding(16.dp)) {
@@ -309,9 +336,6 @@ fun ChoreCreator(onDialogDismiss: () -> Unit,
                         }
 
                         val choreDueDate = Timestamp(dueDate.seconds + repetitionSeconds, dueDate.nanoseconds)
-                        // Create the chore with the calculated due date
-                        println(choreDueDate.toDate())
-
                         val chore = Chore(
                             userId = userId ?: "",
                             choreId = "$choreId-$index", // Ensure unique ID for each chore

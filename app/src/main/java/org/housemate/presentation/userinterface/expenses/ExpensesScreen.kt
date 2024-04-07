@@ -361,7 +361,7 @@ fun ExpensesScreen(
                                                         }
 
                                                         Column(
-                                                            modifier = Modifier.weight(3f),
+                                                            modifier = Modifier.weight(3.2f),
                                                             horizontalAlignment = Alignment.End
                                                         ) {
                                                             Text(

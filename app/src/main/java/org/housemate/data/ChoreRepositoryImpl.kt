@@ -9,10 +9,11 @@ import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.firestore.FieldPath
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 
 class ChoreRepositoryImpl (
     private val auth: FirebaseAuth
-) : ChoreRepository  {
+) : ChoreRepository {
     private val db = FirebaseFirestore.getInstance()
 
     override fun createChore(chore: Chore): Task<Void> {
@@ -22,6 +23,7 @@ class ChoreRepositoryImpl (
             .document(chore.choreId)
             .set(chore.toMap())
     }
+
 
     override fun getGroupChores(): Task<List<Chore>> {
         val choreList = mutableListOf<Chore>()
@@ -58,7 +60,9 @@ class ChoreRepositoryImpl (
                                                     .get()
                                                     .addOnSuccessListener { querySnapshot ->
                                                         for (document in querySnapshot) {
-                                                            val chore = document.toObject(Chore::class.java).copy(choreId = document.id)
+                                                            val chore =
+                                                                document.toObject(Chore::class.java)
+                                                                    .copy(choreId = document.id)
                                                             choreList.add(chore)
                                                         }
                                                     }
@@ -115,7 +119,8 @@ class ChoreRepositoryImpl (
             .document(choreId)
             .delete()
     }
-   override fun deleteMultipleChores(chorePrefix: String, userId: String): Task<Void> {
+
+    override fun deleteMultipleChores(chorePrefix: String, userId: String): Task<Void> {
         val completionSource = TaskCompletionSource<Void>()
         val batch = db.batch()
 
@@ -192,5 +197,241 @@ class ChoreRepositoryImpl (
 
         return taskCompletionSource.task
     }
+
+
+    override fun createDefaultChoresAndCategories(): Task<Void> {
+        val taskCompletionSource = TaskCompletionSource<Void>()
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+
+        currentUser?.let { user ->
+            val currentUserId = user.uid
+
+            // First, retrieve the current user's group code from the users collection
+            db.collection("users")
+                .document(currentUserId)
+                .get()
+                .addOnSuccessListener { userDocument ->
+                    if (userDocument != null && userDocument.exists()) {
+                        val groupCode = userDocument.getString("groupCode")
+
+                        // Check if the document already exists for the group code
+                        db.collection("group_chore_categories")
+                            .document(groupCode!!)
+                            .get()
+                            .addOnSuccessListener { documentSnapshot ->
+                                if (documentSnapshot != null && documentSnapshot.exists()) {
+                                    // Document already exists, do nothing
+                                    taskCompletionSource.setResult(null)
+                                } else {
+                                    // Define default categories
+                                    val categoryList = listOf("Kitchen", "Living Room", "Dining Room", "Bathroom", "Stairs", "Backyard", "Front Yard", "Shower")
+
+                                    // Define default chores
+                                    val choresList = listOf("Clean dishes", "Clean counters", "Clean stove", "Clean fridge", "Sweep Floors", "Vacuum Floor", "Clean Toilet")
+
+                                    // Set the document ID as the group code
+                                    val groupChoreCategoriesRef = db.collection("group_chore_categories").document(groupCode)
+
+                                    val data = hashMapOf(
+                                        "category_list" to categoryList,
+                                        "chores_list" to choresList
+                                    )
+
+                                    groupChoreCategoriesRef.set(data)
+                                        .addOnSuccessListener {
+                                            taskCompletionSource.setResult(null)
+                                        }
+                                        .addOnFailureListener { exception ->
+                                            taskCompletionSource.setException(exception)
+                                        }
+                                }
+                            }
+                            .addOnFailureListener { exception ->
+                                taskCompletionSource.setException(exception)
+                            }
+                    } else {
+                        taskCompletionSource.setException(Exception("User document not found"))
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    taskCompletionSource.setException(exception)
+                }
+        } ?: taskCompletionSource.setException(Exception("Current user is null"))
+
+        return taskCompletionSource.task
+    }
+
+
+    override fun addCategory(newCategory: String, userId: String): Task<Void> {
+        val taskCompletionSource = TaskCompletionSource<Void>()
+
+        // Retrieve the current user's group code from the users collection
+        db.collection("users")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { userDocument ->
+                if (userDocument != null && userDocument.exists()) {
+                    val groupCode = userDocument.getString("groupCode")
+
+                    if (groupCode != null) {
+                        // Get the document reference for the group code
+                        val groupChoreCategoriesRef = db.collection("group_chore_categories").document(groupCode)
+
+                        // Update the category list in the document
+                        groupChoreCategoriesRef.update("category_list", FieldValue.arrayUnion(newCategory))
+                            .addOnSuccessListener {
+                                taskCompletionSource.setResult(null)
+                            }
+                            .addOnFailureListener { exception ->
+                                taskCompletionSource.setException(exception)
+                            }
+                    } else {
+                        taskCompletionSource.setException(Exception("Group code not found for the user"))
+                    }
+                } else {
+                    taskCompletionSource.setException(Exception("User document not found"))
+                }
+            }
+            .addOnFailureListener { exception ->
+                taskCompletionSource.setException(exception)
+            }
+
+        return taskCompletionSource.task
+    }
+
+    override fun addChoreType(newChore: String, userId: String): Task<Void> {
+        val taskCompletionSource = TaskCompletionSource<Void>()
+
+        // Retrieve the current user's group code from the users collection
+        db.collection("users")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { userDocument ->
+                if (userDocument != null && userDocument.exists()) {
+                    val groupCode = userDocument.getString("groupCode")
+
+                    if (groupCode != null) {
+                        // Get the document reference for the group code
+                        val groupChoreCategoriesRef = db.collection("group_chore_categories").document(groupCode)
+
+                        // Update the chore list in the document
+                        groupChoreCategoriesRef.update("chores_list", FieldValue.arrayUnion(newChore))
+                            .addOnSuccessListener {
+                                taskCompletionSource.setResult(null)
+                            }
+                            .addOnFailureListener { exception ->
+                                taskCompletionSource.setException(exception)
+                            }
+                    } else {
+                        taskCompletionSource.setException(Exception("Group code not found for the user"))
+                    }
+                } else {
+                    taskCompletionSource.setException(Exception("User document not found"))
+                }
+            }
+            .addOnFailureListener { exception ->
+                taskCompletionSource.setException(exception)
+            }
+
+        return taskCompletionSource.task
+    }
+
+    override fun getChoreTypes(): Task<List<String>> {
+        val taskCompletionSource = TaskCompletionSource<List<String>>()
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+
+        currentUser?.let { user ->
+            val currentUserId = user.uid
+
+            // Retrieve the current user's group code from the users collection
+            db.collection("users")
+                .document(currentUserId)
+                .get()
+                .addOnSuccessListener { userDocument ->
+                    if (userDocument != null && userDocument.exists()) {
+                        val groupCode = userDocument.getString("groupCode")
+
+                        if (groupCode != null) {
+                            // Get the document reference for the group code
+                            val groupChoreCategoriesRef = db.collection("group_chore_categories").document(groupCode)
+
+                            // Fetch the chore types from the document
+                            groupChoreCategoriesRef.get()
+                                .addOnSuccessListener { documentSnapshot ->
+                                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                                        val choreTypes = documentSnapshot.get("chores_list") as? List<String> ?: emptyList()
+                                        taskCompletionSource.setResult(choreTypes)
+                                    } else {
+                                        taskCompletionSource.setException(Exception("Document for group code not found"))
+                                    }
+                                }
+                                .addOnFailureListener { exception ->
+                                    taskCompletionSource.setException(exception)
+                                }
+                        } else {
+                            taskCompletionSource.setException(Exception("Group code not found for the user"))
+                        }
+                    } else {
+                        taskCompletionSource.setException(Exception("User document not found"))
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    taskCompletionSource.setException(exception)
+                }
+        } ?: taskCompletionSource.setException(Exception("Current user is null"))
+
+        return taskCompletionSource.task
+    }
+
+    override fun getChoreCategories(): Task<List<String>> {
+        val taskCompletionSource = TaskCompletionSource<List<String>>()
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+
+        currentUser?.let { user ->
+            val currentUserId = user.uid
+
+            // Retrieve the current user's group code from the users collection
+            db.collection("users")
+                .document(currentUserId)
+                .get()
+                .addOnSuccessListener { userDocument ->
+                    if (userDocument != null && userDocument.exists()) {
+                        val groupCode = userDocument.getString("groupCode")
+
+                        if (groupCode != null) {
+                            // Get the document reference for the group code
+                            val groupChoreCategoriesRef = db.collection("group_chore_categories").document(groupCode)
+
+                            // Fetch the chore categories from the document
+                            groupChoreCategoriesRef.get()
+                                .addOnSuccessListener { documentSnapshot ->
+                                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                                        val choreCategories = documentSnapshot.get("category_list") as? List<String> ?: emptyList()
+                                        taskCompletionSource.setResult(choreCategories)
+                                    } else {
+                                        taskCompletionSource.setException(Exception("Document for group code not found"))
+                                    }
+                                }
+                                .addOnFailureListener { exception ->
+                                    taskCompletionSource.setException(exception)
+                                }
+                        } else {
+                            taskCompletionSource.setException(Exception("Group code not found for the user"))
+                        }
+                    } else {
+                        taskCompletionSource.setException(Exception("User document not found"))
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    taskCompletionSource.setException(exception)
+                }
+        } ?: taskCompletionSource.setException(Exception("Current user is null"))
+
+        return taskCompletionSource.task
+    }
+
 
 }

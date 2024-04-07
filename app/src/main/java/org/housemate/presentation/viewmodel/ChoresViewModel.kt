@@ -39,10 +39,19 @@ class ChoresViewModel @Inject constructor(
     private val _housemates = MutableStateFlow<List<User>>(emptyList())
     val housemates: StateFlow<List<User>> = _housemates
 
+    private val _choreTypes = MutableStateFlow<List<String>>(emptyList())
+    val choreTypes: StateFlow<List<String>> = _choreTypes
+
+    private val _choreCategories = MutableStateFlow<List<String>>(emptyList())
+    val choreCategories: StateFlow<List<String>> = _choreCategories
+
     init {
         getAllChores()
         fetchAllHousemates()
         fetchCurrentUserId()
+        createDefaultChoreCategories()
+        fetchChoreTypes()
+        fetchChoreCategories()
     }
 
     private val _dialogDismissed = MutableStateFlow(false)
@@ -114,24 +123,61 @@ class ChoresViewModel @Inject constructor(
         }
     }
 
+    fun fetchChoreTypes() {
+        viewModelScope.launch {
+            try {
+                // Call the getChoreTypes function from the repository to fetch chore types
+                val fetchedChoreTypesTask = choreRepository.getChoreTypes()
+                fetchedChoreTypesTask.addOnSuccessListener { fetchedChoreTypes ->
+                    // Update the _choreTypes StateFlow object with the fetched chore types
+                    _choreTypes.value = fetchedChoreTypes
+                }.addOnFailureListener { e ->
+                    // Handle failure
+                    println("Failed to fetch chore types: ${e.message}")
+                }
+            } catch (e: Exception) {
+                // Handle other exceptions
+                println("Failed to fetch chore types: ${e.message}")
+            }
+        }
+    }
+
+    fun fetchChoreCategories() {
+        viewModelScope.launch {
+            try {
+                // Call the getChoreCategories function from the repository to fetch chore categories
+                val fetchedChoreCategoriesTask = choreRepository.getChoreCategories()
+                fetchedChoreCategoriesTask.addOnSuccessListener { fetchedChoreCategories ->
+                    // Update the _choreCategories StateFlow object with the fetched chore categories
+                    _choreCategories.value = fetchedChoreCategories
+                }.addOnFailureListener { e ->
+                    // Handle failure
+                    println("Failed to fetch chore categories: ${e.message}")
+                }
+            } catch (e: Exception) {
+                // Handle other exceptions
+                println("Failed to fetch chore categories: ${e.message}")
+            }
+        }
+    }
+
+    fun createDefaultChoreCategories() {
+        viewModelScope.launch {
+            try {
+                choreRepository.createDefaultChoresAndCategories()
+            } catch (e: Exception) {
+                // Handle the exception
+                println("Failed to create default chore categories: ${e.message}")
+            }
+        }
+    }
+
+
     fun updateChore(chore: Chore) {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
                 choreRepository.updateChore(chore).await()
-            } catch (e: Exception) {
-                _error.value = e.message ?: "An error occurred"
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    fun deleteChore(choreId: String, userId: String) {
-        viewModelScope.launch {
-            try {
-                _isLoading.value = true
-                choreRepository.deleteChore(choreId, userId).await()
             } catch (e: Exception) {
                 _error.value = e.message ?: "An error occurred"
             } finally {
