@@ -303,35 +303,16 @@ fun HomeScreenHelper(
                    }
                }
            }
-            Spacer(modifier = Modifier.height(20.dp))
-            /*Box(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .background(
-                        color = pretty_purple,
-                        shape = RoundedCornerShape(26.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "This week's winner is: $highestScore",
-                    style = MaterialTheme.typography.h5,
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }*/
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "The current leader is:",
+                "Current chore leader:",
                 modifier = Modifier
                     .padding(top = 40.dp)
                     .align(Alignment.CenterHorizontally),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -361,6 +342,7 @@ fun HomeScreenHelper(
                     modifier = Modifier.size(40.dp)
                 )
             }
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
