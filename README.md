@@ -27,10 +27,10 @@ Access our user documentation [here](https://git.uwaterloo.ca/gmmoroie/team-101-
 - Nadine Pigida's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Nadine-Pigida-sprint-journal
 
 ## Design Documentation
-Here is the link to our design documentation: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Design-Documentation
+Access our design documentation [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Design-Documentation)
 
 ## Reflections
-Here is the link to our [reflections ](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Reflections)
+Here is the link to our [reflections](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Reflections)
 
 ## Wiki
 Access our wiki [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Project-Proposal:-HouseMate)
