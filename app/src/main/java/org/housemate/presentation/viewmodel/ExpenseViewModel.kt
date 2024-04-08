@@ -77,10 +77,12 @@ class ExpenseViewModel @Inject constructor(
 
     init {
         // Fetch expenses from the repository when the ViewModel is initialized
-        fetchAllHousemates()
         fetchCurrentUser()
-        fetchExpenses()
-        fetchPayments()
+        viewModelScope.launch {
+            fetchAllHousemates()
+            fetchExpenses()
+            fetchPayments()
+        }
     }
 
     fun fetchCurrentUser() {
@@ -257,6 +259,7 @@ class ExpenseViewModel @Inject constructor(
             }
         }
 
+
     // Calculate amounts from payments
         _paymentItems.value.forEach { payment ->
             val payer = payment.payerId
@@ -314,9 +317,8 @@ class ExpenseViewModel @Inject constructor(
             try {
                 // Call the getPayments function from the repository to fetch payments
                 val fetchedPayments = expenseRepository.getPayments()
-                // Update the _paymentItems StateFlow object with the fetched payments
+                // filter list of payments to only include payments where the payment.payerId and payment.payerId are housemates.uid for each user in housemates
                 _paymentItems.value = fetchedPayments
-
                 // Convert fetched payments to ExpenseOrPayment items
                 val expenseOrPayments = fetchedPayments.map { it }
                 // Update combined list of expenses and payments
@@ -329,7 +331,13 @@ class ExpenseViewModel @Inject constructor(
             }
         }
     }
-
+    private fun List<Payment>.filterPaymentsByHousemates(housemates: List<User>): List<Payment> {
+        return this.filter { payment ->
+            val payerIdInHousemates = housemates.any { it.uid == payment.payerId }
+            val payeeIdInHousemates = housemates.any { it.uid == payment.payeeId }
+            payerIdInHousemates && payeeIdInHousemates
+        }
+    }
     // Function to add a payment
     fun addPayment(id: String, payerId: String, payerName: String, payeeId: String, payeeName: String, amount: BigDecimal) {
 

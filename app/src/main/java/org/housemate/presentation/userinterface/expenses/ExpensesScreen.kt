@@ -176,21 +176,23 @@ fun ExpensesScreen(
                         netAmountOwed.forEach { (userId, amount) ->
                             // Find the user object with the corresponding userId
                             val housemate = housemates.find { it.uid == userId }
-                            // Get the username from the user object, or use a default value if not found
-                            val username = housemate?.username ?: ""
-                            val id = housemate?.uid ?: ""
-                            // Determine if the user owes or is owed money
-                            val youOwe = amount < BigDecimal.ZERO
+                            if (housemate != null) {
+                                // Get the username from the user object, or use a default value if not found
+                                val username = housemate.username
+                                val id = housemate.uid
+                                // Determine if the user owes or is owed money
+                                val youOwe = amount < BigDecimal.ZERO
 
-                            // Call BalancesInfoRow with the username and other parameters
-                            BalancesInfoRow(
-                                name = username,
-                                id = id,
-                                amount = "$${"%.2f".format(amount.abs())}",
-                                youOwe = youOwe,
-                                navController,
-                                expenseViewModel
-                            )
+                                // Call BalancesInfoRow with the username and other parameters
+                                BalancesInfoRow(
+                                    name = username,
+                                    id = id,
+                                    amount = "$${"%.2f".format(amount.abs())}",
+                                    youOwe = youOwe,
+                                    navController,
+                                    expenseViewModel
+                                )
+                            }
                         }
                     }
                 }

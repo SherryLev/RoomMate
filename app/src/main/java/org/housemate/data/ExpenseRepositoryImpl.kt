@@ -83,53 +83,6 @@ class ExpenseRepositoryImpl(
         return expenses
     }
 
-
-
-//    override suspend fun getExpenses(): List<Expense> {
-//        val expenses = mutableListOf<Expense>()
-//        try {
-//            val currentUser = auth.currentUser
-//            val userId = currentUser?.uid
-//            if (userId != null) {
-//                // Retrieve the current user's group code from the users collection
-//                val userDocument = firestore.collection("users").document(userId).get().await()
-//                val groupCode = userDocument.getString("groupCode")
-//                if (groupCode != null) {
-//                    // Fetch the list of member user IDs from the groups collection
-//                    val groupDocument = firestore.collection("groups").document(groupCode).get().await()
-//                    val members = groupDocument.get("members") as? List<*>
-//                    if (members != null) {
-//                        // Query expenses where the payerId is within the group
-//                        val querySnapshot = firestore.collection("expenses")
-//                            .whereIn("payerId", members)
-//                            .orderBy("timestamp", Query.Direction.DESCENDING)
-//                            .get()
-//                            .await()
-//
-//                        for (document in querySnapshot.documents) {
-//                            val expense = document.toObject(Expense::class.java)
-//                            expense?.let {
-//                                expenses.add(it)
-//                            }
-//                        }
-//                    } else {
-//                        throw IllegalStateException("Members list not found in group document")
-//                    }
-//                } else {
-//                    throw IllegalStateException("Group code not found for user")
-//                }
-//            } else {
-//                throw IllegalStateException("User is not authenticated.")
-//            }
-//            Log.d(TAG, "Expenses retrieved successfully")
-//        } catch (e: Exception) {
-//            Log.e(TAG, "Error getting expenses", e)
-//            // You can handle the exception here, e.g., return an empty list or throw it to be handled by the caller
-//        }
-//        return expenses
-//    }
-
-
     override suspend fun updateExpenseById(expenseId: String, updatedExpense: Expense) {
         try {
             // Retrieve the existing timestamp value from Firestore
