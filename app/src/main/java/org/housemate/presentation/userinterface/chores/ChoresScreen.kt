@@ -352,12 +352,16 @@ fun stringToDayOfWeek(dayString: String): DayOfWeek? {
 }
 
 @Composable
-fun TaskDisplayHouse(chores: List<Chore>, choresViewModel: ChoresViewModel = hiltViewModel(), snackbarHostState: SnackbarHostState) {
-    // Remember the unique chore types set to persist its state across recompositions
-    val uniqueChoreTypes = remember { mutableSetOf<String>() }
-
+fun TaskDisplayHouse(
+    chores: List<Chore>,
+    choresViewModel: ChoresViewModel = hiltViewModel(),
+    snackbarHostState: SnackbarHostState
+) {
     // Scroll state for the scrollbar
     val scrollState = rememberScrollState()
+
+    // Local variable to keep track of displayed chore types
+    val displayedChoreTypes = mutableSetOf<String>()
 
     Column(
         modifier = Modifier
@@ -366,7 +370,9 @@ fun TaskDisplayHouse(chores: List<Chore>, choresViewModel: ChoresViewModel = hil
     ) {
         chores.forEach { chore ->
             val choreType = extractChoreType(chore.choreId)
-            if (uniqueChoreTypes.add(choreType)) {
+            if (choreType !in displayedChoreTypes) {
+                // Mark the chore type as displayed
+                displayedChoreTypes.add(choreType)
                 val chorePrefix = chore.choreId.substringBefore("-") + "-"
                 TaskItem(
                     chore,
@@ -381,6 +387,8 @@ fun TaskDisplayHouse(chores: List<Chore>, choresViewModel: ChoresViewModel = hil
         Spacer(modifier = Modifier.height(38.dp))
     }
 }
+
+
 
 
 @Composable
