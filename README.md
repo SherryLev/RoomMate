@@ -29,6 +29,9 @@ Here is the link to our user documentation https://git.uwaterloo.ca/gmmoroie/tea
 ## Design Documentation
 Here is the link to our design documentation 
 
+## Reflections
+Here is the link to our [reflections ](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Reflections)
+
 ## Wiki
 Access our wiki [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Project-Proposal:-HouseMate)
 
