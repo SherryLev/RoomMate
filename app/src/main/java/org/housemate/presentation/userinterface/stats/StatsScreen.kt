@@ -88,7 +88,7 @@ fun WeeklyChoreRateSurface(users: List<User>, chores: List<Chore>) {
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
-                .padding(top = 10.dp)
+                .padding(top = 16.dp)
                 .align(Alignment.CenterHorizontally),
         )
         Surface(
@@ -274,7 +274,6 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
         Column(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 10.dp)
         ) {
 
             Text(
@@ -357,7 +356,6 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
             Text(
                 "Your chore ratings this week:",
                 modifier = Modifier
-                    .padding(top = 8.dp)
                     .align(Alignment.CenterHorizontally),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -386,6 +384,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(14.dp))
             WeeklyChoreRateSurface(users, chores)
 
         }
