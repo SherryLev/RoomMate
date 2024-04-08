@@ -48,7 +48,6 @@ fun findUserWithHighestAverageRating(userAverageRatings: Map<String, Float>): St
             maxRatingUser = userId
         }
     }
-
     return maxRatingUser
 }
 @Composable
