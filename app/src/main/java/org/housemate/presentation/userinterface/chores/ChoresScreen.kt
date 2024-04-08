@@ -1,63 +1,49 @@
 package org.housemate.presentation.userinterface.chores
 
 
+//import com.google.android.libraries.places.api.model.LocalDate
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
-import androidx.compose.foundation.background
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import org.housemate.domain.model.Chore
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.firebase.Timestamp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
-//import com.google.android.libraries.places.api.model.LocalDate
 import org.housemate.R
-import org.housemate.theme.purple_primary
-import java.time.DayOfWeek
+import org.housemate.domain.model.Chore
 import org.housemate.presentation.userinterface.expenses.CustomDropdown
 import org.housemate.presentation.viewmodel.ChoresViewModel
 import org.housemate.theme.light_purple
 import org.housemate.theme.light_red
+import org.housemate.theme.purple_primary
 import org.housemate.theme.red_error
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
-import java.util.Calendar
+import java.util.*
 
 @Composable
 fun DeleteConfirmationDialog(
@@ -101,7 +87,9 @@ fun DeleteConfirmationDialog(
 }
 
 
-//CITE: https://medium.com/@imitiyaz125/star-rating-bar-in-jetpack-compose-5ae54a2b5b23
+// Khan, I.A. (2023) Star rating bar in Jetpack compose, Medium.
+// Available at: https://medium.com/@imitiyaz125/star-rating-bar-in-jetpack-compose-5ae54a2b5b23
+// (Accessed: 08 April 2024).
 @Composable
 fun StarRatingBar(
     maxStars: Int = 5,
