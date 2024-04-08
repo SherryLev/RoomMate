@@ -539,8 +539,8 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
                                 .width(300.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)
+                            Column(
+                                modifier = Modifier.verticalScroll(rememberScrollState()) // Add verticalScroll here
                             ) {
                                 // Iterate over each day of the week
                                 daysOfWeekList.forEach { day ->
@@ -548,39 +548,37 @@ fun MainLayout(navController: NavHostController = rememberNavController(),
                                     val camelCaseDay = day.toString().lowercase()
                                         .replaceFirstChar { it.uppercase() }
 
-                                    item {
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        Text(
-                                            text = camelCaseDay,
-                                            style = TextStyle(
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 18.sp
-                                            )
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                    }
-                                    item {
-                                        TaskDisplayWeek(
-                                            currentWeekTasks,
-//                                            deleteTask = { chore -> chores.remove(chore) },
-                                            day
-                                        )
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = camelCaseDay,
+                                        style = TextStyle(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 18.sp
+                                        ),
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    )
+
+                                    TaskDisplayWeek(
+                                        currentWeekTasks,
+                                        day
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
                                 }
 
-                                item {
-                                    Spacer(modifier = Modifier.height(20.dp))
-                                }
+                                Spacer(modifier = Modifier.height(20.dp))
                             }
                         }
-                    } else {
+
+                } else {
                         val dayOfWeek: DayOfWeek? = stringToDayOfWeek(selectedDay)
                         Box(
                             modifier = Modifier.width(300.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Column() {
+                            Column(
+                                modifier = Modifier.verticalScroll(rememberScrollState())
+                            ) {
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 //Log.d("day conversion ", "Day: "+ dayOfWeek)
