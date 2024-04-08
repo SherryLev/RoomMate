@@ -276,7 +276,10 @@ fun alignButton(options: List<String>, label: String, onCategorySelected: (Strin
                             Spacer(modifier = Modifier.height(16.dp)) // Add space before the content
                             OutlinedTextField(
                                 value = choreTypeText,
-                                onValueChange = { choreTypeText = it },
+                                onValueChange = { if (it.length <= 20) {
+                                    choreTypeText = it
+                                }
+                                                },
                                 label = { Text("Add a custom chore") },
                                 colors = TextFieldDefaults.textFieldColors(
                                     backgroundColor = Color.Transparent,
@@ -328,7 +331,10 @@ fun alignButton(options: List<String>, label: String, onCategorySelected: (Strin
                         Column {
                             OutlinedTextField(
                                 value = choreCategoryText,
-                                onValueChange = { choreCategoryText = it },
+                                onValueChange = { if (it.length <= 20) {
+                                    choreCategoryText = it
+                                    }
+                                },
                                 label = { Text("Add a custom category") },
                                 colors = TextFieldDefaults.textFieldColors(
                                     backgroundColor = Color.Transparent,
