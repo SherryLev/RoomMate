@@ -54,6 +54,9 @@ import org.housemate.presentation.viewmodel.ChoresViewModel
 import org.housemate.theme.light_purple
 import org.housemate.theme.light_red
 import org.housemate.theme.red_error
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.TemporalAdjusters
 import java.util.Calendar
 
 @Composable
@@ -253,27 +256,14 @@ fun TaskItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel(),ch
     Spacer(modifier = Modifier.height(8.dp))
 }
 fun getCurrentWeekTasks(chores: List<Chore>): List<Chore> {
-    val today = Timestamp.now().toDate()
-    val calendar = Calendar.getInstance()
-    calendar.time = today
-    val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-
-    val offsetDays = when (dayOfWeek) {
-        Calendar.MONDAY -> 0
-        else -> dayOfWeek - Calendar.MONDAY
-    }
-
-    calendar.add(Calendar.DAY_OF_YEAR, -offsetDays)
-    val startOfWeek = calendar.time
-    calendar.add(Calendar.DAY_OF_YEAR, 6)
-    val endOfWeek = calendar.time
+    val currentWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+    val currentWeekEnd = currentWeekStart.plusDays(6)
 
     return chores.filter { chore ->
-        val choreDueDate = chore.dueDate?.toDate()
-        choreDueDate in startOfWeek..endOfWeek
+        val choreDueDate = chore.dueDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
+        choreDueDate in currentWeekStart..currentWeekEnd
     }
 }
-
 
 @Composable
 fun TaskWeekItem(chore: Chore, choresViewModel: ChoresViewModel = hiltViewModel()) {

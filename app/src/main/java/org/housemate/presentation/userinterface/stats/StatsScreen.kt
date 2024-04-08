@@ -286,7 +286,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
             )
             Box(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                     .height(150.dp)
                     .width(300.dp)
             ) {
