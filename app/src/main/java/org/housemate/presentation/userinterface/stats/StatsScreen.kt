@@ -94,7 +94,8 @@ fun WeeklyChoreRateSurface(users: List<User>, chores: List<Chore>) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 56.dp, top = 24.dp, end = 48.dp),
+                .padding(start = 56.dp, top = 24.dp, end = 48.dp)
+                .height(200.dp),
             elevation = 4.dp,
             shape = RoundedCornerShape(8.dp)
         ) {

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import org.housemate.presentation.sharedcomponents.*
 import org.housemate.theme.*
 
+// CITE: https://www.youtube.com/watch?v=aCjOmyd_62U&t=500s
 @Composable
 fun RegisterScreen(
     onRegisterSuccessNavigation: () -> Unit,

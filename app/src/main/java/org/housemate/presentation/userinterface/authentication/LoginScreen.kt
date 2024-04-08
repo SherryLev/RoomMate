@@ -27,6 +27,7 @@ import org.housemate.presentation.viewmodel.LoginViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.housemate.theme.*
 
+// CITE: https://www.youtube.com/watch?v=aCjOmyd_62U&t=500s
 @Composable
 fun LoginScreen(
     onLoginSuccessNavigation: () -> Unit,
