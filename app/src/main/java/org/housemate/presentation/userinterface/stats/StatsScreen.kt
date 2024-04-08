@@ -279,7 +279,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
             Text(
                 "Your spending history this month:",
                 modifier = Modifier
-                    .padding(top = 52.dp)
+                    .padding(top = 50.dp)
                     .align(Alignment.CenterHorizontally),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -287,7 +287,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
             Box(
                 modifier = Modifier
                     .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                    .height(150.dp)
+                    .height(140.dp)
                     .width(300.dp)
             ) {
                 Column(
@@ -384,7 +384,7 @@ fun MainLayout(navController: NavController, choresViewModel: ChoresViewModel = 
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             WeeklyChoreRateSurface(users, chores)
 
         }

@@ -37,7 +37,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 
-//val userAverageRatings = mutableMapOf<String, Float>()
 fun findUserWithHighestAverageRating(userAverageRatings: Map<String, Float>): String? {
     var maxRatingUser: String? = null
     var maxRating = Float.MIN_VALUE
@@ -50,6 +49,8 @@ fun findUserWithHighestAverageRating(userAverageRatings: Map<String, Float>): St
     }
     return maxRatingUser
 }
+
+
 @Composable
 fun textShow(chore: Chore) {
     Surface(
@@ -110,7 +111,7 @@ fun HomeScreenHelper(
         choresViewModel.getAllChores()
         choresViewModel.fetchCurrentUser()
     }
-    val userAverageRatings = mutableMapOf<String, Float>()
+    var userAverageRatings = mutableMapOf<String, Float>()
     var highest = "Loading..."
     val chores by choresViewModel.chores.collectAsState()
     val currentUserID by choresViewModel.userId.collectAsState()
@@ -129,7 +130,6 @@ fun HomeScreenHelper(
     val currentWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val currentWeekEnd = currentWeekStart.plusDays(6)
 
-
     users.forEach { user ->
         val currentWeekUserChoresForUser = chores.filter { chore ->
             chore.assigneeId == user.uid &&
@@ -141,12 +141,21 @@ fun HomeScreenHelper(
         val totalAverageRating = if (averageRatings.isNotEmpty()) {
             averageRatings.average().toFloat()
         } else {
-            0f
+            0f // Set to 0 if there are no ratings yet
         }
         userAverageRatings[user.username] = totalAverageRating
     }
 
-    highest = findUserWithHighestAverageRating(userAverageRatings)?.toString() ?: "Loading..."
+    println(userAverageRatings)
+
+    var text = ""
+    if (userAverageRatings.isEmpty()) {
+        highest = "Loading..."
+    } else if (userAverageRatings.all { it.value.toDouble() == 0.0 } ) {
+        text = "No ratings yet"
+    } else {
+        highest = findUserWithHighestAverageRating(userAverageRatings) ?: "Loading..."
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -326,13 +335,33 @@ fun HomeScreenHelper(
                     modifier = Modifier.size(40.dp)
                 )
                 Spacer(modifier = Modifier.width(30.dp))
-                Text(
 
-                    text = highest,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp, // Increase the font size
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
+                if (text == "No ratings yet") {
+                    Text(
+                        text = text,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp, // Increase the font size
+                        color = Color.Gray,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                } else {
+                    if (highest == "Loading...") {
+                        Text(
+                            text = highest,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp, // Increase the font size
+                            color = Color.Gray,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                    } else {
+                        Text(
+                            text = highest,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp, // Increase the font size
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.width(30.dp))
                 Icon(
                     imageVector = Icons.Default.EmojiEvents,
