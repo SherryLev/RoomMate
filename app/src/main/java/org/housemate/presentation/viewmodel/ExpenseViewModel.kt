@@ -309,7 +309,7 @@ class ExpenseViewModel @Inject constructor(
     val paymentAmount = _paymentAmount.asStateFlow()
 
     // Fetch payments from the repository
-    private fun fetchPayments() {
+    fun fetchPayments() {
         viewModelScope.launch {
             try {
                 // Call the getPayments function from the repository to fetch payments

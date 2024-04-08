@@ -73,8 +73,10 @@ dependencies {
     implementation("com.google.android.libraries.places:places:3.4.0")
     // Use the Kotlin test library.
     testImplementation("org.jetbrains.kotlin:kotlin-test")
+
     // Use the Kotlin JUnit integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("androidx.compose.material:material:1.6.1")
