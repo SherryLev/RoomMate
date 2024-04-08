@@ -80,6 +80,8 @@ fun ExpensesScreen(
     val currentUser by expenseViewModel.currentUser.collectAsState()
     val housemates by expenseViewModel.housemates.collectAsState()
 
+
+
     // Observe dialogDismissed and trigger recomposition
     if (dialogDismissed) {
         expenseViewModel.resetDialogDismissed()

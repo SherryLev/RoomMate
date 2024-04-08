@@ -124,13 +124,13 @@ class AuthRepositoryImpl (
                 currentUser.reauthenticate(credential).await()
 
                 val userId = currentUser.uid
-                // delete them from the users collection
-                userRepository.deleteUserById(userId)
                 // remove them from the group
                 val currentGroupCode = userRepository.getGroupCodeForUser(userId)
                 if (currentGroupCode != null) {
                     groupRepository.removeMemberFromGroup(currentGroupCode, userId)
                 }
+                // delete them from the users collection
+                userRepository.deleteUserById(userId)
                 currentUser.delete().await()
                 return DeleteAccountResult.Success
             } else {
