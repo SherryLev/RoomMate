@@ -21,10 +21,10 @@ Here is the link to our user documentation https://git.uwaterloo.ca/gmmoroie/tea
 
 ## Meetings Minutes and Individual Developer Journals
 - Meeting minutes: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Meeting-Minutes
-Gregory Moroie's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Gregory-Moroie-sprint-journal
-Sreekanth Ghatti's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Sreekanth-Ghatti-sprint-journal
-Sherry Lev's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Sherry-Lev-sprint-journal
-Nadine Pigida's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Nadine-Pigida-sprint-journal
+- Gregory Moroie's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Gregory-Moroie-sprint-journal
+- Sreekanth Ghatti's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Sreekanth-Ghatti-sprint-journal
+- Sherry Lev's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Sherry-Lev-sprint-journal
+- Nadine Pigida's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Nadine-Pigida-sprint-journal
 
 ## Design Documentation
 Here is the link to our design documentation 
