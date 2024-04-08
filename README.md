@@ -11,7 +11,7 @@ Sherry Lev, slev@uwaterloo.ca
 Nadine Pigida, npigida@uwaterloo.ca
 
 ## User Documentation
-Here is the link to our user documentation https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/User-Documentation
+Access our user documentation [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/User-Documentation)
 
 ## Our Releases 
 - Version 1.0.0: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/blob/main/housemate-sprint1.apk
