@@ -1,7 +1,33 @@
 # Team 101-13
+## Table of Contents for Final Submission
 
 ## HouseMate
 HouseMate is designed for university students and young working individuals that share their living space with others to aid in tackling common household issues such as keeping the house clean and keeping track of expenses by having an all-in-one chore designator and tracker, as well as an expense splitting function.
+
+## Team Names and Contact Information
+Gregory Moroie, gmmoroie@uwaterloo.ca
+Sreekanth Ghatti, svghatti@uwaterloo.ca
+Sherry Lev, slev@uwaterloo.ca
+Nadine Pigida, npigida@uwaterloo.ca
+
+## User Documentation
+Here is the link to our user documentation https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/User-Documentation
+
+## Our Releases 
+- Version 1.0.0: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/blob/main/housemate-sprint1.apk
+- Version 1.1.0: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/blob/main/housemate-sprint2.apk
+- Version 1.2.0: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/blob/main/housemate_sprint3.apk?ref_type=heads
+- Version 1.3.0: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/blob/main/housemate-sprint4.apk
+
+## Meetings Minutes and Individual Developer Journals
+- Meeting minutes: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Meeting-Minutes
+- Gregory Moroie's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Gregory-Moroie-sprint-journal
+- Sreekanth Ghatti's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Sreekanth-Ghatti-sprint-journal
+- Sherry Lev's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Sherry-Lev-sprint-journal
+- Nadine Pigida's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Nadine-Pigida-sprint-journal
+
+## Design Documentation
+Here is the link to our design documentation 
 
 ## Wiki
 Access our wiki [here](https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Project-Proposal:-HouseMate)
