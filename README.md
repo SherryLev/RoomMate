@@ -20,7 +20,7 @@ Here is the link to our user documentation https://git.uwaterloo.ca/gmmoroie/tea
 - Version 1.3.0: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/blob/main/housemate-sprint4.apk
 
 ## Meetings Minutes and Individual Developer Journals
-Meeting minutes: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Meeting-Minutes
+- Meeting minutes: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Meeting-Minutes
 Gregory Moroie's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Gregory-Moroie-sprint-journal
 Sreekanth Ghatti's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Sreekanth-Ghatti-sprint-journal
 Sherry Lev's journal: https://git.uwaterloo.ca/gmmoroie/team-101-13/-/wikis/Group-Member's-Journals-10113/Sherry-Lev-sprint-journal
