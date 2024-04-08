@@ -1,6 +1,5 @@
 package org.housemate.presentation.userinterface.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,15 +29,15 @@ import org.housemate.presentation.viewmodel.ChoresViewModel
 import org.housemate.presentation.viewmodel.ExpenseViewModel
 import org.housemate.theme.green
 import org.housemate.theme.light_purple
-import org.housemate.theme.red_error
 import org.housemate.theme.pretty_purple
+import org.housemate.theme.red_error
 import java.math.BigDecimal
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 
-val userAverageRatings = mutableMapOf<String, Float>()
+//val userAverageRatings = mutableMapOf<String, Float>()
 fun findUserWithHighestAverageRating(userAverageRatings: Map<String, Float>): String? {
     var maxRatingUser: String? = null
     var maxRating = Float.MIN_VALUE
@@ -112,6 +111,7 @@ fun HomeScreenHelper(
         choresViewModel.getAllChores()
         choresViewModel.fetchCurrentUser()
     }
+    val userAverageRatings = mutableMapOf<String, Float>()
     var highest = "Loading..."
     val chores by choresViewModel.chores.collectAsState()
     val currentUserID by choresViewModel.userId.collectAsState()
