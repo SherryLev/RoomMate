@@ -2,7 +2,7 @@
 
 Our app is designed to streamline household management by combining user authentication, expense splitting, chore management, and a rewarding points system. Whether you live with family or roommates, this app helps you manage shared responsibilities, track expenses, and keep everyone motivated and engaged.
 
-<img src="Screenshot_2024-04-08_at_12.51.00_PM?raw=true" alt="Home Screen" width="200">
+<img src="Screenshot_2024-04-08_at_12.51.00_PM" alt="Home Screen" width="200">
 
 
 ## User Authentication and Profiles
