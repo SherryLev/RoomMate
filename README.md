@@ -1,6 +1,8 @@
 # RoomMate
 
 Our app is designed to streamline household management by combining user authentication, expense splitting, chore management, and a rewarding points system. Whether you live with family or roommates, this app helps you manage shared responsibilities, track expenses, and keep everyone motivated and engaged.
+![image](https://github.com/user-attachments/assets/d15c5f23-ac9d-4f0e-a73e-1480140ad750)
+
 
 ## User Authentication and Profiles
 
