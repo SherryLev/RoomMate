@@ -3,9 +3,9 @@
 Our app is designed to streamline household management by combining user authentication, expense splitting, chore management, and a rewarding points system. Whether you live with family or roommates, this app helps you manage shared responsibilities, track expenses, and keep everyone motivated and engaged.
 
 <div style="display: flex; justify-content: space-between;">
-    <img src="https://github.com/SherryLev/RoomMate/blob/main/Screenshot_2024-04-08_at_12.24.17_PM.png" alt="Screen 1" width="200" />
-    <img src="https://github.com/SherryLev/RoomMate/blob/main/Screenshot_2024-04-08_at_12.51.00_PM.png" alt="Screen 2" width="200" />
-    <img src="path/to/your/image3.png" alt="Screen 3" width="200" />
+    <img src="https://github.com/SherryLev/RoomMate/blob/main/Screenshot_2024-04-08_at_12.51.00_PM.png" alt="Screen 1" width="200" />
+    <img src="https://github.com/SherryLev/RoomMate/blob/main/Screenshot_2024-04-08_at_7.03.27_PM.png" alt="Screen 2" width="200" />
+    <img src="https://github.com/SherryLev/RoomMate/blob/main/Screenshot_2024-04-08_at_12.24.17_PM.png" alt="Screen 3" width="200" />
     <img src="path/to/your/image3.png" alt="Screen 4" width="200" />
 </div>
 
