@@ -6,7 +6,7 @@ Our app is designed to streamline household management by combining user authent
     <img src="https://github.com/SherryLev/RoomMate/blob/main/Screenshot_2024-04-08_at_12.51.00_PM.png" alt="Screen 1" width="200" />
     <img src="https://github.com/SherryLev/RoomMate/blob/main/Screenshot_2024-04-08_at_7.03.27_PM.png" alt="Screen 2" width="200" />
     <img src="https://github.com/SherryLev/RoomMate/blob/main/Screenshot_2024-04-08_at_12.24.17_PM.png" alt="Screen 3" width="200" />
-    <img src="path/to/your/image3.png" alt="Screen 4" width="200" />
+    <img src="https://github.com/SherryLev/RoomMate/blob/main/Screenshot_2024-04-08_at_7.04.26_PM.png" alt="Screen 4" width="200" />
 </div>
 
 
